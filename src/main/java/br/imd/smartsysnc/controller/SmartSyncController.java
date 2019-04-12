@@ -13,16 +13,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import br.imd.smartsysnc.utilEntity.EntityNGSILD;
+import br.imd.smartsysnc.utils.CsvToNGSILDUtil;
+import br.imd.smartsysnc.utils.EntityNGSILDUtils;
 
 /**
  * Classe para consumir e prover dados para importação
@@ -63,7 +68,7 @@ public class SmartSyncController {
 
 				List<Object> listNGSILD = new ArrayList<>();
 
-				listNGSILD = EntityNGSILD.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
+				listNGSILD = EntityNGSILDUtils.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
 						ownLayerName, entity);
 
 				return listNGSILD;
@@ -79,19 +84,39 @@ public class SmartSyncController {
 //		InputStream is = new URL("https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-24-mun.json")
 //				.openStream();
 		InputStreamReader is = new InputStreamReader(
-				getClass().getResourceAsStream("/br/imd/smartsysnc/utilEntity/rn_geojson.json"), "utf-8");
+				getClass().getResourceAsStream("/br/imd/smartsysnc/utils/rn_geojson.json"), "utf-8");
 		try {
 			BufferedReader rd = new BufferedReader(is);
 			String jsonText = readAll(rd);
 			JSONObject json = new JSONObject(jsonText);
 
-			List<Object> listStatesNGSILD = EntityNGSILD
+			List<Object> listStatesNGSILD = EntityNGSILDUtils
 					.converterStateRNJsonToEntityNGSILD(json.getJSONArray("features").toList());
 
 			return listStatesNGSILD;
 		} finally {
 			is.close();
 		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@PostMapping(value = "/csvToJson")
+	public Object getCSVToJson(@RequestParam("file") MultipartFile uploadfile)
+			throws MalformedURLException, IOException {
+
+		if (uploadfile.isEmpty()) {
+			return new ResponseEntity("please select a file!", HttpStatus.OK);
+		} else {
+			InputStreamReader is = new InputStreamReader(uploadfile.getInputStream());
+			try {
+
+				List<Object> listWheaterJson = CsvToNGSILDUtil.convertCsvToNSGILD(is);
+				return listWheaterJson;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return new ResponseEntity("Success", HttpStatus.OK);
 	}
 
 	private static String readAll(Reader rd) throws IOException {
