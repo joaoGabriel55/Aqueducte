@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
@@ -14,14 +15,16 @@ public class EntityNGSILDUtils {
 	/**
 	 * @param data         - data provided by QuarkSmart.
 	 * @param ownLayerName - {@link Optional} - Define a specific name for layer.
-	 * @param entity - {@link Optional} - Define the wished entity.
+	 * @param entity       - {@link Optional} - Define the wished entity.
+	 * @param contextLink  - Context for entity
 	 */
 	@SuppressWarnings("unchecked")
 	public static List<Object> converterToEntityNGSILD(LinkedHashMap<Object, Object> data, String ownLayerName,
-			String entity) {
+			String entity, Map<Object, Object> contextLink) {
 
 		LinkedHashMap<Object, Object> linkedHashMapNGSILD = new LinkedHashMap<Object, Object>();
 
+		HashMap<Object, HashMap<Object, HashMap<Object, Object>>> properties = new HashMap<>();
 		HashMap<Object, HashMap<Object, Object>> atributos = new HashMap<>();
 		HashMap<Object, Object> value = new HashMap<>();
 
@@ -33,45 +36,80 @@ public class EntityNGSILDUtils {
 		List<Object> listObjForSgeol = new ArrayList<>();
 
 		// Attribute of entity obtained.
-		Entry<Object, Object> properties = null;
+		Entry<Object, Object> propertiesContent = null;
 
 		List<String> contextList = Arrays.asList(
 				"https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld",
-				"https://github.com/JorgePereiraUFRN/SGEOL-LD/blob/master/ngsi-ld/education/school/School_Context.jsonld");
+				contextLink.get("contextLink").toString());
 
 		for (int i = 0; i < listObjSigeduc.size(); i++) {
 			linkedHashMapNGSILD.put("@context", contextList);
 			// TODO Generate unique ID
-			linkedHashMapNGSILD.put("id", "urn:ngsi-ld:layer:" + entity + ":id");
+			linkedHashMapNGSILD.put("id", "urn:ngsi-ld:" + entity + ":id");
 			linkedHashMapNGSILD.put("type", layerType);
 
-			LinkedHashMap<Object, Object> ldObj = new LinkedHashMap<>();
+			LinkedHashMap<Object, Object> ldObj;
 			ldObj = (LinkedHashMap<Object, Object>) listObjSigeduc.get(i);
+			if (ldObj != null) {
+				for (Iterator<Entry<Object, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext();) {
+					propertiesContent = iterator.next();
 
-			for (Iterator<Entry<Object, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext();) {
-				properties = iterator.next();
+					value.put("type", propertiesContent.getKey() != "geocode" ? "Property" : "GeoProperty");
 
-				value.put("type", properties.getKey() != "geocode" ? "Property" : "GeoProperty");
-
-				if (properties.getKey() == "geocode" && properties.getValue() != null) {
-					HashMap<Object, Object> valueGeometry = new HashMap<>();
-					String[] coordenates = (String[]) properties.getValue().toString().split(",");
-					valueGeometry.put("coordinates", coordenates);
-					valueGeometry.put("type", "MultiPoint");
-					value.put("value", valueGeometry);
-				} else {
-					value.put("value", properties.getValue());
+					if (propertiesContent.getKey() == "geocode" && propertiesContent.getValue() != null) {
+						HashMap<Object, Object> valueGeometry = new HashMap<>();
+						String[] coordenates = (String[]) propertiesContent.getValue().toString().split(",");
+						valueGeometry.put("coordinates", coordenates);
+						valueGeometry.put("type", "MultiPoint");
+						value.put("value", valueGeometry);
+					} else {
+						value.put("value", propertiesContent.getValue());
+					}
+					atributos.put(propertiesContent.getKey() != "geocode" ? propertiesContent.getKey() : "location",
+							value);
+					properties.put("properties", atributos);
+					value = new HashMap<>();
 				}
-				atributos.put(properties.getKey() != "geocode" ? properties.getKey() : "location", value);
-				value = new HashMap<>();
 			}
-			linkedHashMapNGSILD.putAll(atributos);
+			linkedHashMapNGSILD.putAll(properties);
 			listObjForSgeol.add(linkedHashMapNGSILD);
-			linkedHashMapNGSILD = new LinkedHashMap<Object, Object>();
-			atributos = new HashMap<Object, HashMap<Object, Object>>();
+			linkedHashMapNGSILD = new LinkedHashMap<>();
+			atributos = new HashMap<>();
+			properties = new HashMap<>();
 		}
 
 		return listObjForSgeol;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static List<Object> getColsFromSigEduc(LinkedHashMap<Object, Object> data) {
+		// Property data provided of SIGEduc API
+		ArrayList<Object> listColsSigeduc = (ArrayList<Object>) data.get("cols");
+		return listColsSigeduc;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void matchingWithContext(List<Object> listMatches, List<Object> listNGSILD,
+			HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext) {
+		for (Object element : listNGSILD) {
+
+			HashMap<Object, Object> properties = (HashMap<Object, Object>) ((HashMap<Object, Object>) element)
+					.get("properties");
+			for (Entry<Object, Object> property : properties.entrySet()) {
+				String key = property.getKey().toString();
+				for (Object matches : listMatches) {
+					LinkedHashMap<Object, Object> keyMatch = (LinkedHashMap<Object, Object>) matches;
+					String eqPropertyKey = keyMatch.get("eqProperty").toString();
+					String keyContext = keyMatch.get("name").toString();
+					if (key.equals(eqPropertyKey) || key.equals(keyContext)) {
+						propertiesBasedOnContext.put(keyContext, (HashMap<Object, Object>) property.getValue());
+						break;
+					}
+				}
+			}
+			((HashMap<Object, Object>) element).put("properties", propertiesBasedOnContext);
+			propertiesBasedOnContext = new HashMap<>();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -79,13 +117,14 @@ public class EntityNGSILDUtils {
 
 		LinkedHashMap<Object, Object> linkedHashMapNGSILD = new LinkedHashMap<Object, Object>();
 
+		HashMap<Object, HashMap<Object, HashMap<Object, Object>>> properties = new HashMap<>();
 		HashMap<Object, HashMap<Object, Object>> atributos = new HashMap<>();
 		HashMap<Object, Object> value = new HashMap<>();
 
 		List<Object> listObjForSgeol = new ArrayList<>();
 
 		// Attribute of entity obtained.
-		Entry<Object, Object> properties = null;
+		Entry<Object, Object> propertiesContent = null;
 
 		List<String> contextList = Arrays.asList(
 				"https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld",
@@ -93,8 +132,8 @@ public class EntityNGSILDUtils {
 
 		for (int i = 0; i < dataState.size(); i++) {
 			linkedHashMapNGSILD.put("@context", contextList);
-//			// TODO Generate unique ID
-			
+			// TODO Generate unique ID
+
 			linkedHashMapNGSILD.put("id", "urn:ngsi-ld:layer:municipios:id");
 			linkedHashMapNGSILD.put("type", "municipios");
 
@@ -102,32 +141,34 @@ public class EntityNGSILDUtils {
 			ldObj = (HashMap<Object, Object>) dataState.get(i);
 
 			for (Iterator<Entry<Object, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext();) {
-				properties = iterator.next();
-				value.put("type", !properties.getKey().equals("geometry") ? "Property" : "GeoProperty");
+				propertiesContent = iterator.next();
+				value.put("type", !propertiesContent.getKey().equals("geometry") ? "Property" : "GeoProperty");
 
-				if (properties.getKey().equals("geometry")) {
+				if (propertiesContent.getKey().equals("geometry")) {
 					HashMap<Object, Object> valueGeometry = new HashMap<>();
 					HashMap<Object, Object> valueCoordinates = new HashMap<>();
-					valueCoordinates = (HashMap<Object, Object>) properties.getValue();
+					valueCoordinates = (HashMap<Object, Object>) propertiesContent.getValue();
 					ArrayList<Object> listCoordinates = (ArrayList<Object>) valueCoordinates.get("coordinates");
 					valueGeometry.put("coordinates", listCoordinates.get(0));
 					valueGeometry.put("type", valueCoordinates.get("type"));
 					value.put("value", valueGeometry);
 					atributos.put("location", value);
 				} else {
-					if (properties.getKey().equals("properties")) {
+					if (propertiesContent.getKey().equals("properties")) {
 						HashMap<Object, HashMap<Object, Object>> propertiesMunicipio = iterarPropertiesOfMunicipio(
-								(HashMap<Object, Object>) properties.getValue());
+								(HashMap<Object, Object>) propertiesContent.getValue());
 						atributos.putAll(propertiesMunicipio);
 					}
 				}
+				properties.put("properties", atributos);
 				value = new HashMap<Object, Object>();
 			}
 
-			linkedHashMapNGSILD.putAll(atributos);
+			linkedHashMapNGSILD.putAll(properties);
 			listObjForSgeol.add(linkedHashMapNGSILD);
 			linkedHashMapNGSILD = new LinkedHashMap<Object, Object>();
 			atributos = new HashMap<Object, HashMap<Object, Object>>();
+			properties = new HashMap<Object, HashMap<Object, HashMap<Object, Object>>>();
 		}
 
 		return listObjForSgeol;

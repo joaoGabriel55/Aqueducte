@@ -70,6 +70,12 @@
 			<version>4.1</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.github.jsonld-java</groupId>
+			<artifactId>jsonld-java</artifactId>
+			<version>0.12.3</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
