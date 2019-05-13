@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -43,45 +45,47 @@ public class CsvToNGSILDUtil {
 			HashMap<Object, Object> value = new HashMap<>();
 			HashMap<Object, Map<Object, Object>> atributos = new HashMap<>();
 
-			String[] rowPropertiesName = null;
+			List<String> rowPropertiesName = null;
 			int index = 0;
 			for (String[] row : allData) {
 				csvToJsonNSGILD.put("@context", contextList);
-				csvToJsonNSGILD.put("id", "urn:ngsi-ld:layer:wheater:id");
+				UUID uuid = UUID.randomUUID();
+				csvToJsonNSGILD.put("id", "urn:ngsi-ld:layer:wheater:" + uuid.toString());
+				csvToJsonNSGILD.put("municipio", "Natal");
 				csvToJsonNSGILD.put("type", "wheater");
 
-				if (row.length == 26) {
-					if (row[0].trim().equals("data"))
-						rowPropertiesName = row;
-					else {
-						for (Object cell : row) {
+				if (row[0].trim().equals("Estacao")) {
 
-							if (cell.equals("sim"))
-								cell = true;
-							else if (cell.equals("não"))
-								cell = false;
+					rowPropertiesName = Arrays.asList(row).stream().filter(key -> key != null || key != "").map(key -> {
+						String keyFinal = key.replace(" ", "").trim();
+						return keyFinal.toLowerCase();
+					}).collect(Collectors.toList());
+				} else {
+					for (Object cell : row) {
 
-							if (cell == "" || cell.toString().length() == 0)
-								cell = null;
-							value.put("type", "Property");
-							value.put("value",
-									cell != null && cell.toString().contains(",")
-											? Double.parseDouble(cell.toString().replace(",", "."))
-											: cell);
+						if (cell == "" || cell.toString().length() == 0)
+							cell = null;
 
-							atributos.put(rowPropertiesName[index].trim().replace(" ", ""), value);
-							value = new HashMap<Object, Object>();
-							index++;
+						value.put("type", "Property");
+						if (rowPropertiesName.get(index).equals("hora")) {
+							value.put("value", FormatterUtils.getHourFormat(cell.toString()));
+						} else {
+							value.put("value", cell);
 						}
-						index = 0;
-						csvToJsonNSGILD.putAll(atributos);
-						listOfObjects.add(csvToJsonNSGILD);
-						csvToJsonNSGILD = new HashMap<Object, Object>();
 
-						atributos = new HashMap<Object, Map<Object, Object>>();
+						if (!rowPropertiesName.get(index).equals(""))
+							atributos.put(rowPropertiesName.get(index), value);
+
+						value = new HashMap<Object, Object>();
+						index++;
 					}
-				}
+					index = 0;
+					csvToJsonNSGILD.putAll(atributos);
+					listOfObjects.add(csvToJsonNSGILD);
+					csvToJsonNSGILD = new HashMap<Object, Object>();
 
+					atributos = new HashMap<Object, Map<Object, Object>>();
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

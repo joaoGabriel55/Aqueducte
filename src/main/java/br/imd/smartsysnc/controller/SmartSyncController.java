@@ -3,11 +3,9 @@ package br.imd.smartsysnc.controller;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,6 +15,7 @@ import java.util.Map;
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,13 +23,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.imd.smartsysnc.utils.CsvToNGSILDUtil;
 import br.imd.smartsysnc.utils.EntityNGSILDUtils;
+import br.imd.smartsysnc.utils.RequestsUtils;
 
 /**
  * Classe para consumir e prover dados para importação
@@ -40,10 +42,10 @@ import br.imd.smartsysnc.utils.EntityNGSILDUtils;
 @CrossOrigin(origins = "*")
 public class SmartSyncController {
 
-	private static String TOKEN = "1ab6b2a5b3c47fba85e4a987774707d6";
-	private static int STATUS_OK = 200;
 	private static String URL_SIGEDUC = "https://quarkbi.esig.com.br/api/v1/dw/entity/";
-	private static String URL_SGEOL = "http://localhost:8091/sgeol-dm/v2/";
+	public static String URL_SGEOL = "http://localhost:8091/sgeol-dm/v2/"; // Local
+//    private static String URL_SGEOL = "http://10.7.52.26:8080/sgeol-dm/v2/"; //Test;
+//	private static String URL_SGEOL = "http://10.7.52.76:8080/sgeol-dm/v2/"; // Production;
 
 	@SuppressWarnings({ "unchecked" })
 	@PostMapping(value = "/{entity}")
@@ -57,11 +59,11 @@ public class SmartSyncController {
 
 		try {
 
-			HttpURLConnection con = sendRequest(baseUrl, "GET", true);
+			HttpURLConnection con = RequestsUtils.sendRequest(baseUrl, "GET", true);
 			ObjectMapper mapper = new ObjectMapper();
 
-			if (con.getResponseCode() == STATUS_OK) {
-				String body = readBodyReq(con);
+			if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
+				String body = RequestsUtils.readBodyReq(con);
 				Object credenciais = mapper.readValue(body, Object.class);
 
 				List<Object> listNGSILD = new ArrayList<>();
@@ -94,11 +96,11 @@ public class SmartSyncController {
 		String baseUrl = URL_SIGEDUC + entity + "?limit=1";
 		try {
 
-			HttpURLConnection con = sendRequest(baseUrl, "GET", true);
+			HttpURLConnection con = RequestsUtils.sendRequest(baseUrl, "GET", true);
 			ObjectMapper mapper = new ObjectMapper();
 
-			if (con.getResponseCode() == STATUS_OK) {
-				String body = readBodyReq(con);
+			if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
+				String body = RequestsUtils.readBodyReq(con);
 				Object credenciais = mapper.readValue(body, Object.class);
 
 				List<Object> listCols = new ArrayList<>();
@@ -123,11 +125,11 @@ public class SmartSyncController {
 
 		try {
 
-			HttpURLConnection con = sendRequest(baseUrl, "GET", true);
+			HttpURLConnection con = RequestsUtils.sendRequest(baseUrl, "GET", true);
 			ObjectMapper mapper = new ObjectMapper();
 
-			if (con.getResponseCode() == STATUS_OK) {
-				String body = readBodyReq(con);
+			if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
+				String body = RequestsUtils.readBodyReq(con);
 				Object credenciais = mapper.readValue(body, Object.class);
 
 				List<Object> listNGSILD;
@@ -139,7 +141,7 @@ public class SmartSyncController {
 				HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext = new HashMap<Object, HashMap<Object, Object>>();
 
 				List<Object> listMatches = (List<Object>) matchingJson.get("matches");
-				
+
 				EntityNGSILDUtils.matchingWithContext(listMatches, listNGSILD, propertiesBasedOnContext);
 
 				return listNGSILD;
@@ -152,21 +154,53 @@ public class SmartSyncController {
 		return null;
 	}
 
-	@GetMapping(value = "/jsonStateRN")
-	public List<Object> getJsonStateRN() throws MalformedURLException, IOException {
-//		InputStream is = new URL("https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-24-mun.json")
-//				.openStream();
+	@SuppressWarnings({ "unchecked" })
+	@PostMapping(value = "/importDataToSGEOL/{entity}")
+	@ResponseBody
+	public ResponseEntity<HttpStatus> importDataToSGEOL(@PathVariable(required = true) String entity,
+			@RequestBody List<Map<Object, Object>> dataToImport) throws UnsupportedEncodingException, IOException {
+
+		for (Map<Object, Object> entidadeToImport : dataToImport) {
+			String inepCode = (String) ((LinkedHashMap<Object, Object>) entidadeToImport.get("inepCod")).get("value");
+			Boolean isExistis = EntityNGSILDUtils.isExistisEntity(entity, inepCode);
+			if (isExistis != null) {
+				if (!isExistis) {
+					RestTemplate rt = new RestTemplate();
+					rt.getMessageConverters().add(new StringHttpMessageConverter());
+					String url = URL_SGEOL + entity;
+					rt.postForEntity(url, entidadeToImport, String.class);
+				}
+			}
+		}
+
+		return ResponseEntity.ok(HttpStatus.OK);
+	}
+
+	@PostMapping(value = "/jsonStateRN")
+	public String getJsonStateRN() throws MalformedURLException, IOException {
 		InputStreamReader is = new InputStreamReader(
 				getClass().getResourceAsStream("/br/imd/smartsysnc/utils/rn_geojson.json"), "utf-8");
 		try {
 			BufferedReader rd = new BufferedReader(is);
-			String jsonText = readAll(rd);
+			String jsonText = RequestsUtils.readAll(rd);
 			JSONObject json = new JSONObject(jsonText);
 
 			List<Object> listStatesNGSILD = EntityNGSILDUtils
 					.converterStateRNJsonToEntityNGSILD(json.getJSONArray("features").toList());
 
-			return listStatesNGSILD;
+			RestTemplate rt = new RestTemplate();
+			rt.getMessageConverters().add(new StringHttpMessageConverter());
+
+			String url = URL_SGEOL + "municipio";
+
+			for (int i = 0; i < listStatesNGSILD.size(); i++) {
+				rt.postForEntity(url, listStatesNGSILD.get(i), String.class);
+			}
+
+			return "Data was imported!";
+
+		} catch (Exception e) {
+			throw e;
 		} finally {
 			is.close();
 		}
@@ -178,11 +212,10 @@ public class SmartSyncController {
 			throws MalformedURLException, IOException {
 
 		if (uploadfile.isEmpty()) {
-			return new ResponseEntity("please select a file!", HttpStatus.OK);
+			return new ResponseEntity("Please select a file!", HttpStatus.OK);
 		} else {
 			InputStreamReader is = new InputStreamReader(uploadfile.getInputStream());
 			try {
-
 				List<Object> listWheaterJson = CsvToNGSILDUtil.convertCsvToNSGILD(is);
 				return listWheaterJson;
 			} catch (Exception e) {
@@ -190,37 +223,5 @@ public class SmartSyncController {
 			}
 		}
 		return new ResponseEntity("Success", HttpStatus.OK);
-	}
-
-	private static String readAll(Reader rd) throws IOException {
-		StringBuilder sb = new StringBuilder();
-		int cp;
-		while ((cp = rd.read()) != -1) {
-			sb.append((char) cp);
-		}
-		return sb.toString();
-	}
-
-	private HttpURLConnection sendRequest(String baseUrl, String method, boolean needToken) throws IOException {
-		URL url = new URL(baseUrl);
-		HttpURLConnection con = (HttpURLConnection) url.openConnection();
-		con.setDoOutput(true);
-		con.setRequestMethod(method);
-		con.setRequestProperty("Content-Type", "application/json");
-		if (needToken)
-			con.setRequestProperty("TOKEN", TOKEN);
-
-		con.connect();
-		return con;
-	}
-
-	private String readBodyReq(HttpURLConnection con) throws UnsupportedEncodingException, IOException {
-		/* Lendo body */
-		BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-		String body = "", temp = null;
-		while ((temp = br.readLine()) != null)
-			body += temp;
-
-		return body;
 	}
 }
