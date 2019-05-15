@@ -1,4 +1,4 @@
-package br.imd.smartsysnc.controller;
+package br.imd.smartsysnc.controllers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,11 +42,6 @@ import br.imd.smartsysnc.utils.RequestsUtils;
 @CrossOrigin(origins = "*")
 public class SmartSyncController {
 
-	private static String URL_SIGEDUC = "https://quarkbi.esig.com.br/api/v1/dw/entity/";
-	public static String URL_SGEOL = "http://localhost:8091/sgeol-dm/v2/"; // Local
-//    private static String URL_SGEOL = "http://10.7.52.26:8080/sgeol-dm/v2/"; //Test;
-//	private static String URL_SGEOL = "http://10.7.52.76:8080/sgeol-dm/v2/"; // Production;
-
 	@SuppressWarnings({ "unchecked" })
 	@PostMapping(value = "/{entity}")
 	public Object consumeRestApi(@PathVariable(required = true) String entity,
@@ -55,7 +50,7 @@ public class SmartSyncController {
 			@RequestParam(value = "ownLayerName", defaultValue = "") String ownLayerName,
 			@RequestBody Map<Object, Object> contextLink) {
 
-		String baseUrl = URL_SIGEDUC + entity + "?limit=" + limit + "&offset=" + offset;
+		String baseUrl = RequestsUtils.URL_SIGEDUC + entity + "?limit=" + limit + "&offset=" + offset;
 
 		try {
 
@@ -71,17 +66,6 @@ public class SmartSyncController {
 				listNGSILD = EntityNGSILDUtils.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
 						ownLayerName, entity, contextLink);
 
-//				RestTemplate rt = new RestTemplate();
-//				rt.getMessageConverters().add(new StringHttpMessageConverter());
-//
-//				String url = URL_SGEOL + ownLayerName;
-//
-//				for (int i = 0; i < listNGSILD.size(); i++) {
-//					List<Object> entityForSGEOL = listNGSILD;
-//					entityForSGEOL.add(listNGSILD.get(i).toString());
-//					rt.postForEntity(url, entityForSGEOL, String.class);
-//				}
-
 				return listNGSILD;
 			}
 		} catch (IOException e) {
@@ -93,7 +77,7 @@ public class SmartSyncController {
 	@SuppressWarnings({ "unchecked" })
 	@GetMapping(value = "/colsFromSigEduc/{entity}")
 	public List<Object> getColsFromSigEduc(@PathVariable(required = true) String entity) {
-		String baseUrl = URL_SIGEDUC + entity + "?limit=1";
+		String baseUrl = RequestsUtils.URL_SIGEDUC + entity + "?limit=1";
 		try {
 
 			HttpURLConnection con = RequestsUtils.sendRequest(baseUrl, "GET", true);
@@ -116,12 +100,15 @@ public class SmartSyncController {
 	@SuppressWarnings({ "unused", "unchecked" })
 	@PostMapping(value = "/dataFromSigEducToSgeol/{entity}")
 	public Object getDataFromSigEducToSgeol(@PathVariable(required = true) String entity,
-			@RequestParam(value = "limit", defaultValue = "5") int limit,
-			@RequestParam(value = "offset", defaultValue = "1") int offset,
+			@RequestParam(value = "limit", defaultValue = "0") int limit,
+			@RequestParam(value = "offset", defaultValue = "0") int offset,
 			@RequestParam(value = "ownLayerName", defaultValue = "") String ownLayerName,
 			@RequestBody Map<Object, Object> matchingJson) {
-
-		String baseUrl = URL_SIGEDUC + entity + "?limit=" + limit + "&offset=" + offset;
+		
+		String limitParam = limit> 0?"?limit=" + limit:"";
+		String offsetParam = offset> 0?"&offset=" + offset:"";
+		
+		String baseUrl = RequestsUtils.URL_SIGEDUC + entity + limitParam + offsetParam;
 
 		try {
 
@@ -167,7 +154,7 @@ public class SmartSyncController {
 				if (!isExistis) {
 					RestTemplate rt = new RestTemplate();
 					rt.getMessageConverters().add(new StringHttpMessageConverter());
-					String url = URL_SGEOL + entity;
+					String url = RequestsUtils.URL_SGEOL + entity;
 					rt.postForEntity(url, entidadeToImport, String.class);
 				}
 			}
@@ -191,7 +178,7 @@ public class SmartSyncController {
 			RestTemplate rt = new RestTemplate();
 			rt.getMessageConverters().add(new StringHttpMessageConverter());
 
-			String url = URL_SGEOL + "municipio";
+			String url = RequestsUtils.URL_SGEOL + "municipio";
 
 			for (int i = 0; i < listStatesNGSILD.size(); i++) {
 				rt.postForEntity(url, listStatesNGSILD.get(i), String.class);

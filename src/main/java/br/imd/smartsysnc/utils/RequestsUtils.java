@@ -11,7 +11,12 @@ import java.net.URL;
 public class RequestsUtils {
 	public static int STATUS_OK = 200;
 	private static String TOKEN = "1ab6b2a5b3c47fba85e4a987774707d6";
-	
+
+	public static String URL_SIGEDUC = "https://quarkbi.esig.com.br/api/v1/dw/entity/";
+	public static String URL_SGEOL = "http://localhost:8091/sgeol-dm/v2/"; // Local
+//    private static String URL_SGEOL = "http://10.7.52.26:8080/sgeol-dm/v2/"; //Test;
+//	private static String URL_SGEOL = "http://10.7.52.76:8080/sgeol-dm/v2/"; // Production;
+
 	public static String readAll(Reader rd) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		int cp;
@@ -43,5 +48,5 @@ public class RequestsUtils {
 
 		return body;
 	}
-	
+
 }

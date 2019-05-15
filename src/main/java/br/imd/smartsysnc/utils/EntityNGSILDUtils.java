@@ -16,8 +16,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import br.imd.smartsysnc.controller.SmartSyncController;
-
 public class EntityNGSILDUtils {
 
 	/**
@@ -63,9 +61,9 @@ public class EntityNGSILDUtils {
 				for (Iterator<Entry<Object, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext();) {
 					propertiesContent = iterator.next();
 
-					value.put("type", propertiesContent.getKey() != "geocode" ? "Property" : "GeoProperty");
+					value.put("type", propertiesContent.getKey() != "localizacao" ? "Property" : "GeoProperty");
 
-					if (propertiesContent.getKey() == "geocode" && propertiesContent.getValue() != null) {
+					if (propertiesContent.getKey() == "localizacao" && propertiesContent.getValue() != null) {
 						HashMap<Object, Object> valueGeometry = new HashMap<>();
 						String[] coordenates = (String[]) propertiesContent.getValue().toString().split(",");
 						valueGeometry.put("coordinates", coordenates);
@@ -74,7 +72,7 @@ public class EntityNGSILDUtils {
 					} else {
 						value.put("value", propertiesContent.getValue());
 					}
-					atributos.put(propertiesContent.getKey() != "geocode" ? propertiesContent.getKey() : "location",
+					atributos.put(propertiesContent.getKey() != "localizacao" ? propertiesContent.getKey() : "location",
 							value);
 					properties.put("properties", atributos);
 					value = new HashMap<>();
@@ -95,8 +93,7 @@ public class EntityNGSILDUtils {
 			throws UnsupportedEncodingException, IOException {
 
 		HttpURLConnection con = RequestsUtils.sendRequest(
-				SmartSyncController.URL_SGEOL + entity + "/find-by-query?query=p*.inep_id.value$eq$" + inepCode, "GET",
-				true);
+				RequestsUtils.URL_SGEOL + entity + "/find-by-query?query=p*.inep_id.value$eq$" + inepCode, "GET", true);
 		ObjectMapper mapper = new ObjectMapper();
 		if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
 			String body = RequestsUtils.readBodyReq(con);
@@ -133,7 +130,8 @@ public class EntityNGSILDUtils {
 					String eqPropertyKey = keyMatch.get("eqProperty").toString();
 					String keyContext = keyMatch.get("name").toString();
 					if (key.equals(eqPropertyKey) || key.equals(keyContext)) {
-						if (((HashMap<Object, Object>) property.getValue()).get("value") != null) {
+						if (((HashMap<Object, Object>) property.getValue()).get("value") != null
+								&& ((HashMap<Object, Object>) property.getValue()).get("value") != ""  ) {
 							propertiesBasedOnContext.put(keyContext, (HashMap<Object, Object>) property.getValue());
 							break;
 						}
