@@ -10,7 +10,7 @@ import java.net.URL;
 
 public class RequestsUtils {
 	public static int STATUS_OK = 200;
-	private static String TOKEN = "1ab6b2a5b3c47fba85e4a987774707d6";
+	private static String TOKEN = "dd0ce06d6d51c059f52924aefb2a6aad";
 
 	public static String URL_SIGEDUC = "https://quarkbi.esig.com.br/api/v1/dw/entity/";
 	public static String URL_SGEOL = "http://localhost:8091/sgeol-dm/v2/"; // Local
