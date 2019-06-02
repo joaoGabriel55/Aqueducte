@@ -1,6 +1,7 @@
 package br.imd.smartsysnc.controllers;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,21 @@ import br.imd.smartsysnc.service.MatchingConfigService;
 @CrossOrigin(origins = "*")
 public class MatchingConfigController {
 
+	@PostMapping
+	public ResponseEntity<Object> create(@RequestBody MatchingConfig matchingConfig) {
+
+		try {
+			matchingConfig.setDateCreated(new Date());
+			matchingConfig.setDataModified(null);
+			matchingConfigService.createOrUpdate(matchingConfig);
+		} catch (DuplicateKeyException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+		return ResponseEntity.ok(HttpStatus.OK);
+	}
+
 	@Autowired
 	private MatchingConfigService matchingConfigService;
 
@@ -39,16 +55,4 @@ public class MatchingConfigController {
 		return ResponseEntity.ok(listMatching);
 	}
 
-	@PostMapping
-	public ResponseEntity<Object> create(@RequestBody MatchingConfig matchingConfig) {
-
-		try {
-			matchingConfigService.createOrUpdate(matchingConfig);
-		} catch (DuplicateKeyException e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-		return ResponseEntity.ok(HttpStatus.OK);
-	}
 }
