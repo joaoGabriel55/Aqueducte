@@ -7,5 +7,10 @@ public class FormatterUtils {
 		String minutes = data.substring(2, 4);
 		return hour + ":" + minutes;
 	}
+	
+	public static String dataFormattedForSIGEduc(String data) {
+		String dataFormated = data.replace("/", "%2F");
+		return dataFormated;
+	}
 
 }

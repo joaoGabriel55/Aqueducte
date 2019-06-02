@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.imd.smartsysnc.utils.CsvToNGSILDUtil;
 import br.imd.smartsysnc.utils.EntityNGSILDUtils;
+import br.imd.smartsysnc.utils.FormatterUtils;
 import br.imd.smartsysnc.utils.RequestsUtils;
 
 /**
@@ -103,12 +104,15 @@ public class SmartSyncController {
 			@RequestParam(value = "limit", defaultValue = "0") int limit,
 			@RequestParam(value = "offset", defaultValue = "0") int offset,
 			@RequestParam(value = "ownLayerName", defaultValue = "") String ownLayerName,
+			@RequestParam(value = "dateOfImportation", defaultValue = "") String dateOfImportation,
 			@RequestBody Map<Object, Object> matchingJson) {
-		
-		String limitParam = limit> 0?"?limit=" + limit:"";
-		String offsetParam = offset> 0?"&offset=" + offset:"";
-		
-		String baseUrl = RequestsUtils.URL_SIGEDUC + entity + limitParam + offsetParam;
+
+		String limitParam = limit > 0 ? "limit=" + limit : "";
+		String offsetParam = offset > 0 ? "&offset=" + offset : "";
+		String date = dateOfImportation != "" ? "?date=" + dateOfImportation : "";
+
+		String baseUrl = RequestsUtils.URL_SIGEDUC + entity + limitParam + offsetParam
+				+ FormatterUtils.dataFormattedForSIGEduc(date);
 
 		try {
 
@@ -148,14 +152,17 @@ public class SmartSyncController {
 			@RequestBody List<Map<Object, Object>> dataToImport) throws UnsupportedEncodingException, IOException {
 
 		for (Map<Object, Object> entidadeToImport : dataToImport) {
-			String inepCode = (String) ((LinkedHashMap<Object, Object>) entidadeToImport.get("inepCod")).get("value");
-			Boolean isExistis = EntityNGSILDUtils.isExistisEntity(entity, inepCode);
-			if (isExistis != null) {
-				if (!isExistis) {
-					RestTemplate rt = new RestTemplate();
-					rt.getMessageConverters().add(new StringHttpMessageConverter());
-					String url = RequestsUtils.URL_SGEOL + entity;
-					rt.postForEntity(url, entidadeToImport, String.class);
+			if (entidadeToImport.containsKey("inepCod")) {
+				String inepCode = (String) ((LinkedHashMap<Object, Object>) entidadeToImport.get("inepCod"))
+						.get("value");
+				Boolean isExistis = EntityNGSILDUtils.isExistisEntity(entity, inepCode);
+				if (isExistis != null) {
+					if (!isExistis) {
+						RestTemplate rt = new RestTemplate();
+						rt.getMessageConverters().add(new StringHttpMessageConverter());
+						String url = RequestsUtils.URL_SGEOL + entity;
+						rt.postForEntity(url, entidadeToImport, String.class);
+					}
 				}
 			}
 		}

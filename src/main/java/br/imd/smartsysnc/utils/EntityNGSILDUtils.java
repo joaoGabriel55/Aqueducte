@@ -97,8 +97,9 @@ public class EntityNGSILDUtils {
 		ObjectMapper mapper = new ObjectMapper();
 		if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
 			String body = RequestsUtils.readBodyReq(con);
-			Object credenciais = mapper.readValue(body, Object.class);
-			if (((LinkedHashMap<Object, Object>) credenciais).entrySet().size() != 0) {
+			ArrayList<LinkedHashMap<Object, Object>> credenciais = mapper.readValue(body, ArrayList.class);
+//			((LinkedHashMap<Object, Object>) credenciais).entrySet().size() != 0
+			if (credenciais.size() > 0) {
 				return true;
 			} else {
 				return false;
