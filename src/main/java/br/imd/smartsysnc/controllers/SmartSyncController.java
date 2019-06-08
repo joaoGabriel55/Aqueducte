@@ -38,6 +38,7 @@ import br.imd.smartsysnc.processors.MunicipioEntityNGSILDProcessor;
 import br.imd.smartsysnc.service.GenericService;
 import br.imd.smartsysnc.utils.CsvToNGSILDUtil;
 import br.imd.smartsysnc.utils.FormatterUtils;
+import br.imd.smartsysnc.utils.MessageUtils;
 import br.imd.smartsysnc.utils.RequestsUtils;
 
 /**
@@ -212,7 +213,7 @@ public class SmartSyncController {
 	}
 
 	@PostMapping(value = "/jsonStateRN")
-	public String getJsonStateRN() throws MalformedURLException, IOException {
+	public ResponseEntity<Object> getJsonStateRN() throws MalformedURLException, IOException {
 		InputStreamReader is = new InputStreamReader(
 				getClass().getResourceAsStream("/br/imd/smartsysnc/utils/rn_geojson.json"), "utf-8");
 		try {
@@ -233,10 +234,10 @@ public class SmartSyncController {
 				rt.postForEntity(url, listStatesNGSILD.get(i), String.class);
 			}
 
-			return "Data was imported!";
+			return MessageUtils.sendMessage("Data was imported!", HttpStatus.OK);
 
 		} catch (Exception e) {
-			throw e;
+			return MessageUtils.sendMessage("Error on importation", HttpStatus.BAD_REQUEST);
 		} finally {
 			is.close();
 		}
@@ -244,7 +245,7 @@ public class SmartSyncController {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@PostMapping(value = "/csvToJson")
-	public Object getCSVToJson(@RequestParam("file") MultipartFile uploadfile)
+	public ResponseEntity<Object> getCSVToJson(@RequestParam("file") MultipartFile uploadfile)
 			throws MalformedURLException, IOException {
 
 		if (uploadfile.isEmpty()) {
@@ -253,11 +254,10 @@ public class SmartSyncController {
 			InputStreamReader is = new InputStreamReader(uploadfile.getInputStream());
 			try {
 				List<Object> listWheaterJson = CsvToNGSILDUtil.convertCsvToNSGILD(is);
-				return listWheaterJson;
+				return MessageUtils.sendMessage(listWheaterJson, HttpStatus.BAD_REQUEST);
 			} catch (Exception e) {
-				e.printStackTrace();
+				return MessageUtils.sendMessage("Error on importation", HttpStatus.BAD_REQUEST);
 			}
 		}
-		return new ResponseEntity("Success", HttpStatus.OK);
 	}
 }
