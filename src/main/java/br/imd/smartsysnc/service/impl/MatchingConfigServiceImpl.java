@@ -22,7 +22,6 @@ public class MatchingConfigServiceImpl implements MatchingConfigService {
 
 	@Override
 	public List<MatchingConfig> findAll() {
-		// TODO Auto-generated method stub
 		return this.matchingConfigRepository.findAll();
 	}
 
