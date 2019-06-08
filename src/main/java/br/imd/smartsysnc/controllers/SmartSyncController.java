@@ -9,10 +9,12 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -30,8 +32,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import br.imd.smartsysnc.models.EntityWithLinkedID;
+import br.imd.smartsysnc.processors.EntityNGSILDProcessor;
+import br.imd.smartsysnc.processors.MunicipioEntityNGSILDProcessor;
+import br.imd.smartsysnc.service.GenericService;
 import br.imd.smartsysnc.utils.CsvToNGSILDUtil;
-import br.imd.smartsysnc.utils.EntityNGSILDUtils;
 import br.imd.smartsysnc.utils.FormatterUtils;
 import br.imd.smartsysnc.utils.RequestsUtils;
 
@@ -42,6 +47,9 @@ import br.imd.smartsysnc.utils.RequestsUtils;
 @RequestMapping("/sync")
 @CrossOrigin(origins = "*")
 public class SmartSyncController {
+
+	@Autowired
+	private GenericService<EntityWithLinkedID> entityService;
 
 	@SuppressWarnings({ "unchecked" })
 	@PostMapping(value = "/{entity}")
@@ -64,7 +72,9 @@ public class SmartSyncController {
 
 				List<Object> listNGSILD = new ArrayList<>();
 
-				listNGSILD = EntityNGSILDUtils.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
+				EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
+
+				listNGSILD = entityNGSILD.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
 						ownLayerName, entity, contextLink);
 
 				return listNGSILD;
@@ -88,8 +98,10 @@ public class SmartSyncController {
 				String body = RequestsUtils.readBodyReq(con);
 				Object credenciais = mapper.readValue(body, Object.class);
 
-				List<Object> listCols = new ArrayList<>();
-				listCols = EntityNGSILDUtils.getColsFromSigEduc((LinkedHashMap<Object, Object>) credenciais);
+				EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
+
+				List<Object> listCols = entityNGSILD.getColsFromSigEduc((LinkedHashMap<Object, Object>) credenciais);
+
 				return listCols;
 			}
 		} catch (IOException e) {
@@ -124,16 +136,17 @@ public class SmartSyncController {
 				Object credenciais = mapper.readValue(body, Object.class);
 
 				List<Object> listNGSILD;
-				List<Object> propertiesConvertNGSILD = new ArrayList<Object>();
 
-				listNGSILD = EntityNGSILDUtils.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
+				EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
+
+				listNGSILD = entityNGSILD.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
 						ownLayerName, entity, matchingJson);
 
 				HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext = new HashMap<Object, HashMap<Object, Object>>();
 
 				List<Object> listMatches = (List<Object>) matchingJson.get("matches");
 
-				EntityNGSILDUtils.matchingWithContext(listMatches, listNGSILD, propertiesBasedOnContext);
+				entityNGSILD.matchingWithContext(listMatches, listNGSILD, propertiesBasedOnContext);
 
 				return listNGSILD;
 			}
@@ -151,20 +164,48 @@ public class SmartSyncController {
 	public ResponseEntity<HttpStatus> importDataToSGEOL(@PathVariable(required = true) String entity,
 			@RequestBody List<Map<Object, Object>> dataToImport) throws UnsupportedEncodingException, IOException {
 
-		for (Map<Object, Object> entidadeToImport : dataToImport) {
-			if (entidadeToImport.containsKey("inepCod")) {
-				String inepCode = (String) ((LinkedHashMap<Object, Object>) entidadeToImport.get("inepCod"))
-						.get("value");
-				Boolean isExistis = EntityNGSILDUtils.isExistisEntity(entity, inepCode);
-				if (isExistis != null) {
-					if (!isExistis) {
+		EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
+
+		String entitySGEOL = null;
+		List<Map<String, Integer>> listIDsLinked = new LinkedList<>();
+		try {
+			int count = 0;
+			for (Map<Object, Object> entidadeToImport : dataToImport) {
+
+				if (entidadeToImport.containsKey("inepCod")) {
+
+					if (count == 0)
+						entitySGEOL = entidadeToImport.get("type").toString();
+					String inepCode = (String) ((LinkedHashMap<Object, Object>) entidadeToImport.get("inepCod"))
+							.get("value");
+					Boolean isExistis = entityNGSILD.isExistisEntity(entity, inepCode);
+					if (isExistis != null && !isExistis) {
 						RestTemplate rt = new RestTemplate();
 						rt.getMessageConverters().add(new StringHttpMessageConverter());
 						String url = RequestsUtils.URL_SGEOL + entity;
 						rt.postForEntity(url, entidadeToImport, String.class);
+
+						String idForSGEOL = entidadeToImport.get("id").toString();
+						HashMap<String, Integer> mapIDs = new HashMap<>();
+						mapIDs.put(idForSGEOL, 1);
+
+						listIDsLinked.add(mapIDs);
 					}
 				}
+				count++;
 			}
+
+			EntityWithLinkedID entityWithLinkedID = new EntityWithLinkedID();
+
+			entityWithLinkedID.setEntitySGEOL(entitySGEOL);
+			entityWithLinkedID.setEntityWebService("escolas_seec");
+			entityWithLinkedID.setWebService("SIGEduc");
+			entityWithLinkedID.setRefList(listIDsLinked);
+
+			entityService.createOrUpdate(entityWithLinkedID);
+
+		} catch (Exception e) {
+			return (ResponseEntity<HttpStatus>) ResponseEntity.badRequest();
 		}
 
 		return ResponseEntity.ok(HttpStatus.OK);
@@ -175,11 +216,12 @@ public class SmartSyncController {
 		InputStreamReader is = new InputStreamReader(
 				getClass().getResourceAsStream("/br/imd/smartsysnc/utils/rn_geojson.json"), "utf-8");
 		try {
+			MunicipioEntityNGSILDProcessor municipioEntityNGSILDProcessor = new MunicipioEntityNGSILDProcessor();
 			BufferedReader rd = new BufferedReader(is);
 			String jsonText = RequestsUtils.readAll(rd);
 			JSONObject json = new JSONObject(jsonText);
 
-			List<Object> listStatesNGSILD = EntityNGSILDUtils
+			List<Object> listStatesNGSILD = municipioEntityNGSILDProcessor
 					.converterStateRNJsonToEntityNGSILD(json.getJSONArray("features").toList());
 
 			RestTemplate rt = new RestTemplate();

@@ -24,8 +24,11 @@ import br.imd.smartsysnc.service.MatchingConfigService;
 @CrossOrigin(origins = "*")
 public class MatchingConfigController {
 
+	@Autowired
+	private MatchingConfigService matchingConfigService;
+
 	@PostMapping
-	public ResponseEntity<Object> create(@RequestBody MatchingConfig matchingConfig) {
+	public ResponseEntity<Object> createMatchingConfig(@RequestBody MatchingConfig matchingConfig) {
 
 		try {
 			matchingConfig.setDateCreated(new Date());
@@ -39,12 +42,9 @@ public class MatchingConfigController {
 		return ResponseEntity.ok(HttpStatus.OK);
 	}
 
-	@Autowired
-	private MatchingConfigService matchingConfigService;
-
 	@GetMapping
 	public ResponseEntity<Object> getAllMatchingConfig() {
-		List<MatchingConfig> listMatching = new ArrayList<MatchingConfig>();
+		List<MatchingConfig> listMatching = new ArrayList<>();
 		try {
 			listMatching = matchingConfigService.findAll();
 		} catch (DuplicateKeyException e) {
