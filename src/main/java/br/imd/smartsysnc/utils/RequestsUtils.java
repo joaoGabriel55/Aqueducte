@@ -42,7 +42,8 @@ public class RequestsUtils {
 	public static String readBodyReq(HttpURLConnection con) throws UnsupportedEncodingException, IOException {
 		/* Lendo body */
 		BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-		String body = "", temp = null;
+		String body = "";
+		String temp = null;
 		while ((temp = br.readLine()) != null)
 			body += temp;
 
