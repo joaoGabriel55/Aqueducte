@@ -1,8 +1,5 @@
 package br.imd.smartsysnc.processors;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,11 +11,14 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import br.imd.smartsysnc.utils.RequestsUtils;
-
 public class EntityNGSILDProcessor {
+
+	private void initDefaultProperties(LinkedHashMap<Object, Object> linkedHashMapNGSILD, List<String> contextList,
+			String layerType, String uuid) {
+		linkedHashMapNGSILD.put("@context", contextList);
+		linkedHashMapNGSILD.put("id", "urn:ngsi-ld:" + layerType + ":" + uuid);
+		linkedHashMapNGSILD.put("type", layerType);
+	}
 
 	/**
 	 * @param data         - data provided by QuarkSmart.
@@ -27,13 +27,13 @@ public class EntityNGSILDProcessor {
 	 * @param contextLink  - Context for entity
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Object> converterToEntityNGSILD(LinkedHashMap<Object, Object> data, String ownLayerName, String entity,
-			Map<Object, Object> contextLink) {
+	public List<LinkedHashMap<Object, Object>> converterToEntityNGSILD(
+			LinkedHashMap<Object, Object> data, String ownLayerName, String entity, Map<Object, Object> contextLink) {
 
 		LinkedHashMap<Object, Object> linkedHashMapNGSILD = new LinkedHashMap<>();
 
-		HashMap<Object, HashMap<Object, HashMap<Object, Object>>> properties = new HashMap<>();
-		HashMap<Object, HashMap<Object, Object>> atributos = new HashMap<>();
+		
+		
 		HashMap<Object, Object> value = new HashMap<>();
 
 		String layerType = ownLayerName.length() != 0 ? ownLayerName : (String) data.get("name");
@@ -41,7 +41,7 @@ public class EntityNGSILDProcessor {
 		// Property data provided of SIGEduc API
 		ArrayList<Object> listObjSigeduc = (ArrayList<Object>) data.get("rows");
 
-		List<Object> listObjForSgeol = new ArrayList<>();
+		List<LinkedHashMap<Object, Object>> listObjForSgeol = new ArrayList<>();
 
 		// Attribute of entity obtained.
 		Entry<Object, Object> propertiesContent = null;
@@ -51,74 +51,54 @@ public class EntityNGSILDProcessor {
 				contextLink.get("contextLink").toString());
 
 		for (int i = 0; i < listObjSigeduc.size(); i++) {
-			linkedHashMapNGSILD.put("@context", contextList);
-			UUID uuid = UUID.randomUUID();
-			linkedHashMapNGSILD.put("id", "urn:ngsi-ld:" + layerType + ":" + uuid.toString());
-			linkedHashMapNGSILD.put("type", layerType);
-
 			LinkedHashMap<Object, Object> ldObj;
 			ldObj = (LinkedHashMap<Object, Object>) listObjSigeduc.get(i);
+			UUID uuid = UUID.randomUUID();
+			initDefaultProperties(linkedHashMapNGSILD, contextList, layerType, uuid.toString());
+			
+			HashMap<Object, HashMap<Object, HashMap<Object, Object>>> properties = new HashMap<>();
+			HashMap<Object, HashMap<Object, Object>> typeAndValueMap = new HashMap<>();
+			
+			LinkedHashMap<Object, Object> linkedHashIdForRelationship = new LinkedHashMap<>();
 			if (ldObj != null) {
+
+				linkedHashIdForRelationship = new Processor(ldObj, entity, Processor.IDS_FOR_RELATIONSHIP).execute();
+				
 				for (Iterator<Entry<Object, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext();) {
 					propertiesContent = iterator.next();
-
-					value.put("type", propertiesContent.getKey() != "localizacao" ? "Property" : "GeoProperty");
-
+					
 					if (propertiesContent.getKey() == "localizacao" && propertiesContent.getValue() != null) {
-						HashMap<Object, Object> valueGeometry = new HashMap<>();
-						String[] coordenates = propertiesContent.getValue().toString().split(",");
-						valueGeometry.put("coordinates", coordenates);
-						valueGeometry.put("type", "MultiPoint");
-						value.put("value", valueGeometry);
+						convertToGeoJson(value, propertiesContent);
+						typeAndValueMap.put("location", value);
 					} else {
+						value.put("type", "Property");
 						value.put("value", propertiesContent.getValue());
+						typeAndValueMap.put(propertiesContent.getKey(), value);
 					}
-					atributos.put(propertiesContent.getKey() != "localizacao" ? propertiesContent.getKey() : "location",
-							value);
-					properties.put("properties", atributos);
+					properties.put("properties", typeAndValueMap);
 					value = new HashMap<>();
 				}
 			}
 			linkedHashMapNGSILD.putAll(properties);
+			linkedHashMapNGSILD.put("idForRelationShip", linkedHashIdForRelationship);
 			listObjForSgeol.add(linkedHashMapNGSILD);
 			linkedHashMapNGSILD = new LinkedHashMap<>();
-			atributos = new HashMap<>();
-			properties = new HashMap<>();
 		}
 
 		return listObjForSgeol;
 	}
 
-	@SuppressWarnings("unchecked")
-	public Boolean isExistisEntity(String entity, String inepCode)
-			throws UnsupportedEncodingException, IOException {
-
-		HttpURLConnection con = RequestsUtils.sendRequest(
-				RequestsUtils.URL_SGEOL + entity + "/find-by-query?query=p*.inep_id.value$eq$" + inepCode, "GET", true);
-		ObjectMapper mapper = new ObjectMapper();
-		if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
-			String body = RequestsUtils.readBodyReq(con);
-			ArrayList<LinkedHashMap<Object, Object>> credenciais = mapper.readValue(body, ArrayList.class);
-//			((LinkedHashMap<Object, Object>) credenciais).entrySet().size() != 0
-			if (credenciais.size() > 0) {
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return null;
-		}
+	public void convertToGeoJson(HashMap<Object, Object> value, Entry<Object, Object> propertiesContent) {
+		value.put("type", "GeoProperty");
+		HashMap<Object, Object> valueGeometry = new HashMap<>();
+		String[] coordenates = propertiesContent.getValue().toString().split(",");
+		valueGeometry.put("coordinates", coordenates);
+		valueGeometry.put("type", "MultiPoint");
+		value.put("value", valueGeometry);
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Object> getColsFromSigEduc(LinkedHashMap<Object, Object> data) {
-		// Property data provided of SIGEduc API
-		ArrayList<Object> listColsSigeduc = (ArrayList<Object>) data.get("cols");
-		return listColsSigeduc;
-	}
-
-	@SuppressWarnings("unchecked")
-	public  void matchingWithContext(List<Object> listMatches, List<Object> listNGSILD,
+	public void matchingWithContext(List<Object> listMatches, List<LinkedHashMap<Object, Object>> listNGSILD,
 			HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext) {
 		for (Object element : listNGSILD) {
 

@@ -6,4 +6,6 @@ import br.imd.smartsysnc.models.EntityWithLinkedID;
 
 public interface EntityWithLinkedIDRepository extends MongoRepository<EntityWithLinkedID, String> {
 
+	EntityWithLinkedID findByEntitySGEOL(String entitySGEOL);
+
 }

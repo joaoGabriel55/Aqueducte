@@ -7,13 +7,14 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
- * This Class represent the Linked IDs of SGEOL Entities and PK id from WebService
- * */
+ * This Class represent the Linked IDs of SGEOL Entities and PK id from
+ * WebService
+ */
 @Document
 public class EntityWithLinkedID {
 
 	@Id
-	private int id;
+	private String id;
 
 	private String entitySGEOL;
 
@@ -25,13 +26,13 @@ public class EntityWithLinkedID {
 	 * This attribute consists store in a List of Maps the Entity Id of SGEOL and PK
 	 * Id of WebService
 	 */
-	private List<Map<String, Integer>> refList;
+	private List<Map<String, Object>> refList;
 
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -43,11 +44,11 @@ public class EntityWithLinkedID {
 		this.entitySGEOL = entitySGEOL;
 	}
 
-	public List<Map<String, Integer>> getRefList() {
+	public List<Map<String, Object>> getRefList() {
 		return refList;
 	}
 
-	public void setRefList(List<Map<String, Integer>> refList) {
+	public void setRefList(List<Map<String, Object>> refList) {
 		this.refList = refList;
 	}
 

@@ -7,6 +7,10 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
+
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
 
 public class RequestsUtils {
 	public static int STATUS_OK = 200;
@@ -31,6 +35,7 @@ public class RequestsUtils {
 		HttpURLConnection con = (HttpURLConnection) url.openConnection();
 		con.setDoOutput(true);
 		con.setRequestMethod(method);
+		con.setConnectTimeout(10000);
 		con.setRequestProperty("Content-Type", "application/json");
 		if (needToken)
 			con.setRequestProperty("TOKEN", TOKEN);
@@ -48,6 +53,14 @@ public class RequestsUtils {
 			body += temp;
 
 		return body;
+	}
+
+	public static void postMethodRestTemplate(String url, Map<Object, Object> entidadeToImport) {
+
+		RestTemplate rt = new RestTemplate();
+		rt.getMessageConverters().add(new StringHttpMessageConverter());
+
+		rt.postForEntity(url, entidadeToImport, String.class);
 	}
 
 }
