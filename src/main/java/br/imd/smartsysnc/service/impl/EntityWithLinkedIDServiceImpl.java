@@ -30,4 +30,8 @@ public class EntityWithLinkedIDServiceImpl implements GenericService<EntityWithL
 		return null;
 	}
 
+	public EntityWithLinkedID findByEntitySGEOL(String entitySGEOL) {
+		return this.entityWithLinkedIDRepository.findByEntitySGEOL(entitySGEOL);
+	}
+
 }

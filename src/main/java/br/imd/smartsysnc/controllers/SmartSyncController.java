@@ -35,7 +35,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.imd.smartsysnc.models.EntityWithLinkedID;
 import br.imd.smartsysnc.processors.EntityNGSILDProcessor;
 import br.imd.smartsysnc.processors.MunicipioEntityNGSILDProcessor;
-import br.imd.smartsysnc.service.GenericService;
+import br.imd.smartsysnc.processors.sigeduc.SigEducAPIEntityUtils;
+import br.imd.smartsysnc.service.impl.EntityWithLinkedIDServiceImpl;
 import br.imd.smartsysnc.utils.CsvToNGSILDUtil;
 import br.imd.smartsysnc.utils.FormatterUtils;
 import br.imd.smartsysnc.utils.MessageUtils;
@@ -50,11 +51,11 @@ import br.imd.smartsysnc.utils.RequestsUtils;
 public class SmartSyncController {
 
 	@Autowired
-	private GenericService<EntityWithLinkedID> entityService;
+	private EntityWithLinkedIDServiceImpl entityService;
 
 	@SuppressWarnings({ "unchecked" })
 	@PostMapping(value = "/{entity}")
-	public Object consumeRestApi(@PathVariable(required = true) String entity,
+	public List<LinkedHashMap<Object, Object>> consumeRestApi(@PathVariable(required = true) String entity,
 			@RequestParam(value = "limit", defaultValue = "100") int limit,
 			@RequestParam(value = "offset", defaultValue = "1") int offset,
 			@RequestParam(value = "ownLayerName", defaultValue = "") String ownLayerName,
@@ -71,47 +72,29 @@ public class SmartSyncController {
 				String body = RequestsUtils.readBodyReq(con);
 				Object credenciais = mapper.readValue(body, Object.class);
 
-				List<Object> listNGSILD = new ArrayList<>();
-
 				EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
 
-				listNGSILD = entityNGSILD.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
-						ownLayerName, entity, contextLink);
+				return entityNGSILD.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais, ownLayerName,
+						entity, contextLink);
 
-				return listNGSILD;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return new ArrayList<>();
 	}
 
-	@SuppressWarnings({ "unchecked" })
 	@GetMapping(value = "/colsFromSigEduc/{entity}")
-	public List<Object> getColsFromSigEduc(@PathVariable(required = true) String entity) {
-		String baseUrl = RequestsUtils.URL_SIGEDUC + entity + "?limit=1";
-		try {
+	public List<Object> getColsFromSigEduc(@PathVariable(required = true) String entity) throws Exception {
+		SigEducAPIEntityUtils apiEntityProcessor = new SigEducAPIEntityUtils();
+		return apiEntityProcessor.getColsFromSigEduc(entity);
 
-			HttpURLConnection con = RequestsUtils.sendRequest(baseUrl, "GET", true);
-			ObjectMapper mapper = new ObjectMapper();
-
-			if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
-				String body = RequestsUtils.readBodyReq(con);
-				Object credenciais = mapper.readValue(body, Object.class);
-
-				EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
-
-				List<Object> listCols = entityNGSILD.getColsFromSigEduc((LinkedHashMap<Object, Object>) credenciais);
-
-				return listCols;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
-
-	@SuppressWarnings({ "unused", "unchecked" })
+	
+	/**
+	 * Generate Data to import for SGEOL (With matchings)
+	 * */
+	@SuppressWarnings({ "unchecked" })
 	@PostMapping(value = "/dataFromSigEducToSgeol/{entity}")
 	public Object getDataFromSigEducToSgeol(@PathVariable(required = true) String entity,
 			@RequestParam(value = "limit", defaultValue = "0") int limit,
@@ -136,14 +119,14 @@ public class SmartSyncController {
 				String body = RequestsUtils.readBodyReq(con);
 				Object credenciais = mapper.readValue(body, Object.class);
 
-				List<Object> listNGSILD;
+				List<LinkedHashMap<Object, Object>> listNGSILD;
 
 				EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
 
 				listNGSILD = entityNGSILD.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
 						ownLayerName, entity, matchingJson);
 
-				HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext = new HashMap<Object, HashMap<Object, Object>>();
+				HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext = new HashMap<>();
 
 				List<Object> listMatches = (List<Object>) matchingJson.get("matches");
 
@@ -163,47 +146,37 @@ public class SmartSyncController {
 	@PostMapping(value = "/importDataToSGEOL/{entity}")
 	@ResponseBody
 	public ResponseEntity<HttpStatus> importDataToSGEOL(@PathVariable(required = true) String entity,
-			@RequestBody List<Map<Object, Object>> dataToImport) throws UnsupportedEncodingException, IOException {
-
-		EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
+			@RequestBody List<LinkedHashMap<Object,Object>> dataToImport) throws UnsupportedEncodingException, IOException {
 
 		String entitySGEOL = null;
-		List<Map<String, Integer>> listIDsLinked = new LinkedList<>();
+		List<Map<String, Object>> listIDsLinked = new LinkedList<>();
+		String entityTeste = "escola_seec";
 		try {
 			int count = 0;
-			for (Map<Object, Object> entidadeToImport : dataToImport) {
+			for (LinkedHashMap<Object,Object> entidadeToImport : dataToImport) {
+				if (count == 0)
+					entitySGEOL = entidadeToImport.get("type").toString();
 
-				if (entidadeToImport.containsKey("inepCod")) {
+//				Processor entityNGSILDProcessor = 
+//				//(entityTeste, entidadeToImport, entitySGEOL, listIDsLinked)
+//				entityNGSILDProcessor.execute(entidadeToImport, entityTeste, Processor.IMPORTATION_TO_SGEOL);
 
-					if (count == 0)
-						entitySGEOL = entidadeToImport.get("type").toString();
-					String inepCode = (String) ((LinkedHashMap<Object, Object>) entidadeToImport.get("inepCod"))
-							.get("value");
-					Boolean isExistis = entityNGSILD.isExistisEntity(entity, inepCode);
-					if (isExistis != null && !isExistis) {
-						RestTemplate rt = new RestTemplate();
-						rt.getMessageConverters().add(new StringHttpMessageConverter());
-						String url = RequestsUtils.URL_SGEOL + entity;
-						rt.postForEntity(url, entidadeToImport, String.class);
-
-						String idForSGEOL = entidadeToImport.get("id").toString();
-						HashMap<String, Integer> mapIDs = new HashMap<>();
-						mapIDs.put(idForSGEOL, 1);
-
-						listIDsLinked.add(mapIDs);
-					}
-				}
 				count++;
 			}
 
-			EntityWithLinkedID entityWithLinkedID = new EntityWithLinkedID();
+			EntityWithLinkedID entityWithLinkedID = entityService.findByEntitySGEOL(entitySGEOL);
+			if (entityWithLinkedID != null) {
 
-			entityWithLinkedID.setEntitySGEOL(entitySGEOL);
-			entityWithLinkedID.setEntityWebService("escolas_seec");
-			entityWithLinkedID.setWebService("SIGEduc");
-			entityWithLinkedID.setRefList(listIDsLinked);
+			} else {
+				entityWithLinkedID = new EntityWithLinkedID();
+				entityWithLinkedID.setEntitySGEOL(entitySGEOL);
+				entityWithLinkedID.setEntityWebService(entityTeste);
+				entityWithLinkedID.setWebService("SIGEduc");
+				entityWithLinkedID.setRefList(listIDsLinked);
 
-			entityService.createOrUpdate(entityWithLinkedID);
+				entityService.createOrUpdate(entityWithLinkedID);
+
+			}
 
 		} catch (Exception e) {
 			return (ResponseEntity<HttpStatus>) ResponseEntity.badRequest();
