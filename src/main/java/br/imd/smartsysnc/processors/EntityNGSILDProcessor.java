@@ -27,13 +27,13 @@ public class EntityNGSILDProcessor {
 	 * @param contextLink  - Context for entity
 	 */
 	@SuppressWarnings("unchecked")
-	public List<LinkedHashMap<Object, Object>> converterToEntityNGSILD(
-			LinkedHashMap<Object, Object> data, String ownLayerName, String entity, Map<Object, Object> contextLink) {
+	public List<LinkedHashMap<Object, Object>> converterToEntityNGSILD(LinkedHashMap<Object, Object> data,
+			String ownLayerName, String entity, Map<Object, Object> contextLink) {
+
+		LinkedHashMap<Object, Object> linkedHashMapFinal = new LinkedHashMap<>();
 
 		LinkedHashMap<Object, Object> linkedHashMapNGSILD = new LinkedHashMap<>();
 
-		
-		
 		HashMap<Object, Object> value = new HashMap<>();
 
 		String layerType = ownLayerName.length() != 0 ? ownLayerName : (String) data.get("name");
@@ -55,18 +55,19 @@ public class EntityNGSILDProcessor {
 			ldObj = (LinkedHashMap<Object, Object>) listObjSigeduc.get(i);
 			UUID uuid = UUID.randomUUID();
 			initDefaultProperties(linkedHashMapNGSILD, contextList, layerType, uuid.toString());
-			
+
 			HashMap<Object, HashMap<Object, HashMap<Object, Object>>> properties = new HashMap<>();
 			HashMap<Object, HashMap<Object, Object>> typeAndValueMap = new HashMap<>();
-			
-			LinkedHashMap<Object, Object> linkedHashIdForRelationship = new LinkedHashMap<>();
+
+			HashMap<Object, Object> linkedHashIdForRelationship = new LinkedHashMap<>();
 			if (ldObj != null) {
 
-				linkedHashIdForRelationship = new Processor(ldObj, entity, Processor.IDS_FOR_RELATIONSHIP).execute();
-				
+				linkedHashIdForRelationship = (HashMap<Object, Object>) new Processor(ldObj, entity,
+						Processor.IDS_FOR_RELATIONSHIP).execute();
+
 				for (Iterator<Entry<Object, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext();) {
 					propertiesContent = iterator.next();
-					
+
 					if (propertiesContent.getKey() == "localizacao" && propertiesContent.getValue() != null) {
 						convertToGeoJson(value, propertiesContent);
 						typeAndValueMap.put("location", value);
@@ -79,10 +80,14 @@ public class EntityNGSILDProcessor {
 					value = new HashMap<>();
 				}
 			}
+
 			linkedHashMapNGSILD.putAll(properties);
-			linkedHashMapNGSILD.put("idForRelationShip", linkedHashIdForRelationship);
-			listObjForSgeol.add(linkedHashMapNGSILD);
+			linkedHashMapFinal.put("idForRelationShip", linkedHashIdForRelationship);
+			linkedHashMapFinal.put("objNGSILD", linkedHashMapNGSILD);
+
+			listObjForSgeol.add(linkedHashMapFinal);
 			linkedHashMapNGSILD = new LinkedHashMap<>();
+			linkedHashMapFinal = new LinkedHashMap<>();
 		}
 
 		return listObjForSgeol;
@@ -102,8 +107,10 @@ public class EntityNGSILDProcessor {
 			HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext) {
 		for (Object element : listNGSILD) {
 
-			HashMap<Object, Object> properties = (HashMap<Object, Object>) ((HashMap<Object, Object>) element)
-					.get("properties");
+			HashMap<Object, Object> objNGSILD = (HashMap<Object, Object>) ((HashMap<Object, Object>) element)
+					.get("objNGSILD");
+			HashMap<Object, Object> properties = (HashMap<Object, Object>) objNGSILD.get("properties");
+
 			for (Entry<Object, Object> property : properties.entrySet()) {
 				String key = property.getKey().toString();
 				for (Object matches : listMatches) {
@@ -120,8 +127,13 @@ public class EntityNGSILDProcessor {
 				}
 			}
 			((HashMap<Object, Object>) element).remove("properties");
-			((HashMap<Object, Object>) element).putAll(propertiesBasedOnContext);
+			objNGSILD.put("properties", propertiesBasedOnContext);
 			propertiesBasedOnContext = new HashMap<>();
 		}
+	}
+	
+	public Map<Object, Object> getLinkedIdListAndImportDataToSGEOL(Map<Object, Object> entidadeToImport,
+			String entity, boolean importationToo) {
+		return new Processor(entidadeToImport, entity, Processor.IMPORTATION_TO_SGEOL, importationToo).execute();
 	}
 }

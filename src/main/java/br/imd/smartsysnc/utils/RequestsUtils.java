@@ -17,7 +17,7 @@ public class RequestsUtils {
 	private static String TOKEN = "dd0ce06d6d51c059f52924aefb2a6aad";
 
 	public static String URL_SIGEDUC = "https://quarkbi.esig.com.br/api/v1/dw/entity/";
-	public static String URL_SGEOL = "http://localhost:8091/sgeol-dm/v2/"; // Local
+	public static String URL_SGEOL = "http://localhost:8091/data-middleware/v2/"; // Local
 //    private static String URL_SGEOL = "http://10.7.52.26:8080/sgeol-dm/v2/"; //Test;
 //	private static String URL_SGEOL = "http://10.7.52.76:8080/sgeol-dm/v2/"; // Production;
 

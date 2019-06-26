@@ -9,7 +9,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.imd.smartsysnc.models.EntityWithLinkedID;
+import br.imd.smartsysnc.models.ReferenceForRelationship;
 import br.imd.smartsysnc.processors.EntityNGSILDProcessor;
 import br.imd.smartsysnc.processors.MunicipioEntityNGSILDProcessor;
 import br.imd.smartsysnc.processors.sigeduc.SigEducAPIEntityUtils;
@@ -90,10 +90,10 @@ public class SmartSyncController {
 		return apiEntityProcessor.getColsFromSigEduc(entity);
 
 	}
-	
+
 	/**
 	 * Generate Data to import for SGEOL (With matchings)
-	 * */
+	 */
 	@SuppressWarnings({ "unchecked" })
 	@PostMapping(value = "/dataFromSigEducToSgeol/{entity}")
 	public Object getDataFromSigEducToSgeol(@PathVariable(required = true) String entity,
@@ -146,40 +146,53 @@ public class SmartSyncController {
 	@PostMapping(value = "/importDataToSGEOL/{entity}")
 	@ResponseBody
 	public ResponseEntity<HttpStatus> importDataToSGEOL(@PathVariable(required = true) String entity,
-			@RequestBody List<LinkedHashMap<Object,Object>> dataToImport) throws UnsupportedEncodingException, IOException {
+			@RequestBody List<Map<Object, Object>> dataToImport) throws UnsupportedEncodingException, IOException {
 
 		String entitySGEOL = null;
-		List<Map<String, Object>> listIDsLinked = new LinkedList<>();
-		String entityTeste = "escola_seec";
+		List<ReferenceForRelationship> listIDsLinked = new ArrayList<>();
+		String entityTeste = "escolas_seec";
 		try {
+			boolean importationToo = true;
+
+			EntityWithLinkedID entityWithLinkedID = entityService.findByEntitySGEOL(entity);
+			if (entityWithLinkedID != null)
+				importationToo = false;
+
 			int count = 0;
-			for (LinkedHashMap<Object,Object> entidadeToImport : dataToImport) {
-				if (count == 0)
-					entitySGEOL = entidadeToImport.get("type").toString();
+			for (Map<Object, Object> entidadeToImport : dataToImport) {
 
-//				Processor entityNGSILDProcessor = 
-//				//(entityTeste, entidadeToImport, entitySGEOL, listIDsLinked)
-//				entityNGSILDProcessor.execute(entidadeToImport, entityTeste, Processor.IMPORTATION_TO_SGEOL);
+				if (count == 0) {
+					Map<Object, Object> objNGSILD = (LinkedHashMap<Object, Object>) entidadeToImport.get("objNGSILD");
+					entitySGEOL = objNGSILD.get("type").toString();
+				}
 
+				EntityNGSILDProcessor entityNGSILDProcessor = new EntityNGSILDProcessor();
+				Map<Object, Object> idsLinked = (HashMap<Object, Object>) entityNGSILDProcessor
+						.getLinkedIdListAndImportDataToSGEOL(entidadeToImport, entityTeste, importationToo);
+				if (idsLinked != null) {
+					String idSGEOL = (String) idsLinked.get("idSGEOL");
+					Map<String, Object> idsRelationship = (LinkedHashMap<String, Object>) idsLinked
+							.get("idForRelationShip");
+					listIDsLinked.add(new ReferenceForRelationship(idSGEOL, idsRelationship));
+				}
 				count++;
 			}
 
-			EntityWithLinkedID entityWithLinkedID = entityService.findByEntitySGEOL(entitySGEOL);
 			if (entityWithLinkedID != null) {
-
+				EntityWithLinkedIDServiceImpl entityWithLinkedIDService = new EntityWithLinkedIDServiceImpl();
+				entityWithLinkedIDService.findLinkedIdsWhichAlreadyExists(listIDsLinked, entityWithLinkedID);
 			} else {
 				entityWithLinkedID = new EntityWithLinkedID();
 				entityWithLinkedID.setEntitySGEOL(entitySGEOL);
 				entityWithLinkedID.setEntityWebService(entityTeste);
-				entityWithLinkedID.setWebService("SIGEduc");
+				entityWithLinkedID.setWebService("SIGEduc"); // TODO Get the web service via DevBoard.
 				entityWithLinkedID.setRefList(listIDsLinked);
 
 				entityService.createOrUpdate(entityWithLinkedID);
-
 			}
 
 		} catch (Exception e) {
-			return (ResponseEntity<HttpStatus>) ResponseEntity.badRequest();
+			e.printStackTrace();
 		}
 
 		return ResponseEntity.ok(HttpStatus.OK);
