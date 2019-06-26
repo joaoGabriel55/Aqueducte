@@ -1,7 +1,6 @@
 package br.imd.smartsysnc.models;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -26,7 +25,7 @@ public class EntityWithLinkedID {
 	 * This attribute consists store in a List of Maps the Entity Id of SGEOL and PK
 	 * Id of WebService
 	 */
-	private List<Map<String, Object>> refList;
+	private List<ReferenceForRelationship> refList;
 
 	public String getId() {
 		return id;
@@ -44,11 +43,11 @@ public class EntityWithLinkedID {
 		this.entitySGEOL = entitySGEOL;
 	}
 
-	public List<Map<String, Object>> getRefList() {
+	public List<ReferenceForRelationship> getRefList() {
 		return refList;
 	}
 
-	public void setRefList(List<Map<String, Object>> refList) {
+	public void setRefList(List<ReferenceForRelationship> refList) {
 		this.refList = refList;
 	}
 
