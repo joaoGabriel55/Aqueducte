@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.imd.smartsysnc.models.EntityWithLinkedID;
 import br.imd.smartsysnc.models.ReferenceForRelationship;
-import br.imd.smartsysnc.processors.EntityNGSILDProcessor;
+import br.imd.smartsysnc.processors.EntityNGSILDTreat;
 import br.imd.smartsysnc.processors.MunicipioEntityNGSILDProcessor;
 import br.imd.smartsysnc.processors.sigeduc.SigEducAPIEntityUtils;
 import br.imd.smartsysnc.service.impl.EntityWithLinkedIDServiceImpl;
@@ -72,7 +72,7 @@ public class SmartSyncController {
 				String body = RequestsUtils.readBodyReq(con);
 				Object credenciais = mapper.readValue(body, Object.class);
 
-				EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
+				EntityNGSILDTreat entityNGSILD = new EntityNGSILDTreat();
 
 				return entityNGSILD.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais, ownLayerName,
 						entity, contextLink);
@@ -121,7 +121,7 @@ public class SmartSyncController {
 
 				List<LinkedHashMap<Object, Object>> listNGSILD;
 
-				EntityNGSILDProcessor entityNGSILD = new EntityNGSILDProcessor();
+				EntityNGSILDTreat entityNGSILD = new EntityNGSILDTreat();
 
 				listNGSILD = entityNGSILD.converterToEntityNGSILD((LinkedHashMap<Object, Object>) credenciais,
 						ownLayerName, entity, matchingJson);
@@ -154,10 +154,6 @@ public class SmartSyncController {
 		try {
 			boolean importationToo = true;
 
-			EntityWithLinkedID entityWithLinkedID = entityService.findByEntitySGEOL(entity);
-			if (entityWithLinkedID != null)
-				importationToo = false;
-
 			int count = 0;
 			for (Map<Object, Object> entidadeToImport : dataToImport) {
 
@@ -166,9 +162,9 @@ public class SmartSyncController {
 					entitySGEOL = objNGSILD.get("type").toString();
 				}
 
-				EntityNGSILDProcessor entityNGSILDProcessor = new EntityNGSILDProcessor();
-				Map<Object, Object> idsLinked = (HashMap<Object, Object>) entityNGSILDProcessor
-						.getLinkedIdListAndImportDataToSGEOL(entidadeToImport, entityTeste, importationToo);
+				EntityNGSILDTreat ngsildTreat = new EntityNGSILDTreat();
+				Map<Object, Object> idsLinked = (HashMap<Object, Object>) ngsildTreat
+						.getLinkedIdListForImportDataToSGEOL(entidadeToImport, entityTeste, importationToo);
 				if (idsLinked != null) {
 					String idSGEOL = (String) idsLinked.get("idSGEOL");
 					Map<String, Object> idsRelationship = (LinkedHashMap<String, Object>) idsLinked
@@ -178,9 +174,14 @@ public class SmartSyncController {
 				count++;
 			}
 
+			EntityWithLinkedID entityWithLinkedID = entityService.findByEntitySGEOL(entity);
+
 			if (entityWithLinkedID != null) {
 				EntityWithLinkedIDServiceImpl entityWithLinkedIDService = new EntityWithLinkedIDServiceImpl();
-				entityWithLinkedIDService.findLinkedIdsWhichAlreadyExists(listIDsLinked, entityWithLinkedID);
+				entityWithLinkedID = entityWithLinkedIDService.findLinkedIdsWhichAlreadyExists(listIDsLinked,
+						entityWithLinkedID, "id_escola");
+				
+				
 			} else {
 				entityWithLinkedID = new EntityWithLinkedID();
 				entityWithLinkedID.setEntitySGEOL(entitySGEOL);
