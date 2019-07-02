@@ -11,7 +11,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
-public class EntityNGSILDProcessor {
+public class EntityNGSILDTreat {
 
 	private void initDefaultProperties(LinkedHashMap<Object, Object> linkedHashMapNGSILD, List<String> contextList,
 			String layerType, String uuid) {
@@ -82,7 +82,7 @@ public class EntityNGSILDProcessor {
 			}
 
 			linkedHashMapNGSILD.putAll(properties);
-			linkedHashMapFinal.put("idForRelationShip", linkedHashIdForRelationship);
+			linkedHashMapFinal.put("idForRelationship", linkedHashIdForRelationship);
 			linkedHashMapFinal.put("objNGSILD", linkedHashMapNGSILD);
 
 			listObjForSgeol.add(linkedHashMapFinal);
@@ -132,8 +132,8 @@ public class EntityNGSILDProcessor {
 		}
 	}
 	
-	public Map<Object, Object> getLinkedIdListAndImportDataToSGEOL(Map<Object, Object> entidadeToImport,
+	public Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entidadeToImport,
 			String entity, boolean importationToo) {
-		return new Processor(entidadeToImport, entity, Processor.IMPORTATION_TO_SGEOL, importationToo).execute();
+		return new Processor(entidadeToImport, entity, Processor.IMPORTATION_TO_SGEOL).execute();
 	}
 }

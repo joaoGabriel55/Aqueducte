@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.imd.smartsysnc.processors.Processor;
-import br.imd.smartsysnc.service.impl.EntityWithLinkedIDServiceImpl;
 import br.imd.smartsysnc.utils.FormatterUtils;
 import br.imd.smartsysnc.utils.RequestsUtils;
 
@@ -40,21 +39,17 @@ public class EscolaEntityProcessor extends Processor {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<Object, Object> getLinkedIdListOrImportDataToSGEOL(Map<Object, Object> ldObj, boolean importationToo) {
+	public Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> ldObj) {
 
 		Map<Object, Object> objNGSILD = (LinkedHashMap<Object, Object>) ldObj.get("objNGSILD");
 		Map<Object, Object> propertiesObjNGSILD = (LinkedHashMap<Object, Object>) objNGSILD.get("properties");
 
-		Map<Object, Object> idForRelationShip = (LinkedHashMap<Object, Object>) ldObj.get("idForRelationShip");
+		Map<Object, Object> idForRelationShip = (LinkedHashMap<Object, Object>) ldObj.get("idForRelationship");
 
 		try {
 			String inepCode = (String) FormatterUtils
 					.getValuePropertyNGSILD((Map<Object, Object>) propertiesObjNGSILD.get("inepCodSch"));
 			if (isExistisEntityByInepCode(objNGSILD.get("type").toString(), inepCode)) {
-				if(importationToo) {
-					importToSGEOL(objNGSILD, objNGSILD.get("type").toString());
-				}
-
 				Map<Object, Object> idsLinked = new HashMap<>();
 				idsLinked.put("idSGEOL", objNGSILD.get("id").toString());
 				idsLinked.put("idForRelationShip", idForRelationShip);

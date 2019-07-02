@@ -15,19 +15,11 @@ public class Processor {
 	private Map<Object, Object> ldObj;
 	private String entity;
 	private int operation;
-	private boolean importationToo;
 
 	public Processor(Map<Object, Object> ldObj, String entity, int operation) {
 		this.ldObj = ldObj;
 		this.entity = entity;
 		this.operation = operation;
-	}
-	
-	public Processor(Map<Object, Object> ldObj, String entity, int operation, boolean importationToo) {
-		this.ldObj = ldObj;
-		this.entity = entity;
-		this.operation = operation;
-		this.importationToo = importationToo;
 	}
 
 	public Map<Object, Object> execute() {
@@ -35,7 +27,7 @@ public class Processor {
 		if (operation == 1) {
 			response = selectSpecificEntityIdsForRelationship();
 		} else if (operation == 2) {
-			response = selectEspectificEntityForGetLinkedIdListOrImportDataToSGEOL();
+			response = selectEspectificEntityForGetLinkedIdListForImportDataToSGEOL();
 		}
 		return response;
 	}
@@ -64,19 +56,19 @@ public class Processor {
 	 * Method to select the specific entity for return of LinkedId List for Document 
 	 * (Persisted at DevBoard dataBase) or make the Importation of entities for SGEOL. 
 	 * */
-	private Map<Object, Object> selectEspectificEntityForGetLinkedIdListOrImportDataToSGEOL() {
+	private Map<Object, Object> selectEspectificEntityForGetLinkedIdListForImportDataToSGEOL() {
 		if (entity.equals("escolas_seec"))
-			return getLinkedIdListOrImportDataToSGEOL(new EscolaEntityProcessor(ldObj, entity, operation));
+			return getLinkedIdListForImportDataToSGEOL(new EscolaEntityProcessor(ldObj, entity, operation));
 		else
 			return new HashMap<>();
 	}	
 
-	public Map<Object, Object> getLinkedIdListOrImportDataToSGEOL(Processor processor) {
-		return processor.getLinkedIdListOrImportDataToSGEOL(ldObj, importationToo);
+	public Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Processor processor) {
+		return processor.getLinkedIdListForImportDataToSGEOL(ldObj);
 	}
 	
-	public Map<Object, Object> getLinkedIdListOrImportDataToSGEOL(Map<Object, Object> ldObj, boolean importationToo) {
-		return getLinkedIdListOrImportDataToSGEOL(ldObj, importationToo);
+	public Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> ldObj) {
+		return getLinkedIdListForImportDataToSGEOL(ldObj);
 	}
 
 	/**
