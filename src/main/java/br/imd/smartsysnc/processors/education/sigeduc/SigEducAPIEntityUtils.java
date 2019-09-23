@@ -1,4 +1,4 @@
-package br.imd.smartsysnc.processors.sigeduc;
+package br.imd.smartsysnc.processors.education.sigeduc;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -11,6 +11,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.imd.smartsysnc.utils.RequestsUtils;
 
 public class SigEducAPIEntityUtils {
+	
+	public static String getUrlOfEntity(String entity, int limit, int offset) {
+		return RequestsUtils.URL_SIGEDUC + entity + "?limit=" + limit + "&offset=" + offset;
+	}
 
 	@SuppressWarnings("unchecked")
 	public List<Object> getColsFromSigEduc(String entity) throws Exception {

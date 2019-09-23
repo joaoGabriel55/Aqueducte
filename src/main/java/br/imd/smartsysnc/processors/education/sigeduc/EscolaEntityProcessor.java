@@ -1,4 +1,4 @@
-package br.imd.smartsysnc.processors.sigeduc;
+package br.imd.smartsysnc.processors.education.sigeduc;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -14,11 +14,7 @@ import br.imd.smartsysnc.processors.Processor;
 import br.imd.smartsysnc.utils.FormatterUtils;
 import br.imd.smartsysnc.utils.RequestsUtils;
 
-public class EscolaEntityProcessor extends Processor {
-
-	public EscolaEntityProcessor(Map<Object, Object> ldObj, String entity, int operation) {
-		super(ldObj, entity, operation);
-	}
+public class EscolaEntityProcessor implements Processor {
 
 	@Override
 	public Map<Object, Object> getIdsForRelationship(Map<Object, Object> ldObj) {
@@ -64,9 +60,10 @@ public class EscolaEntityProcessor extends Processor {
 	@SuppressWarnings("unchecked")
 	private boolean isExistisEntityByInepCode(String entity, String inepCode) throws IOException {
 		if (inepCode != null) {
+
 			HttpURLConnection con = RequestsUtils.sendRequest(
 					RequestsUtils.URL_SGEOL + entity + "/find-by-query?query=p*.inep_id.value$eq$" + inepCode, "GET",
-					true);
+					false);
 			ObjectMapper mapper = new ObjectMapper();
 			if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
 				String body = RequestsUtils.readBodyReq(con);

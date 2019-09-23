@@ -1,4 +1,4 @@
-package br.imd.smartsysnc.processors;
+package br.imd.smartsysnc.processors.education.sigeduc.treats;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,17 +8,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import br.imd.smartsysnc.processors.NGSILDTreat;
+import br.imd.smartsysnc.processors.Processor;
+import br.imd.smartsysnc.processors.education.sigeduc.EscolaEntityProcessor;
+import br.imd.smartsysnc.utils.NGSILDUtils;
+
 import java.util.Optional;
 import java.util.UUID;
 
-public class EntityNGSILDTreat {
-
-	private void initDefaultProperties(LinkedHashMap<Object, Object> linkedHashMapNGSILD, List<String> contextList,
-			String layerType, String uuid) {
-		linkedHashMapNGSILD.put("@context", contextList);
-		linkedHashMapNGSILD.put("id", "urn:ngsi-ld:" + layerType + ":" + uuid);
-		linkedHashMapNGSILD.put("type", layerType);
-	}
+public class EscolaNGSILDTreat implements NGSILDTreat{
 
 	/**
 	 * @param data         - data provided by QuarkSmart.
@@ -27,8 +26,11 @@ public class EntityNGSILDTreat {
 	 * @param contextLink  - Context for entity
 	 */
 	@SuppressWarnings("unchecked")
-	public List<LinkedHashMap<Object, Object>> converterToEntityNGSILD(LinkedHashMap<Object, Object> data,
-			String ownLayerName, String entity, Map<Object, Object> contextLink) {
+	public List<LinkedHashMap<Object, Object>> convertToEntityNGSILD(
+			LinkedHashMap<Object, Object> data,
+			String ownLayerName, 
+			String entity,
+			Map<Object, Object> contextLink) {
 
 		LinkedHashMap<Object, Object> linkedHashMapFinal = new LinkedHashMap<>();
 
@@ -54,17 +56,16 @@ public class EntityNGSILDTreat {
 			LinkedHashMap<Object, Object> ldObj;
 			ldObj = (LinkedHashMap<Object, Object>) listObjSigeduc.get(i);
 			UUID uuid = UUID.randomUUID();
-			initDefaultProperties(linkedHashMapNGSILD, contextList, layerType, uuid.toString());
+			NGSILDUtils.initDefaultProperties(linkedHashMapNGSILD, contextList, layerType, uuid.toString());
 
 			HashMap<Object, HashMap<Object, HashMap<Object, Object>>> properties = new HashMap<>();
 			HashMap<Object, HashMap<Object, Object>> typeAndValueMap = new HashMap<>();
 
 			HashMap<Object, Object> linkedHashIdForRelationship = new LinkedHashMap<>();
 			if (ldObj != null) {
-
-				linkedHashIdForRelationship = (HashMap<Object, Object>) new Processor(ldObj, entity,
-						Processor.IDS_FOR_RELATIONSHIP).execute();
-
+				EscolaEntityProcessor entityProcessor = new EscolaEntityProcessor();
+				entityProcessor.getIdsForRelationship(ldObj);
+				
 				for (Iterator<Entry<Object, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext();) {
 					propertiesContent = iterator.next();
 
@@ -103,12 +104,13 @@ public class EntityNGSILDTreat {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void matchingWithContext(List<Object> listMatches, List<LinkedHashMap<Object, Object>> listNGSILD,
+	public void matchingWithContext(
+			List<Object> listMatches, 
+			List<LinkedHashMap<Object, Object>> listNGSILD,
 			HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext) {
 		for (Object element : listNGSILD) {
 
-			HashMap<Object, Object> objNGSILD = (HashMap<Object, Object>) ((HashMap<Object, Object>) element)
-					.get("objNGSILD");
+			HashMap<Object, Object> objNGSILD  = (HashMap<Object, Object>) ((HashMap<Object, Object>) element).get("objNGSILD");
 			HashMap<Object, Object> properties = (HashMap<Object, Object>) objNGSILD.get("properties");
 
 			for (Entry<Object, Object> property : properties.entrySet()) {
@@ -131,9 +133,16 @@ public class EntityNGSILDTreat {
 			propertiesBasedOnContext = new HashMap<>();
 		}
 	}
-	
-	public Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entidadeToImport,
-			String entity, boolean importationToo) {
-		return new Processor(entidadeToImport, entity, Processor.IMPORTATION_TO_SGEOL).execute();
+
+	public Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entidadeToImport) {
+		Processor processor = new EscolaEntityProcessor();
+		return processor.getLinkedIdListForImportDataToSGEOL(entidadeToImport);
+	}
+
+	@Override
+	public List<LinkedHashMap<Object, Object>> converterToEntityNGSILD(LinkedHashMap<Object, Object> data,
+			String layerNameFromSgeol, String entity, Map<Object, Object> contextLink) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

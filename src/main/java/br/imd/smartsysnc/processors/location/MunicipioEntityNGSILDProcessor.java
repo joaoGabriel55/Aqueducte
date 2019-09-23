@@ -1,4 +1,4 @@
-package br.imd.smartsysnc.processors;
+package br.imd.smartsysnc.processors.location;
 
 import java.util.ArrayList;
 import java.util.Arrays;

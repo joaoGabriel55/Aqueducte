@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SmartSysncApplication {
+public class SmartSyncApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SmartSysncApplication.class, args);
+		SpringApplication.run(SmartSyncApplication.class, args);
 	}
 
 }
