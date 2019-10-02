@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class EntityWithLinkedIDServiceImpl implements GenericService<EntityWithL
 	}
 
 	@Override
-	public List<EntityWithLinkedID> findById() {
+	public Optional<EntityWithLinkedID> findById(String id) {
 		return null;
 	}
 
@@ -96,6 +97,12 @@ public class EntityWithLinkedIDServiceImpl implements GenericService<EntityWithL
 		List<ReferenceForRelationship> listReferenceForRelationshipsNewFilted = listToAdd.stream()
 				.filter(elem -> listFilted.contains(elem.getIdsRelationship())).collect(Collectors.toList());
 		return listReferenceForRelationshipsNewFilted;
+	}
+
+	@Override
+	public String delete(String id) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

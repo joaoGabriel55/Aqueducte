@@ -23,8 +23,8 @@ public class ImportWithoutContextTreat implements NGSILDTreat {
 
 		HashMap<Object, Object> value = new HashMap<>();
 
-		// Property data provided of SIGEduc API
-		ArrayList<Object> listObjSigeduc = (ArrayList<Object>) data;
+		// Property data provided from external API
+		ArrayList<Object> dataListFromExternalAPI = (ArrayList<Object>) data;
 
 		List<LinkedHashMap<Object, Object>> listObjForSgeol = new ArrayList<>();
 
@@ -34,9 +34,9 @@ public class ImportWithoutContextTreat implements NGSILDTreat {
 		List<String> contextList = Arrays.asList(
 				"https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld");
 
-		for (int i = 0; i < listObjSigeduc.size(); i++) {
+		for (int i = 0; i < dataListFromExternalAPI.size(); i++) {
 			LinkedHashMap<Object, Object> ldObj;
-			ldObj = (LinkedHashMap<Object, Object>) listObjSigeduc.get(i);
+			ldObj = (LinkedHashMap<Object, Object>) dataListFromExternalAPI.get(i);
 			UUID uuid = UUID.randomUUID();
 			NGSILDUtils.initDefaultProperties(linkedHashMapNGSILD, contextList, layerPath, uuid.toString());
 
@@ -48,9 +48,15 @@ public class ImportWithoutContextTreat implements NGSILDTreat {
 				for (Iterator<Entry<Object, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext();) {
 					propertiesContent = iterator.next();
 
-					if (propertiesContent.getKey() == "localizacao" && propertiesContent.getValue() != null) {
-						convertToGeoJson(value, propertiesContent);
-						typeAndValueMap.put("location", value);
+					if (propertiesContent.getValue() != null && propertiesContent.getValue() instanceof LinkedHashMap) {
+						LinkedHashMap<Object, Object> linkedHashMap = (LinkedHashMap<Object, Object>) propertiesContent
+								.getValue();
+						if (linkedHashMap.containsKey("isLocation") && linkedHashMap.containsKey("coordinates")) {
+
+							convertToGeoJson(value, (List<Object>) linkedHashMap.get("coordinates"),
+									(String) linkedHashMap.get("typeGeolocation"));
+							typeAndValueMap.put(propertiesContent.getKey(), value);
+						}
 					} else {
 						value.put("type", "Property");
 						value.put("value", propertiesContent.getValue());
@@ -70,12 +76,11 @@ public class ImportWithoutContextTreat implements NGSILDTreat {
 		return listObjForSgeol;
 	}
 
-	public void convertToGeoJson(HashMap<Object, Object> value, Entry<Object, Object> propertiesContent) {
+	public void convertToGeoJson(HashMap<Object, Object> value, List<Object> coordinates, String type) {
 		value.put("type", "GeoProperty");
 		HashMap<Object, Object> valueGeometry = new HashMap<>();
-		String[] coordenates = propertiesContent.getValue().toString().split(",");
-		valueGeometry.put("coordinates", coordenates);
-		valueGeometry.put("type", "MultiPoint");
+		valueGeometry.put("coordinates", coordinates);
+		valueGeometry.put("type", type);
 		value.put("value", valueGeometry);
 	}
 

@@ -3,14 +3,19 @@ package br.imd.smartsysnc.utils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RequestsUtils {
 	public static int STATUS_OK = 200;
@@ -18,7 +23,7 @@ public class RequestsUtils {
 
 	public static String URL_SIGEDUC = "https://quarksmart.com.br/api/v1/dw/entity/";
 //	public static String URL_SGEOL = "http://localhost:8091/data-middleware/v2/"; // Local
-    public static String URL_SGEOL = "http://10.7.52.26:8080/sgeol-dm/v2/"; //Test;
+	public static String URL_SGEOL = "http://10.7.52.26:8080/sgeol-dm/v2/"; // Test;
 //	private static String URL_SGEOL = "http://10.7.52.76:8080/sgeol-dm/v2/"; // Production;
 
 	public static String readAll(Reader rd) throws IOException {
@@ -42,6 +47,80 @@ public class RequestsUtils {
 
 		con.connect();
 		return con;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> resquestToAPI(Map<Object, Object> paramsResquest) throws IOException {
+		URL url = new URL(fullUrl(paramsResquest));
+		HttpURLConnection con = (HttpURLConnection) url.openConnection();
+		con.setDoOutput(true);
+		con.setRequestMethod(paramsResquest.get("method").toString());
+		con.setConnectTimeout(10000);
+
+		LinkedHashMap<String, String> headersParams = (LinkedHashMap<String, String>) paramsResquest.get("headers");
+		if (headersParams != null) {
+			setHeadersParams(headersParams, con);
+		}
+
+		if (paramsResquest.get("data") != null)
+			treatBodyData(con, paramsResquest.get("data").toString());
+
+		con.connect();
+
+		Map<String, Object> responseObject = new HashMap<>();
+		if (con.getResponseCode() == STATUS_OK) {
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, String> jsonObject = mapper.readValue("{ \"data\": " + readBodyReq(con) + "}", Map.class);
+			responseObject.putAll(jsonObject);
+			return responseObject;
+		}
+		responseObject.put("statusCode", con.getResponseCode());
+		responseObject.put("message", con.getResponseMessage());
+
+		return responseObject;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static String fullUrl(Map<Object, Object> paramsResquest) {
+		String url = paramsResquest.get("url").toString();
+
+		LinkedHashMap<String, String> queryParams = (LinkedHashMap<String, String>) paramsResquest.get("params");
+
+		if (queryParams != null)
+			return url + "?" + getQueryParams(queryParams);
+		return url;
+	}
+
+	private static String getQueryParams(LinkedHashMap<String, String> queryParams) {
+		String queryParamsString = "";
+		int count = 1;
+		for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+			if (count == queryParams.entrySet().size())
+				queryParamsString += key + "=" + value;
+			else
+				queryParamsString += key + "=" + value + "&";
+			count++;
+		}
+
+		return queryParamsString;
+
+	}
+
+	private static void setHeadersParams(LinkedHashMap<String, String> headersParams, HttpURLConnection con) {
+		for (Map.Entry<String, String> entry : headersParams.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+			con.setRequestProperty(key, value);
+		}
+	}
+
+	public static void treatBodyData(HttpURLConnection con, String jsonInputString) throws IOException {
+		try (OutputStream os = con.getOutputStream()) {
+			byte[] input = jsonInputString.getBytes("utf-8");
+			os.write(input, 0, input.length);
+		}
 	}
 
 	public static String readBodyReq(HttpURLConnection con) throws UnsupportedEncodingException, IOException {
