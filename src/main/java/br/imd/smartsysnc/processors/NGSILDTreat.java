@@ -6,18 +6,18 @@ import java.util.List;
 import java.util.Map;
 
 public interface NGSILDTreat {
-	List<LinkedHashMap<Object, Object>> converterToEntityNGSILD(
-			LinkedHashMap<Object, Object> data,
-			String layerNameFromSgeol,
-			String entity,
-			Map<Object, Object> contextLink
-	);
-	
-	void matchingWithContext(
-		List<Object> listMatches, 
-		List<LinkedHashMap<Object, Object>> listNGSILD,
-		HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext
-	);
+    List<LinkedHashMap<Object, Object>> convertToEntityNGSILD(
+            List<Object> data,
+            String layerPath,
+            Map<Object, Object> contextLink);
 
-	Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entidadeToImport);
+    void matchingWithContext(
+            List<Object> listMatches,
+            List<LinkedHashMap<Object, Object>> listNGSILD,
+            HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext
+    );
+
+    void importToSGEOL();
+
+    Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entidadeToImport);
 }

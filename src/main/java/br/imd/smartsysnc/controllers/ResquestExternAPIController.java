@@ -23,7 +23,7 @@ public class ResquestExternAPIController {
 
 		Response<Map<String, Object>> response = new Response<>();
 		try {
-			response.setData(RequestsUtils.resquestToAPI(paramsResquest));
+			response.setData(RequestsUtils.requestToAPI(paramsResquest));
 		} catch (IOException e) {
 			response.getErrors().add("Error at retrive data");
 			e.printStackTrace();

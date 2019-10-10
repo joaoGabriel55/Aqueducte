@@ -66,7 +66,7 @@ public class EscolaEntityProcessor implements Processor {
 					false);
 			ObjectMapper mapper = new ObjectMapper();
 			if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
-				String body = RequestsUtils.readBodyReq(con);
+				String body = RequestsUtils.readBodyReq(con.getInputStream());
 				ArrayList<LinkedHashMap<Object, Object>> credenciais = mapper.readValue(body, ArrayList.class);
 				if (!credenciais.isEmpty()) {
 					return true;
