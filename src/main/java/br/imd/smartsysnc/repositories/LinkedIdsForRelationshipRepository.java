@@ -7,7 +7,9 @@ import org.springframework.data.mongodb.repository.Query;
 
 import java.util.List;
 
-public interface ImportationSetupWithoutContextRepository
-        extends MongoRepository<ImportationSetupWithoutContext, String> {
+public interface LinkedIdsForRelationshipRepository extends MongoRepository<LinkedIdsForRelationship, String> {
+
+//    @Query(value = "{ _id : ?0}")
+    List<LinkedIdsForRelationship> findByIdImportationSetupWithoutContext(String id);
 
 }

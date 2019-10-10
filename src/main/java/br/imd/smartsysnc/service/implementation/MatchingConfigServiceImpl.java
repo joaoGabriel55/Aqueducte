@@ -1,4 +1,4 @@
-package br.imd.smartsysnc.service.impl;
+package br.imd.smartsysnc.service.implementation;
 
 import java.util.List;
 

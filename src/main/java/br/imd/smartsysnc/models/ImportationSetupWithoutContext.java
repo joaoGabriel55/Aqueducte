@@ -1,174 +1,222 @@
 package br.imd.smartsysnc.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 @Document
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ImportationSetupWithoutContext {
 
-	@Id
-	private String id;
+    @Id
+    private String id;
 
-	private String label;
+    private String label;
 
-	private String description;
+    private String description;
 
-	private String baseUrl;
+    private String baseUrl;
 
-	private String path;
+    private String path;
 
-	private String httpVerb;
+    private String httpVerb;
 
-	private boolean isUseBodyData;
+    private boolean isUseBodyData;
 
-	private Map<Object, Object> bodyData;
+    private Map<Object, Object> bodyData;
 
-	private Map<Object, Object> queryParameters;
+    private Map<Object, Object> queryParameters;
 
-	private Map<Object, Object> headersParameters;
+    private Map<Object, Object> headersParameters;
 
-	private String layerSelected;
+    private String dataSelected;
 
-	private List<String> fieldsSelected;
+    private String layerSelected;
 
-	private boolean isSelectedGeolocationData;
+    private List<String> fieldsAvailable;
 
-	private List<Map<Object, Object>> fieldsGeolocationSelected;
+    private List<String> fieldsSelected;
 
-	private Date dateCreated;
 
-	private Date dateModified;
+    private boolean isSelectedGeolocationData;
 
-	public String getId() {
-		return id;
-	}
+    private List<String> fieldsGeolocationSelected;
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    private List<Map<Object, Object>> fieldsGeolocationSelectedConfigs;
 
-	public String getLabel() {
-		return label;
-	}
+    @DBRef(lazy = true)
+    private List<LinkedIdsForRelationship> linkedIdsForRelationshipList;
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    private Date dateCreated;
 
-	public String getDescription() {
-		return description;
-	}
+    private Date dateModified;
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    // ===================================================================================
+    // Getters & Setters
+    // ===================================================================================
 
-	public String getBaseUrl() {
-		return baseUrl;
-	}
+    public String getId() {
+        return id;
+    }
 
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public String getPath() {
-		return path;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public void setPath(String path) {
-		this.path = path;
-	}
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-	public String getHttpVerb() {
-		return httpVerb;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setHttpVerb(String httpVerb) {
-		this.httpVerb = httpVerb;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public boolean isUseBodyData() {
-		return isUseBodyData;
-	}
+    public String getBaseUrl() {
+        return baseUrl;
+    }
 
-	public void setUseBodyData(boolean isUseBodyData) {
-		this.isUseBodyData = isUseBodyData;
-	}
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
 
-	public Map<Object, Object> getBodyData() {
-		return bodyData;
-	}
+    public String getPath() {
+        return path;
+    }
 
-	public void setBodyData(Map<Object, Object> bodyData) {
-		this.bodyData = bodyData;
-	}
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-	public Map<Object, Object> getQueryParameters() {
-		return queryParameters;
-	}
+    public String getHttpVerb() {
+        return httpVerb;
+    }
 
-	public void setQueryParameters(Map<Object, Object> queryParameters) {
-		this.queryParameters = queryParameters;
-	}
+    public void setHttpVerb(String httpVerb) {
+        this.httpVerb = httpVerb;
+    }
 
-	public Map<Object, Object> getHeadersParameters() {
-		return headersParameters;
-	}
+    public boolean isUseBodyData() {
+        return isUseBodyData;
+    }
 
-	public void setHeadersParameters(Map<Object, Object> headersParameters) {
-		this.headersParameters = headersParameters;
-	}
+    public void setUseBodyData(boolean useBodyData) {
+        isUseBodyData = useBodyData;
+    }
 
-	public String getLayerSelected() {
-		return layerSelected;
-	}
+    public Map<Object, Object> getBodyData() {
+        return bodyData;
+    }
 
-	public void setLayerSelected(String layerSelected) {
-		this.layerSelected = layerSelected;
-	}
+    public void setBodyData(Map<Object, Object> bodyData) {
+        this.bodyData = bodyData;
+    }
 
-	public List<String> getFieldsSelected() {
-		return fieldsSelected;
-	}
+    public Map<Object, Object> getQueryParameters() {
+        return queryParameters;
+    }
 
-	public void setFieldsSelected(List<String> fieldsSelected) {
-		this.fieldsSelected = fieldsSelected;
-	}
+    public void setQueryParameters(Map<Object, Object> queryParameters) {
+        this.queryParameters = queryParameters;
+    }
 
-	public boolean isSelectedGeolocationData() {
-		return isSelectedGeolocationData;
-	}
+    public Map<Object, Object> getHeadersParameters() {
+        return headersParameters;
+    }
 
-	public void setSelectedGeolocationData(boolean isSelectedGeolocationData) {
-		this.isSelectedGeolocationData = isSelectedGeolocationData;
-	}
+    public void setHeadersParameters(Map<Object, Object> headersParameters) {
+        this.headersParameters = headersParameters;
+    }
 
-	public List<Map<Object, Object>> getFieldsGeolocationSelected() {
-		return fieldsGeolocationSelected;
-	}
+    public String getDataSelected() {
+        return dataSelected;
+    }
 
-	public void setFieldsGeolocationSelected(List<Map<Object, Object>> fieldsGeolocationSelected) {
-		this.fieldsGeolocationSelected = fieldsGeolocationSelected;
-	}
+    public void setDataSelected(String dataSelected) {
+        this.dataSelected = dataSelected;
+    }
 
-	public Date getDateCreated() {
-		return dateCreated;
-	}
+    public String getLayerSelected() {
+        return layerSelected;
+    }
 
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
-	}
+    public void setLayerSelected(String layerSelected) {
+        this.layerSelected = layerSelected;
+    }
 
-	public Date getDateModified() {
-		return dateModified;
-	}
+    public List<String> getFieldsAvailable() {
+        return fieldsAvailable;
+    }
 
-	public void setDateModified(Date dateModified) {
-		this.dateModified = dateModified;
-	}
+    public void setFieldsAvailable(List<String> fieldsAvailable) {
+        this.fieldsAvailable = fieldsAvailable;
+    }
 
+    public List<String> getFieldsSelected() {
+        return fieldsSelected;
+    }
+
+    public void setFieldsSelected(List<String> fieldsSelected) {
+        this.fieldsSelected = fieldsSelected;
+    }
+
+    public boolean isSelectedGeolocationData() {
+        return isSelectedGeolocationData;
+    }
+
+    public void setSelectedGeolocationData(boolean selectedGeolocationData) {
+        isSelectedGeolocationData = selectedGeolocationData;
+    }
+
+    public List<String> getFieldsGeolocationSelected() {
+        return fieldsGeolocationSelected;
+    }
+
+    public void setFieldsGeolocationSelected(List<String> fieldsGeolocationSelected) {
+        this.fieldsGeolocationSelected = fieldsGeolocationSelected;
+    }
+
+    public List<Map<Object, Object>> getFieldsGeolocationSelectedConfigs() {
+        return fieldsGeolocationSelectedConfigs;
+    }
+
+    public void setFieldsGeolocationSelectedConfigs(List<Map<Object, Object>> fieldsGeolocationSelectedConfigs) {
+        this.fieldsGeolocationSelectedConfigs = fieldsGeolocationSelectedConfigs;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getDateModified() {
+        return dateModified;
+    }
+
+    public void setDateModified(Date dateModified) {
+        this.dateModified = dateModified;
+    }
+
+    public List<LinkedIdsForRelationship> getLinkedIdsForRelationshipList() {
+        return linkedIdsForRelationshipList;
+    }
+
+    public void setLinkedIdsForRelationshipList(List<LinkedIdsForRelationship> linkedIdsForRelationshipList) {
+        this.linkedIdsForRelationshipList = linkedIdsForRelationshipList;
+    }
 }

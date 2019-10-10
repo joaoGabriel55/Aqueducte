@@ -30,7 +30,7 @@ import br.imd.smartsysnc.models.EntityWithLinkedID;
 import br.imd.smartsysnc.models.ReferenceForRelationship;
 import br.imd.smartsysnc.processors.education.sigeduc.SigEducAPIEntityUtils;
 import br.imd.smartsysnc.processors.education.sigeduc.treats.EscolaNGSILDTreat;
-import br.imd.smartsysnc.service.impl.EntityWithLinkedIDServiceImpl;
+import br.imd.smartsysnc.service.implementation.EntityWithLinkedIDServiceImpl;
 import br.imd.smartsysnc.utils.FormatterUtils;
 import br.imd.smartsysnc.utils.RequestsUtils;
 
@@ -61,7 +61,7 @@ public class EducationSigEducController {
 		ObjectMapper mapper = new ObjectMapper();
 
 		if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
-			String body = RequestsUtils.readBodyReq(con);
+			String body = RequestsUtils.readBodyReq(con.getInputStream());
 			Object credenciais = mapper.readValue(body, Object.class);
 
 			EscolaNGSILDTreat entityNGSILD = new EscolaNGSILDTreat();
@@ -111,7 +111,7 @@ public class EducationSigEducController {
 		ObjectMapper mapper = new ObjectMapper();
 
 		if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
-			String body = RequestsUtils.readBodyReq(con);
+			String body = RequestsUtils.readBodyReq(con.getInputStream());
 			Object credenciais = mapper.readValue(body, Object.class);
 
 			List<LinkedHashMap<Object, Object>> listNGSILD;
