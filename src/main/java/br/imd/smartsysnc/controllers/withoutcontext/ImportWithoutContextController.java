@@ -1,29 +1,19 @@
 package br.imd.smartsysnc.controllers.withoutcontext;
 
-import java.io.IOException;
-import java.util.*;
-
-import br.imd.smartsysnc.service.implementation.ImportationSetupWithoutContextServiceImpl;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.mongodb.DuplicateKeyException;
-
 import br.imd.smartsysnc.models.ImportationSetupWithoutContext;
 import br.imd.smartsysnc.models.response.Response;
 import br.imd.smartsysnc.processors.withoutcontext.ImportWithoutContextTreat;
 import br.imd.smartsysnc.service.ImportationSetupWithoutContextService;
+import com.mongodb.DuplicateKeyException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/sync/withoutContextSetup")
@@ -50,12 +40,13 @@ public class ImportWithoutContextController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
-    public ResponseEntity<Response<List<ImportationSetupWithoutContext>>> findAllImportationSetupWithoutContext() {
+    @GetMapping(value = "{page}/{count}")
+    public ResponseEntity<Response<Page<ImportationSetupWithoutContext>>> findAllImportationSetupWithoutContext(@PathVariable("page") int page,
+                                                                                                                @PathVariable("count") int count) {
 
-        Response<List<ImportationSetupWithoutContext>> response = new Response<>();
+        Response<Page<ImportationSetupWithoutContext>> response = new Response<>();
         try {
-            List<ImportationSetupWithoutContext> list = impSetupWithoutCxtService.findAll();
+            Page<ImportationSetupWithoutContext> list = impSetupWithoutCxtService.findAllLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(page, count);
             response.setData(list);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
@@ -68,9 +59,13 @@ public class ImportWithoutContextController {
     public ResponseEntity<Response<ImportationSetupWithoutContext>> getByIdImportationSetupWithoutContext(@PathVariable(required = true) String id) {
 
         Response<ImportationSetupWithoutContext> response = new Response<>();
-        Optional<ImportationSetupWithoutContext> importationSetupWithoutContext = impSetupWithoutCxtService.findById(id);
-        response.setData(importationSetupWithoutContext.get());
-
+        try {
+            Optional<ImportationSetupWithoutContext> importationSetupWithoutContext = impSetupWithoutCxtService.findById(id);
+            response.setData(importationSetupWithoutContext.get());
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
         return ResponseEntity.ok(response);
     }
 
@@ -83,13 +78,26 @@ public class ImportWithoutContextController {
         try {
             List<String> fieldsSelectedForRelationship = (List<String>) objectMap.get("fieldsSelectedForRelationship");
             ImportWithoutContextTreat treat = new ImportWithoutContextTreat();
+            ImportationSetupWithoutContext impSetupWithoutCxtRequest = treat.convertToImportationSetupModel(objectMap);
 
-            ImportationSetupWithoutContext impSetupWithoutCxtPersisted = impSetupWithoutCxtService.createOrUpdate(
-                    treat.convertToImportationSetupModel(objectMap)
-            );
+            boolean isExistsImportationSetup = false;
+            Optional<ImportationSetupWithoutContext> importationSetupWithoutContextChecked;
+            if (impSetupWithoutCxtRequest.getId() != null) {
+                importationSetupWithoutContextChecked = impSetupWithoutCxtService.findById(impSetupWithoutCxtRequest.getId());
+
+                if (importationSetupWithoutContextChecked.isPresent()) {
+                    impSetupWithoutCxtRequest = importationSetupWithoutContextChecked.get();
+                    isExistsImportationSetup = true;
+                }
+            } else {
+                impSetupWithoutCxtRequest = impSetupWithoutCxtService.createOrUpdate(
+                        impSetupWithoutCxtRequest
+                );
+            }
             ImportationSetupWithoutContext impSetupWithoutCxtUpdated = impSetupWithoutCxtService.treatCreateImportationWithoutContextSetup(
-                    impSetupWithoutCxtPersisted,
-                    fieldsSelectedForRelationship
+                    impSetupWithoutCxtRequest,
+                    fieldsSelectedForRelationship,
+                    isExistsImportationSetup
             );
             impSetupWithoutCxtService.createOrUpdate(impSetupWithoutCxtUpdated);
 

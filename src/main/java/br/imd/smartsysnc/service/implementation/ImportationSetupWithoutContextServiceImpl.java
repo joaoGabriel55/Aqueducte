@@ -6,6 +6,8 @@ import br.imd.smartsysnc.repositories.ImportationSetupWithoutContextRepository;
 import br.imd.smartsysnc.service.ImportationSetupWithoutContextService;
 import br.imd.smartsysnc.service.LinkedIdsForRelationshipService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -24,7 +26,7 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
     @Override
     public ImportationSetupWithoutContext treatCreateImportationWithoutContextSetup(
             ImportationSetupWithoutContext importationSetupWithoutContext,
-            List<String> fieldsSelectedForRelationship) {
+            List<String> fieldsSelectedForRelationship, boolean isUpdate) {
 
         if (fieldsSelectedForRelationship != null) {
             List<LinkedIdsForRelationship> linkedIdsForRelationshipList = linkedIdsForRelationshipService
@@ -37,9 +39,17 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
         if (importationSetupWithoutContext.getFieldsGeolocationSelected().size() > 0)
             importationSetupWithoutContext.setSelectedGeolocationData(true);
 
-        importationSetupWithoutContext.setDateCreated(new Date());
+        if (!isUpdate)
+            importationSetupWithoutContext.setDateCreated(new Date());
+
         importationSetupWithoutContext.setDateModified(new Date());
         return importationSetupWithoutContext;
+    }
+
+    @Override
+    public Page<ImportationSetupWithoutContext> findAllLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(int page, int count) {
+        PageRequest pageable = new PageRequest(page, count);
+        return this.importationSetupWithoutContextRepository.findAllByOrderByDateCreatedDesc(pageable);
     }
 
     @Override
