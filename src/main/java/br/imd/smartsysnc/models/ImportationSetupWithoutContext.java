@@ -2,9 +2,11 @@ package br.imd.smartsysnc.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotBlank;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +18,20 @@ public class ImportationSetupWithoutContext {
     @Id
     private String id;
 
+    @Indexed(unique = true)
+    @NotBlank(message = "Label required")
     private String label;
 
+    @NotBlank(message = "Description required")
     private String description;
 
+    @NotBlank(message = "Base Url required")
     private String baseUrl;
 
+    @NotBlank(message = "Path required")
     private String path;
 
+    @NotBlank(message = "HTTP verb required")
     private String httpVerb;
 
     private boolean isUseBodyData;
@@ -34,14 +42,15 @@ public class ImportationSetupWithoutContext {
 
     private Map<Object, Object> headersParameters;
 
+    @NotBlank(message = "Data required")
     private String dataSelected;
 
+    @NotBlank(message = "Layer required")
     private String layerSelected;
 
     private List<String> fieldsAvailable;
 
     private List<String> fieldsSelected;
-
 
     private boolean isSelectedGeolocationData;
 
