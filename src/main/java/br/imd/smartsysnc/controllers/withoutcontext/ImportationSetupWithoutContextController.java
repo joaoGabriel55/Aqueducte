@@ -18,7 +18,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/sync/withoutContextSetup")
 @CrossOrigin(origins = "*")
-public class ImportWithoutContextController {
+public class ImportationSetupWithoutContextController {
 
     @Autowired
     private ImportationSetupWithoutContextService impSetupWithoutCxtService;

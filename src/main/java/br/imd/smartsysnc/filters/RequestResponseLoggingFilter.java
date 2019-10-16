@@ -12,8 +12,8 @@ import java.io.IOException;
 @Order(1)
 public class RequestResponseLoggingFilter implements Filter {
     private final static Logger LOG = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
-    private final static String APP_TOKEN = "application-token";
-    private final static String USER_TOKEN = "user-token";
+    public final static String APP_TOKEN = "application-token";
+    public final static String USER_TOKEN = "user-token";
 
     @Override
     public void doFilter(
