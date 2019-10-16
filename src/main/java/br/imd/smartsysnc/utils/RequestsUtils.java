@@ -25,11 +25,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class RequestsUtils {
     public static int STATUS_OK = 200;
-    private static String TOKEN = "dd0ce06d6d51c059f52924aefb2a6aad";
+    private static String TOKEN = "";
 
     public static String URL_SIGEDUC = "https://quarksmart.com.br/api/v1/dw/entity/";
     //	public static String URL_SGEOL = "http://localhost:8091/data-middleware/v2/"; // Local
-    public static String URL_SGEOL = "http://10.7.52.26:8080/sgeol-dm/v2/"; // Test;
+    public static String URL_SGEOL = "http://sgeolayers.imd.ufrn.br/sgeol-dm/v2/"; // Test;
 //	private static String URL_SGEOL = "http://10.7.52.76:8080/sgeol-dm/v2/"; // Production;
 
     public static String readAll(Reader rd) throws IOException {
@@ -61,7 +61,7 @@ public class RequestsUtils {
         if (paramsRequest.get("method").toString().equalsIgnoreCase("GET"))
             response = httpGet((LinkedHashMap<Object, Object>) paramsRequest, fullUrl(paramsRequest));
         else if (paramsRequest.get("method").toString().equalsIgnoreCase("POST"))
-            response = httpPost(paramsRequest.get("data"), fullUrl(paramsRequest));
+            response = httpPost(fullUrl(paramsRequest), paramsRequest.get("data"), (LinkedHashMap<String, String>) paramsRequest.get("headers"));
         return response;
     }
 
@@ -85,7 +85,7 @@ public class RequestsUtils {
         return response;
     }
 
-    private static Map<String, Object> httpPost(Object paramsRequest, String url) throws IOException {
+    private static Map<String, Object> httpPost(String url, Object paramsRequest, LinkedHashMap<String, String> headersParams) throws IOException {
         String jsonString = null;
         if (!(paramsRequest instanceof ArrayList))
             jsonString = new JSONObject(paramsRequest).toString();
@@ -95,7 +95,15 @@ public class RequestsUtils {
         StringEntity entity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
         HttpClient httpClient = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(url);
-        // TODO add headers
+
+        if (headersParams != null) {
+            for (Map.Entry<String, String> entry : headersParams.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                request.setHeader(key, value);
+            }
+        }
+
         request.setEntity(entity);
         HttpResponse response = httpClient.execute(request);
         Map<String, Object> finalResponse = buildResponse(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), response.getEntity().getContent());
