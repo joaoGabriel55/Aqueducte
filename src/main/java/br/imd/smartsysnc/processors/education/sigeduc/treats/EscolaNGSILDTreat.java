@@ -1,23 +1,14 @@
 package br.imd.smartsysnc.processors.education.sigeduc.treats;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import br.imd.smartsysnc.processors.NGSILDTreat;
+import br.imd.smartsysnc.processors.impl.NGSILDTreatImpl;
 import br.imd.smartsysnc.processors.Processor;
 import br.imd.smartsysnc.processors.education.sigeduc.EscolaEntityProcessor;
 import br.imd.smartsysnc.utils.NGSILDUtils;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.Map.Entry;
 
-public class EscolaNGSILDTreat implements NGSILDTreat {
+public class EscolaNGSILDTreat extends NGSILDTreatImpl {
 
     /**
      * @param data         - data provided by QuarkSmart.
@@ -137,11 +128,6 @@ public class EscolaNGSILDTreat implements NGSILDTreat {
             objNGSILD.put("properties", propertiesBasedOnContext);
             propertiesBasedOnContext = new HashMap<>();
         }
-    }
-
-    @Override
-    public void importToSGEOL() {
-
     }
 
     public Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entidadeToImport) {

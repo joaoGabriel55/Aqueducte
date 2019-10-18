@@ -1,5 +1,8 @@
 package br.imd.smartsysnc.processors;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -17,7 +20,7 @@ public interface NGSILDTreat {
             HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext
     );
 
-    void importToSGEOL();
+    List<String> importToSGEOL(String url, String appToken, String userToken, JSONArray jsonArray);
 
     Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entidadeToImport);
 }

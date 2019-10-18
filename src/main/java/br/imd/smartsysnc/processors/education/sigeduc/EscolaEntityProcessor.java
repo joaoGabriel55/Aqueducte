@@ -62,7 +62,7 @@ public class EscolaEntityProcessor implements Processor {
 		if (inepCode != null) {
 
 			HttpURLConnection con = RequestsUtils.sendRequest(
-					RequestsUtils.URL_SGEOL + entity + "/find-by-query?query=p*.inep_id.value$eq$" + inepCode, "GET",
+					RequestsUtils.URL_SGEOL + "v2/" + entity + "/find-by-query?query=p*.inep_id.value$eq$" + inepCode, "GET",
 					false);
 			ObjectMapper mapper = new ObjectMapper();
 			if (con.getResponseCode() == RequestsUtils.STATUS_OK) {
