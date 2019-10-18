@@ -1,19 +1,28 @@
 package br.imd.smartsysnc.controllers.withoutcontext;
 
-import br.imd.smartsysnc.models.ImportationSetupWithoutContext;
-import br.imd.smartsysnc.models.response.Response;
-import br.imd.smartsysnc.processors.withoutcontext.ImportWithoutContextTreat;
-import br.imd.smartsysnc.service.ImportationSetupWithoutContextService;
-import com.mongodb.DuplicateKeyException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mongodb.DuplicateKeyException;
+
+import br.imd.smartsysnc.models.ImportationSetupWithoutContext;
+import br.imd.smartsysnc.models.response.Response;
+import br.imd.smartsysnc.processors.withoutcontext.ImportWithoutContextTreat;
+import br.imd.smartsysnc.service.ImportationSetupWithoutContextService;
 
 @RestController
 @RequestMapping("/sync/withoutContextSetup")
@@ -69,7 +78,8 @@ public class ImportationSetupWithoutContextController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping
+    @SuppressWarnings("unchecked")
+	@PostMapping
     public ResponseEntity<Response<ImportationSetupWithoutContext>> saveImportationSetupWithoutContext(
             @RequestBody Map<String, Object> objectMap) {
 
@@ -86,7 +96,7 @@ public class ImportationSetupWithoutContextController {
                 importationSetupWithoutContextChecked = impSetupWithoutCxtService.findById(impSetupWithoutCxtRequest.getId());
 
                 if (importationSetupWithoutContextChecked.isPresent()) {
-                    impSetupWithoutCxtRequest = importationSetupWithoutContextChecked.get();
+                	impSetupWithoutCxtRequest.setDateCreated(importationSetupWithoutContextChecked.get().getDateCreated());
                     isExistsImportationSetup = true;
                 }
             } else {

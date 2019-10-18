@@ -1,9 +1,12 @@
 package br.imd.smartsysnc.utils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +19,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -26,10 +28,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RequestsUtils {
     public static int STATUS_OK = 200;
     private static String TOKEN = "";
+    public final static String APP_TOKEN = "application-token";
+    public final static String USER_TOKEN = "user-token";
 
     public static String URL_SIGEDUC = "https://quarksmart.com.br/api/v1/dw/entity/";
     //	public static String URL_SGEOL = "http://localhost:8091/data-middleware/v2/"; // Local
-    public static String URL_SGEOL = "http://sgeolayers.imd.ufrn.br/sgeol-dm/v2/"; // Test;
+    public static String URL_SGEOL = "http://sgeolayers.imd.ufrn.br/sgeol-dm/"; // Test;
 //	private static String URL_SGEOL = "http://10.7.52.76:8080/sgeol-dm/v2/"; // Production;
 
     public static String readAll(Reader rd) throws IOException {
@@ -65,7 +69,8 @@ public class RequestsUtils {
         return response;
     }
 
-    private static Map<String, Object> httpGet(LinkedHashMap<Object, Object> paramsRequest, String fullUrl) throws IOException {
+    @SuppressWarnings("unchecked")
+	private static Map<String, Object> httpGet(LinkedHashMap<Object, Object> paramsRequest, String fullUrl) throws IOException {
         URL url = new URL(fullUrl);
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setDoOutput(true);
@@ -85,7 +90,7 @@ public class RequestsUtils {
         return response;
     }
 
-    private static Map<String, Object> httpPost(String url, Object paramsRequest, LinkedHashMap<String, String> headersParams) throws IOException {
+    public static Map<String, Object> httpPost(String url, Object paramsRequest, LinkedHashMap<String, String> headersParams) throws IOException {
         String jsonString = null;
         if (!(paramsRequest instanceof ArrayList))
             jsonString = new JSONObject(paramsRequest).toString();
@@ -110,7 +115,8 @@ public class RequestsUtils {
         return finalResponse;
     }
 
-    private static Map<String, Object> buildResponse(int statusCode, String statusMessage, InputStream inputStream) throws IOException {
+    @SuppressWarnings("unchecked")
+	private static Map<String, Object> buildResponse(int statusCode, String statusMessage, InputStream inputStream) throws IOException {
         Map<String, Object> responseObject = new HashMap<>();
 
         if (statusCode == STATUS_OK) {

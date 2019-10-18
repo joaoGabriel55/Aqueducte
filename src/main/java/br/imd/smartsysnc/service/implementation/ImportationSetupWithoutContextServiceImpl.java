@@ -1,18 +1,19 @@
 package br.imd.smartsysnc.service.implementation;
 
-import br.imd.smartsysnc.models.ImportationSetupWithoutContext;
-import br.imd.smartsysnc.models.LinkedIdsForRelationship;
-import br.imd.smartsysnc.repositories.ImportationSetupWithoutContextRepository;
-import br.imd.smartsysnc.service.ImportationSetupWithoutContextService;
-import br.imd.smartsysnc.service.LinkedIdsForRelationshipService;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import br.imd.smartsysnc.models.ImportationSetupWithoutContext;
+import br.imd.smartsysnc.models.LinkedIdsForRelationship;
+import br.imd.smartsysnc.repositories.ImportationSetupWithoutContextRepository;
+import br.imd.smartsysnc.service.ImportationSetupWithoutContextService;
+import br.imd.smartsysnc.service.LinkedIdsForRelationshipService;
 
 @Service
 public class ImportationSetupWithoutContextServiceImpl implements ImportationSetupWithoutContextService {
@@ -38,6 +39,9 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
 
         if (importationSetupWithoutContext.getFieldsGeolocationSelected().size() > 0)
             importationSetupWithoutContext.setSelectedGeolocationData(true);
+        if (importationSetupWithoutContext.getBodyData() != null)
+        	importationSetupWithoutContext.setUseBodyData(true);
+        	
 
         if (!isUpdate)
             importationSetupWithoutContext.setDateCreated(new Date());
@@ -46,7 +50,8 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
         return importationSetupWithoutContext;
     }
 
-    @Override
+    @SuppressWarnings("deprecation")
+	@Override
     public Page<ImportationSetupWithoutContext> findAllLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(int page, int count) {
         PageRequest pageable = new PageRequest(page, count);
         return this.importationSetupWithoutContextRepository.findAllByOrderByDateCreatedDesc(pageable);
