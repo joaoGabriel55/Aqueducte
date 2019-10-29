@@ -1,0 +1,35 @@
+package br.imd.aqueducte.controllers;
+
+import java.io.IOException;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import br.imd.aqueducte.models.response.Response;
+import br.imd.aqueducte.utils.RequestsUtils;
+
+@RestController
+@RequestMapping("/sync/resquestExternAPIController")
+@CrossOrigin(origins = "*")
+public class ResquestExternAPIController {
+
+	@PostMapping
+	public ResponseEntity<Response<Map<String, Object>>> resquestDataExternAPI(@RequestBody Map<Object, Object> paramsResquest) {
+
+		Response<Map<String, Object>> response = new Response<>();
+		try {
+			response.setData(RequestsUtils.requestToAPI(paramsResquest));
+		} catch (IOException e) {
+			response.getErrors().add("Error at retrive data");
+			e.printStackTrace();
+		}
+
+		return ResponseEntity.ok(response);
+	}
+
+}
