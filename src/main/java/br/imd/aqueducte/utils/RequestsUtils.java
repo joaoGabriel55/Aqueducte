@@ -32,9 +32,7 @@ public class RequestsUtils {
     public final static String USER_TOKEN = "user-token";
 
     public static String URL_SIGEDUC = "https://quarksmart.com.br/api/v1/dw/entity/";
-    //	public static String URL_SGEOL = "http://localhost:8091/data-middleware/v2/"; // Local
     public static String URL_SGEOL = "http://sgeolayers.imd.ufrn.br/sgeol-test-sec/"; // Test;
-//	private static String URL_SGEOL = "http://10.7.52.76:8080/sgeol-dm/v2/"; // Production;
 
     public static String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();

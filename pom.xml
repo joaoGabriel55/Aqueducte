@@ -12,6 +12,7 @@
     <groupId>br.imd.aqueducte</groupId>
     <artifactId>Aqueducte</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
     <name>Aqueducte</name>
     <description>Importator e conversor de dados</description>
 
