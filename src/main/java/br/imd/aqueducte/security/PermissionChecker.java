@@ -21,7 +21,8 @@ import br.imd.aqueducte.utils.RequestsUtils;
 
 public class PermissionChecker {
 	private final static Logger LOG = LoggerFactory.getLogger(RequestResponseLoggingFilter.class);
-
+	// private final static String ROLE_AQUEDUCTE = "aqueducte";
+	private final static String ROLE_AQUEDUCTE = "smart_sync";
 	/**
 	 * Check if User from IDM have permission to access Smart Sync API.
 	 */
@@ -37,7 +38,6 @@ public class PermissionChecker {
 					CloseableHttpResponse response = httpClient.execute(request)) {
 
 				// Get HttpResponse Status
-
 				LOG.info("Logging ProtocolVersion :{}", response.getProtocolVersion());
 				LOG.info("Logging Status Code :{}", response.getStatusLine().getStatusCode());
 
@@ -51,7 +51,7 @@ public class PermissionChecker {
 
 					for (Object role : roles) {
 						JSONObject roleJson = new JSONObject(role.toString());
-						if (roleJson.getString("name").toString().equals("smart_sync")) {
+						if (roleJson.getString("name").toString().equals(ROLE_AQUEDUCTE)) {
 							return true;
 						}
 					}

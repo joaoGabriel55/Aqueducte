@@ -1,22 +1,17 @@
 package br.imd.aqueducte.restservices.convertionNgsild;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import br.imd.aqueducte.AqueducteApplicationTests;
-
-public class ConvertionToNGSILDTest extends AqueducteApplicationTests {
+public class ConvertionToNGSILDTest /*extends AqueducteApplicationTests*/ {
 
 //	private static String PATH = "/br/imd/aqueducte/restservices/convertionNgsild/";
 
-	@Override
-	@Before
-	public void setUp() {
-		super.setUp();
-	}
+	/*
+	 * @Override
+	 * 
+	 * @Before public void setUp() { super.setUp(); }
+	 */
 
-	@Test
-	public void convertToNSILDService() throws Exception {
+//	@Test
+//	public void convertToNSILDService() throws Exception {
 //		InputStreamReader is = new InputStreamReader(getClass().getResourceAsStream(PATH + "payload1000.json"),
 //				"utf-8");
 //		BufferedReader buf = new BufferedReader(is);
@@ -43,6 +38,6 @@ public class ConvertionToNGSILDTest extends AqueducteApplicationTests {
 //		assertEquals(201, status);
 //		String content = mvcResult.getResponse().getContentAsString();
 //		assertEquals(content, "Product is created successfully");
-	}
+//	}
 
 }
