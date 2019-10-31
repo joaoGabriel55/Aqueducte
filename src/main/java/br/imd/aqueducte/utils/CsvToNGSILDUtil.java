@@ -5,9 +5,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.opencsv.CSVParser;
@@ -21,92 +20,90 @@ public class CsvToNGSILDUtil {
 		throw new IllegalStateException("Utility class");
 	}
 
-	public static List<Object> convertCsvToNSGILD(InputStreamReader inputStreamReader) {
-		List<Object> listOfObjects = new ArrayList<>();
+	public static List<HashMap<String, Object>> convertCsvToJson(InputStreamReader inputStreamReader, int limit) {
+		List<HashMap<String, Object>> listOfObjects = new ArrayList<>();
 		try {
 			// Create object of filereader
 			// class with csv file as parameter.
 			BufferedReader rd = new BufferedReader(inputStreamReader);
 
 			// create csvParser object with
-			// custom seperator semi-colon
-			CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
+			// custom separator semi-colon
+			CSVParser parser = new CSVParserBuilder().build();
 
 			// create csvReader object with
 			// parameter filereader and parser
 			CSVReader csvReader = new CSVReaderBuilder(rd).withCSVParser(parser).build();
+			
+			int index = 0;
+			List<String[]> allData = new ArrayList<String[]>();
+			for (Iterator iterator = csvReader.iterator(); iterator.hasNext();) {
+				allData.add((String[]) iterator.next());
+				
+				if (index == limit) break;
+				
+				if (index > 0)
+					index++;
+			}
+			
+//			List<String[]> allData = csvReader.readAll();
 
-			// Read all data at once
-			List<String[]> allData = csvReader.readAll();
+			HashMap<String, Object> csvToJson = new HashMap<>();
 
-			HashMap<Object, Object> csvToJsonNSGILD = new HashMap<>();
-
-			listOfObjects = generateJson(csvToJsonNSGILD, allData);
+			listOfObjects = generateJson(csvToJson, allData, limit);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return listOfObjects;
 	}
 
-	private static List<Object> generateJson(HashMap<Object, Object> csvToJsonNSGILD, List<String[]> allData) {
-		List<Object> listOfObjects = new ArrayList<>();
-		List<String> contextList = initContextList();
-		HashMap<Object, Object> value = new HashMap<>();
-		HashMap<Object, Map<Object, Object>> atributos = new HashMap<>();
+	private static boolean isNumeric(String strNum) {
+		try {
+			Double.parseDouble(strNum);
+		} catch (NumberFormatException | NullPointerException nfe) {
+			return false;
+		}
+		return true;
+	}
+
+	private static List<HashMap<String, Object>> generateJson(
+			HashMap<String, Object> csvToJsonNSGILD,
+			List<String[]> allData,
+			int limit) {
+		List<HashMap<String, Object>> listOfObjects = new ArrayList<>();
 		List<String> rowPropertiesName = null;
 
 		int index = 0;
 		for (String[] row : allData) {
-			UUID uuid = UUID.randomUUID();
-			initParams(csvToJsonNSGILD, contextList, uuid.toString());
 
-			if (row[0].trim().equals("Estacao")) {
+			if (index == 0) {
 				rowPropertiesName = Arrays.asList(row).stream().filter(key -> key != null || !"".equals(key))
 						.map(key -> {
-							String keyFinal = key.replace(" ", "").trim();
-							return keyFinal.toLowerCase();
+							return key.replace(" ", "_").toLowerCase().trim();
 						}).collect(Collectors.toList());
 			} else {
+				int indexData = 0;
 				for (Object cell : row) {
 
 					if (cell == "" || cell.toString().length() == 0)
 						cell = null;
 
-					value.put("type", "Property");
-					if (rowPropertiesName.get(index).equals("hora") && cell != null) {
-						value.put("value", FormatterUtils.getHourFormat(cell.toString()));
-					} else {
-						value.put("value", cell);
-					}
+					if (isNumeric((String) cell) && !rowPropertiesName.get(indexData).equals(""))
+						csvToJsonNSGILD.put(rowPropertiesName.get(indexData), Double.parseDouble((String) cell));
+					else
+						csvToJsonNSGILD.put(rowPropertiesName.get(indexData), cell);
 
-					if (!rowPropertiesName.get(index).equals(""))
-						atributos.put(rowPropertiesName.get(index), value);
-
-					value = new HashMap<>();
-					index++;
+					indexData++;
 				}
-				index = 0;
-				csvToJsonNSGILD.putAll(atributos);
 				listOfObjects.add(csvToJsonNSGILD);
 				csvToJsonNSGILD = new HashMap<>();
-
-				atributos = new HashMap<>();
 			}
+			
+			if (limit == index) break;
+
+			index++;
 		}
 		return listOfObjects;
 	}
 
-	private static List<String> initContextList() {
-		return Arrays.asList(
-				"https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld",
-				"https://github.com/JorgePereiraUFRN/SGEOL-LD/blob/master/ngsi-ld/education/school/School_Context.jsonld");
-
-	}
-
-	private static void initParams(HashMap<Object, Object> csvToJsonNSGILD, List<String> contextList, String uuid) {
-		csvToJsonNSGILD.put("@context", contextList);
-		csvToJsonNSGILD.put("id", "urn:ngsi-ld:layer:wheater:" + uuid);
-		csvToJsonNSGILD.put("municipio", "Natal");
-		csvToJsonNSGILD.put("type", "wheater");
-	}
 }

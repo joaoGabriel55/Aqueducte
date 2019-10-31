@@ -41,8 +41,10 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
 		if (importationSetupWithoutContext.getBodyData() != null)
 			importationSetupWithoutContext.setUseBodyData(true);
 
-		if (!isUpdate) {
+		if (importationSetupWithoutContext.getIdUser() == null)
 			importationSetupWithoutContext.setIdUser(userId);
+
+		if (!isUpdate) {
 			importationSetupWithoutContext.setDateCreated(new Date());
 		}
 		importationSetupWithoutContext.setDateModified(new Date());
