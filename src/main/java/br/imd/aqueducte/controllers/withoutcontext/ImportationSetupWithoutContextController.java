@@ -1,9 +1,5 @@
 package br.imd.aqueducte.controllers.withoutcontext;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,9 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.mongodb.DuplicateKeyException;
 
@@ -32,7 +26,6 @@ import br.imd.aqueducte.models.ImportationSetupWithoutContext;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.processors.withoutcontext.ImportWithoutContextTreat;
 import br.imd.aqueducte.service.ImportationSetupWithoutContextService;
-import br.imd.aqueducte.utils.CsvToNGSILDUtil;
 
 @RestController
 @RequestMapping("/sync/withoutContextSetup")
@@ -159,29 +152,6 @@ public class ImportationSetupWithoutContextController {
 			return ResponseEntity.badRequest().body(response);
 		}
 		return ResponseEntity.ok(response);
-	}
-
-	@PostMapping(value = "/fileConverterJson")
-	public ResponseEntity<Response<List<HashMap<String, Object>>>> getCSVToJson(
-			@RequestParam("file") MultipartFile uploadfile,
-			@RequestParam(required = true) int limit
-		) throws MalformedURLException, IOException {
-
-		Response<List<HashMap<String, Object>>> response = new Response<>();
-
-		if (uploadfile.isEmpty()) {
-			response.getErrors().add("File not informed");
-			return ResponseEntity.badRequest().body(response);
-		} else {
-			InputStreamReader is = new InputStreamReader(uploadfile.getInputStream());
-			try {
-				List<HashMap<String, Object>> listWheaterJson = CsvToNGSILDUtil.convertCsvToJson(is, limit);
-				response.setData(listWheaterJson);
-				return ResponseEntity.ok().body(response);
-			} catch (Exception e) {
-				return ResponseEntity.badRequest().body(response);
-			}
-		}
 	}
 
 }
