@@ -9,8 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import br.imd.aqueducte.models.ImportationSetupWithoutContext;
-import br.imd.aqueducte.models.LinkedIdsForRelationship;
+import br.imd.aqueducte.models.documents.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.documents.LinkedIdsForRelationship;
 import br.imd.aqueducte.repositories.ImportationSetupWithoutContextRepository;
 import br.imd.aqueducte.service.ImportationSetupWithoutContextService;
 import br.imd.aqueducte.service.LinkedIdsForRelationshipService;
@@ -18,16 +18,16 @@ import br.imd.aqueducte.service.LinkedIdsForRelationshipService;
 @Service
 public class ImportationSetupWithoutContextServiceImpl implements ImportationSetupWithoutContextService {
 
-	@Autowired
-	private ImportationSetupWithoutContextRepository importationSetupWithoutContextRepository;
+    @Autowired
+    private ImportationSetupWithoutContextRepository importationSetupWithoutContextRepository;
 
-	@Autowired
-	private LinkedIdsForRelationshipService linkedIdsForRelationshipService;
+    @Autowired
+    private LinkedIdsForRelationshipService linkedIdsForRelationshipService;
 
-	@Override
-	public ImportationSetupWithoutContext treatCreateImportationWithoutContextSetup(String userId,
-			ImportationSetupWithoutContext importationSetupWithoutContext, List<String> fieldsSelectedForRelationship,
-			boolean isUpdate) {
+    @Override
+    public ImportationSetupWithoutContext treatCreateImportationWithoutContextSetup(String userId,
+                                                                                    ImportationSetupWithoutContext importationSetupWithoutContext, List<String> fieldsSelectedForRelationship,
+                                                                                    boolean isUpdate) {
 
 		if (fieldsSelectedForRelationship != null) {
 			List<LinkedIdsForRelationship> linkedIdsForRelationshipList = linkedIdsForRelationshipService
@@ -48,42 +48,42 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
 			importationSetupWithoutContext.setDateCreated(new Date());
 		}
 		importationSetupWithoutContext.setDateModified(new Date());
-		return importationSetupWithoutContext;
-	}
+        return importationSetupWithoutContext;
+    }
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public Page<ImportationSetupWithoutContext> findAllLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
-			int page, int count) {
-		PageRequest pageable = new PageRequest(page, count);
-		return this.importationSetupWithoutContextRepository.findAllByOrderByDateCreatedDesc(pageable);
-	}
+    @SuppressWarnings("deprecation")
+    @Override
+    public Page<ImportationSetupWithoutContext> findAllLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+            int page, int count) {
+        PageRequest pageable = new PageRequest(page, count);
+        return this.importationSetupWithoutContextRepository.findAllByOrderByDateCreatedDesc(pageable);
+    }
 
-	@Override
-	public ImportationSetupWithoutContext createOrUpdate(
-			ImportationSetupWithoutContext importationSetupWithoutContext) {
-		return this.importationSetupWithoutContextRepository.save(importationSetupWithoutContext);
-	}
+    @Override
+    public ImportationSetupWithoutContext createOrUpdate(
+            ImportationSetupWithoutContext importationSetupWithoutContext) {
+        return this.importationSetupWithoutContextRepository.save(importationSetupWithoutContext);
+    }
 
-	@Override
-	public List<ImportationSetupWithoutContext> findAll() {
-		return this.importationSetupWithoutContextRepository.findAll();
-	}
+    @Override
+    public List<ImportationSetupWithoutContext> findAll() {
+        return this.importationSetupWithoutContextRepository.findAll();
+    }
 
-	@Override
-	public Optional<ImportationSetupWithoutContext> findById(String id) {
-		return this.importationSetupWithoutContextRepository.findById(id);
-	}
+    @Override
+    public Optional<ImportationSetupWithoutContext> findById(String id) {
+        return this.importationSetupWithoutContextRepository.findById(id);
+    }
 
-	@Override
-	public String delete(String id) {
-		Optional<ImportationSetupWithoutContext> impSetupWithoutCxt = findById(id);
-		if (!impSetupWithoutCxt.isPresent())
-			return null;
-		String idForDelete = impSetupWithoutCxt.get().getId();
-		importationSetupWithoutContextRepository.deleteById(idForDelete);
-		return idForDelete;
+    @Override
+    public String delete(String id) {
+        Optional<ImportationSetupWithoutContext> impSetupWithoutCxt = findById(id);
+        if (!impSetupWithoutCxt.isPresent())
+            return null;
+        String idForDelete = impSetupWithoutCxt.get().getId();
+        importationSetupWithoutContextRepository.deleteById(idForDelete);
+        return idForDelete;
 
-	}
+    }
 
 }

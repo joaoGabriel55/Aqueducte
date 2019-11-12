@@ -1,4 +1,4 @@
-package br.imd.aqueducte.utils;
+package br.imd.aqueducte.service.files;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import br.imd.aqueducte.service.files.FileConversionService;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -15,14 +16,12 @@ import com.opencsv.CSVReaderBuilder;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
+import org.springframework.stereotype.Service;
 
-public class CsvToJsonUtil {
+@Service
+public class CsvToJsonService implements FileConversionService {
 
-    private CsvToJsonUtil() {
-        throw new IllegalStateException("Utility class");
-    }
-
-    private static String readDataFromFile(FileItemIterator fileItemIterator, int limit, String delimiter) throws IOException, FileUploadException {
+    private String readDataFromFile(FileItemIterator fileItemIterator, int limit, String delimiter) throws IOException, FileUploadException {
         int countLoop = 0;
         String contentFile = null;
         System.out.println("Limit: " + limit);
@@ -45,7 +44,8 @@ public class CsvToJsonUtil {
 
     }
 
-    public static List<HashMap<String, Object>> convertCsvToJson(FileItemIterator fileItemIterator, int limit, String delimiter) {
+    @Override
+    public List<HashMap<String, Object>> convertToJson(FileItemIterator fileItemIterator, int limit, String delimiter) {
         List<HashMap<String, Object>> listOfObjects = new ArrayList<>();
         try {
             String contentFile = readDataFromFile(fileItemIterator, limit, delimiter);
@@ -65,7 +65,7 @@ public class CsvToJsonUtil {
         return listOfObjects;
     }
 
-    private static boolean isNumeric(String strNum) {
+    private boolean isNumeric(String strNum) {
         try {
             Double.parseDouble(strNum);
         } catch (NumberFormatException | NullPointerException nfe) {
@@ -74,7 +74,7 @@ public class CsvToJsonUtil {
         return true;
     }
 
-    private static List<HashMap<String, Object>> generateJson(
+    private List<HashMap<String, Object>> generateJson(
             HashMap<String, Object> csvToJsonNSGILD,
             List<String[]> allData,
             int limit) {

@@ -1,4 +1,4 @@
-package br.imd.aqueducte.models;
+package br.imd.aqueducte.models.documents;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import br.imd.aqueducte.models.LinkedIdsForRelationship;
+import br.imd.aqueducte.models.documents.LinkedIdsForRelationship;
 
 @Component
 public interface LinkedIdsForRelationshipService extends GenericService<LinkedIdsForRelationship> {

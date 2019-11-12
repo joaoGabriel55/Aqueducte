@@ -1,6 +1,5 @@
-package br.imd.aqueducte.processors;
+package br.imd.aqueducte.treats;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,15 +7,15 @@ import java.util.Map;
 import org.json.JSONArray;
 
 public interface NGSILDTreat {
-    List<LinkedHashMap<Object, Object>> convertToEntityNGSILD(
+    List<LinkedHashMap<String, Object>> convertToEntityNGSILD(
             List<Object> data,
             String layerPath,
             Map<Object, Object> contextLink);
 
-    void matchingWithContext(
-            List<Object> listMatches,
-            List<LinkedHashMap<Object, Object>> listNGSILD,
-            HashMap<Object, HashMap<Object, Object>> propertiesBasedOnContext
+    List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
+            List<LinkedHashMap<String, Object>> matchingConfig,
+            List<LinkedHashMap<String, Object>> contentForConvert,
+            String layerPath
     );
 
     List<String> importToSGEOL(String url, String appToken, String userToken, JSONArray jsonArray);

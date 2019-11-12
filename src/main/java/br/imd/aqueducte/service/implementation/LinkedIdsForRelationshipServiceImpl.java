@@ -1,6 +1,6 @@
 package br.imd.aqueducte.service.implementation;
 
-import br.imd.aqueducte.models.LinkedIdsForRelationship;
+import br.imd.aqueducte.models.documents.LinkedIdsForRelationship;
 import br.imd.aqueducte.repositories.LinkedIdsForRelationshipRepository;
 import br.imd.aqueducte.service.LinkedIdsForRelationshipService;
 import org.springframework.beans.factory.annotation.Autowired;

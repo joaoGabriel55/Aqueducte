@@ -1,7 +1,5 @@
 package br.imd.aqueducte.filters;
 
-import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
-
 import java.io.IOException;
 
 import javax.servlet.Filter;
@@ -19,6 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.security.PermissionChecker;
 
+import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
+
 @Order(1)
 public class RequestResponseLoggingFilter implements Filter {
 
@@ -31,11 +31,11 @@ public class RequestResponseLoggingFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse res = (HttpServletResponse) response;
 		try {
-			// if (!permissionChecker.checkSmartSyncPerssisionAccess(req.getHeader(USER_TOKEN),
-			// 		(HttpServletRequest) request)) {
-			// 	buildResponseError(res, "You don't have permission to access Smart Sync API");
-			// 	return;
-			// }
+			 if (!permissionChecker.checkSmartSyncPerssisionAccess(req.getHeader(USER_TOKEN),
+			 		(HttpServletRequest) request)) {
+			 	buildResponseError(res, "You don't have permission to access Smart Sync API");
+			 	return;
+			 }
 			chain.doFilter(request, response);
 		} catch (Exception e) {
 			buildResponseError(response, "Internal error.");

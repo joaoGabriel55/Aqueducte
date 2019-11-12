@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.imd.aqueducte.models.EntityWithLinkedID;
-import br.imd.aqueducte.models.ReferenceForRelationship;
+import br.imd.aqueducte.models.documents.EntityWithLinkedID;
+import br.imd.aqueducte.models.documents.ReferenceForRelationship;
 import br.imd.aqueducte.repositories.EntityWithLinkedIDRepository;
 import br.imd.aqueducte.service.GenericService;
 
