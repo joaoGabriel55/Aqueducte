@@ -1,7 +1,8 @@
 package br.imd.aqueducte.controllers;
 
 import br.imd.aqueducte.models.response.Response;
-import br.imd.aqueducte.processors.withoutcontext.ImportWithoutContextTreat;
+import br.imd.aqueducte.treats.NGSILDTreat;
+import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
 import br.imd.aqueducte.utils.RequestsUtils;
 import org.json.JSONArray;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +30,8 @@ public class ImportDataToSGEOLController {
 			JSONArray jsonArrayNGSILD = new JSONArray((ArrayList) dataNGSILD.get("data_ngsild"));
 			String url = RequestsUtils.URL_SGEOL + "v2/" + layer;
 
-			ImportWithoutContextTreat importWithoutContextTreat = new ImportWithoutContextTreat();
-			List<String> jsonArrayResponse = importWithoutContextTreat.importToSGEOL(url, appToken, userToken,
+			NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
+			List<String> jsonArrayResponse = ngsildTreat.importToSGEOL(url, appToken, userToken,
 					jsonArrayNGSILD);
 			response.setData(jsonArrayResponse);
 		} catch (Exception e) {

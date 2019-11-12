@@ -1,4 +1,4 @@
-package br.imd.aqueducte.processors.location;
+package br.imd.aqueducte.treats.location;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Map.Entry;
 
-public class MunicipioEntityNGSILDProcessor {
+public class MunicipioEntityNGSILDTreat {
 
 	@SuppressWarnings("unchecked")
 	public List<Object> converterStateRNJsonToEntityNGSILD(List<Object> dataState) {

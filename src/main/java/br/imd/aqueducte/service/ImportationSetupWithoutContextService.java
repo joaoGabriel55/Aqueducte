@@ -1,6 +1,6 @@
 package br.imd.aqueducte.service;
 
-import br.imd.aqueducte.models.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.documents.ImportationSetupWithoutContext;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 

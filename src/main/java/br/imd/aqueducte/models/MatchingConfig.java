@@ -1,86 +1,43 @@
 package br.imd.aqueducte.models;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-/**
- * Class for represent the Matching Configuration of user logged.
- * */
-@Document
 public class MatchingConfig {
 
-	@Id
-	private String id;
+    private String contextName;
+    private String foreignProperty;
+    private boolean isLocation;
+    private Map<Object, Object> fieldsGeolocationSelectedConfigs;
 
-	private String userId;
-	
-	private Date dateCreated;
-	
-	private Date dataModified;
+    public String getContextName() {
+        return contextName;
+    }
 
-	private String entityNameService;
+    public void setContextName(String contextName) {
+        this.contextName = contextName;
+    }
 
-	private String entityNameServiceForSGEOL;
+    public String getForeignProperty() {
+        return foreignProperty;
+    }
 
-	private List<Map<String, String>> matchingsList;
+    public void setForeignProperty(String foreignProperty) {
+        this.foreignProperty = foreignProperty;
+    }
 
-	public String getId() {
-		return id;
-	}
+    public boolean isLocation() {
+        return isLocation;
+    }
 
-	public void setId(String id) {
-		this.id = id;
-	}
+    public void setLocation(boolean location) {
+        isLocation = location;
+    }
 
-	public String getUserId() {
-		return userId;
-	}
+    public Map<Object, Object> getFieldsGeolocationSelectedConfigs() {
+        return fieldsGeolocationSelectedConfigs;
+    }
 
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
-	
-	public Date getDateCreated() {
-		return dateCreated;
-	}
-
-	public void setDateCreated(Date dateCreated) {
-		this.dateCreated = dateCreated;
-	}
-
-	public Date getDataModified() {
-		return dataModified;
-	}
-
-	public void setDataModified(Date dataModified) {
-		this.dataModified = dataModified;
-	}
-
-	public String getEntityNameService() {
-		return entityNameService;
-	}
-
-	public void setEntityNameService(String entityNameService) {
-		this.entityNameService = entityNameService;
-	}
-
-	public String getEntityNameServiceForSGEOL() {
-		return entityNameServiceForSGEOL;
-	}
-
-	public void setEntityNameServiceForSGEOL(String entityNameServiceForSGEOL) {
-		this.entityNameServiceForSGEOL = entityNameServiceForSGEOL;
-	}
-
-	public List<Map<String, String>> getMatchingsList() {
-		return matchingsList;
-	}
-
-	public void setMatchingsList(List<Map<String, String>> matchingsList) {
-		this.matchingsList = matchingsList;
-	}
+    public void setFieldsGeolocationSelectedConfigs(Map<Object, Object> fieldsGeolocationSelectedConfigs) {
+        this.fieldsGeolocationSelectedConfigs = fieldsGeolocationSelectedConfigs;
+    }
 }

@@ -30,8 +30,6 @@ public class RequestsUtils {
     private static String TOKEN = "";
     public final static String APP_TOKEN = "application-token";
     public final static String USER_TOKEN = "user-token";
-
-    public static String URL_SIGEDUC = "https://quarksmart.com.br/api/v1/dw/entity/";
     // public static String URL_SGEOL = "http://192.168.7.47/sgeol-dm/"; // MPRN
     public static String URL_SGEOL = "http://sgeolayers.imd.ufrn.br/sgeol-test-sec/"; // Test
     

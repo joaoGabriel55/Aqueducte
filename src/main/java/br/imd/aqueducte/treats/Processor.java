@@ -1,4 +1,4 @@
-package br.imd.aqueducte.processors;
+package br.imd.aqueducte.treats;
 
 import java.util.Map;
 

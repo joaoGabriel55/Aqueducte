@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import br.imd.aqueducte.processors.location.MunicipioEntityNGSILDProcessor;
+import br.imd.aqueducte.treats.location.MunicipioEntityNGSILDTreat;
 import br.imd.aqueducte.utils.MessageUtils;
 import br.imd.aqueducte.utils.RequestsUtils;
 
@@ -30,12 +30,12 @@ public class AqueducteLocationController {
 		InputStreamReader is = new InputStreamReader(
 				getClass().getResourceAsStream("/br/imd/smartsysnc/utils/rn_geojson.json"), "utf-8");
 		try {
-			MunicipioEntityNGSILDProcessor municipioEntityNGSILDProcessor = new MunicipioEntityNGSILDProcessor();
+			MunicipioEntityNGSILDTreat municipioEntityNGSILDTreat = new MunicipioEntityNGSILDTreat();
 			BufferedReader rd = new BufferedReader(is);
 			String jsonText = RequestsUtils.readAll(rd);
 			JSONObject json = new JSONObject(jsonText);
 
-			List<Object> listStatesNGSILD = municipioEntityNGSILDProcessor
+			List<Object> listStatesNGSILD = municipioEntityNGSILDTreat
 					.converterStateRNJsonToEntityNGSILD(json.getJSONArray("features").toList());
 
 			RestTemplate rt = new RestTemplate();
