@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+
 @RestController
 @RequestMapping("/sync/ngsildConverter")
 @CrossOrigin(origins = "*")
@@ -57,7 +59,7 @@ public class NGSILDConverterController {
             );
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
-            LoggerMessage.LOG.info("Time to convert MatchingConfig Into NGSI-LD: {}", timeElapsed);
+            logInfo("Time to convert MatchingConfig Into NGSI-LD: {}", timeElapsed);
             response.setData(listConvertedIntoNGSILD);
             return ResponseEntity.ok(response);
         } catch (Exception e) {

@@ -17,6 +17,9 @@ import org.json.JSONObject;
 import br.imd.aqueducte.logger.LoggerMessage;
 import br.imd.aqueducte.utils.RequestsUtils;
 
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
+
 public class PermissionChecker {
     private final static String ROLE_AQUEDUCTE = "aqueducte";
 //    private final static String ROLE_AQUEDUCTE = "smart_sync";
@@ -36,8 +39,8 @@ public class PermissionChecker {
                  CloseableHttpResponse response = httpClient.execute(request)) {
 
                 // Get HttpResponse Status
-                LoggerMessage.LOG.info("Logging ProtocolVersion: {}", response.getProtocolVersion());
-                LoggerMessage.LOG.info("Logging Status Code: {}", response.getStatusLine().getStatusCode());
+                logInfo("Logging ProtocolVersion: {}", response.getProtocolVersion());
+                logInfo("Logging Status Code: {}", response.getStatusLine().getStatusCode());
 
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
@@ -50,16 +53,20 @@ public class PermissionChecker {
                     for (Object role : roles) {
                         JSONObject roleJson = new JSONObject(role.toString());
                         if (roleJson.getString("name").toString().equals(ROLE_AQUEDUCTE)) {
+                            logInfo("Authentication Status: {}", "OKAY");
                             return true;
                         }
                     }
+                    logInfo("Authentication Status: {}", "WRONG");
 
                 }
 
             } catch (ParseException e) {
                 e.printStackTrace();
+                logError("ParseException: {}", e.getMessage());
             } catch (IOException e) {
                 e.printStackTrace();
+                logError("IOException: {}", e.getMessage());
             }
         }
         return false;
