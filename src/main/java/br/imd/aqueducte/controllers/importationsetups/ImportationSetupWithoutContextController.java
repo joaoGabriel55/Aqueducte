@@ -61,7 +61,6 @@ public class ImportationSetupWithoutContextController extends GenericController 
             @ModelAttribute("user-id") String userId, @RequestBody Map<String, Object> objectMap) {
 
         Response<ImportationSetupWithoutContext> response = new Response<>();
-        userId = "1";
         if (userId == null || userId.trim() == "") {
             response.getErrors().add("Without user id");
             return ResponseEntity.badRequest().body(response);
