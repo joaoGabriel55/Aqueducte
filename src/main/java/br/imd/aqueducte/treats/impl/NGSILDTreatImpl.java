@@ -1,32 +1,19 @@
 package br.imd.aqueducte.treats.impl;
 
-import static br.imd.aqueducte.utils.RequestsUtils.APP_TOKEN;
-import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.Map.Entry;
-
+import br.imd.aqueducte.treats.NGSILDTreat;
+import br.imd.aqueducte.utils.NGSILDUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
-import br.imd.aqueducte.treats.NGSILDTreat;
-import br.imd.aqueducte.utils.NGSILDUtils;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static br.imd.aqueducte.utils.RequestsUtils.APP_TOKEN;
+import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 public class NGSILDTreatImpl implements NGSILDTreat {
     @SuppressWarnings("unchecked")
@@ -47,10 +34,11 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         Map.Entry<String, Object> propertiesContent = null;
 
         for (int i = 0; i < dataListFromExternalAPI.size(); i++) {
+            NGSILDUtils ngsildUtils = new NGSILDUtils();
             LinkedHashMap<String, Object> ldObj;
             ldObj = (LinkedHashMap<String, Object>) dataListFromExternalAPI.get(i);
             UUID uuid = UUID.randomUUID();
-            NGSILDUtils.initDefaultProperties(linkedHashMapNGSILD, NGSILDUtils.contextList, layerPath, uuid.toString());
+            ngsildUtils.initDefaultProperties(linkedHashMapNGSILD, null, layerPath, uuid.toString());
 
             HashMap<String, HashMap<String, Object>> typeAndValueMap = new HashMap<>();
 
@@ -90,21 +78,68 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         return listObjForSgeol;
     }
 
-    private HashMap<String, HashMap<String, Object>> convertIntoTypeValueObject(
-            HashMap<String, HashMap<String, Object>> typeAndValueMap,
-            Map.Entry<String, Object> propertiesContent,
-            HashMap<String, Object> content) {
-        content.put("type", "Property");
-        content.put("value", propertiesContent.getValue());
-        if (propertiesContent.getKey() == "type" || propertiesContent.getKey() == "id") {
-            typeAndValueMap.put(propertiesContent.getKey() + "_", content);
-        } else if (propertiesContent.getKey().contains(".")) {
-            typeAndValueMap.put(propertiesContent.getKey().replace(".", "_"), content);
-        } else {
-            typeAndValueMap.put(propertiesContent.getKey(), content);
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
+            String contextLink,
+            List<LinkedHashMap<String, Object>> matchingConfig,
+            List<LinkedHashMap<String, Object>> contentForConvert,
+            String layerPath) {
+        List<LinkedHashMap<String, Object>> listNGSILD = new ArrayList<>();
+        LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
+        List<String> contextList = Arrays.asList(contextLink);
+        for (Map<String, Object> element : contentForConvert) {
+            NGSILDUtils ngsildUtils = new NGSILDUtils();
+            UUID uuid = UUID.randomUUID();
+            ngsildUtils.initDefaultProperties(properties, contextList, layerPath, uuid.toString());
+            for (Entry<String, Object> property : element.entrySet()) {
+                String key = property.getKey();
+                for (Object matches : matchingConfig) {
+                    LinkedHashMap<Object, Object> keyMatch = (LinkedHashMap<Object, Object>) matches;
+                    String foreignProperty = getValueMatching(keyMatch.get("foreignProperty"));
+                    String contextName = getValueMatching(keyMatch.get("contextName"));
+                    Boolean isLocation = (Boolean) keyMatch.get("isLocation");
+                    if (key.equals(foreignProperty) && (!isLocation && isLocation != null)) {
+                        if (checkValuesFromKeysAreNull(property)) {
+                            HashMap<String, Object> typeValue = new HashMap<String, Object>();
+                            typeValue.put("type", "Property");
+                            typeValue.put("value", property.getValue());
+                            properties.put(contextName, typeValue);
+                            break;
+                        }
+                    } else if (isLocation && isLocation != null) {
+                        HashMap<String, Object> valueGeoLocation = new HashMap<>();
+                        convertToGeoJson(
+                                valueGeoLocation,
+                                (List<Object>) ((HashMap<String, Object>) property.getValue()).get("coordinates"),
+                                (String) ((HashMap<String, Object>) property.getValue()).get("typeGeolocation")
+                        );
+                        properties.put(contextName, valueGeoLocation);
+                        break;
+                    }
+                }
+            }
+            listNGSILD.add(properties);
+            properties = new LinkedHashMap<>();
         }
-        return typeAndValueMap;
+        return listNGSILD;
     }
+
+//    private HashMap<String, HashMap<String, Object>> convertIntoTypeValueObject(
+//            HashMap<String, HashMap<String, Object>> typeAndValueMap,
+//            Map.Entry<String, Object> propertiesContent,
+//            HashMap<String, Object> content) {
+//        content.put("type", "Property");
+//        content.put("value", propertiesContent.getValue());
+//        if (propertiesContent.getKey() == "type" || propertiesContent.getKey() == "id") {
+//            typeAndValueMap.put(propertiesContent.getKey() + "_", content);
+//        } else if (propertiesContent.getKey().contains(".")) {
+//            typeAndValueMap.put(propertiesContent.getKey().replace(".", "_"), content);
+//        } else {
+//            typeAndValueMap.put(propertiesContent.getKey(), content);
+//        }
+//        return typeAndValueMap;
+//    }
 
 
     private List<List<Object>> parseDoubleCoordinates(List<Object> coordinates) {
@@ -145,50 +180,6 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         return jsonArrayResponse;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
-            List<LinkedHashMap<String, Object>> matchingConfig,
-            List<LinkedHashMap<String, Object>> contentForConvert,
-            String layerPath) {
-        List<LinkedHashMap<String, Object>> listNGSILD = new ArrayList<>();
-        LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
-        for (Map<String, Object> element : contentForConvert) {
-            UUID uuid = UUID.randomUUID();
-            NGSILDUtils.initDefaultProperties(properties, NGSILDUtils.contextList, layerPath, uuid.toString());
-            for (Entry<String, Object> property : element.entrySet()) {
-                String key = property.getKey();
-                for (Object matches : matchingConfig) {
-                    LinkedHashMap<Object, Object> keyMatch = (LinkedHashMap<Object, Object>) matches;
-                    String foreignProperty = getValueMatching(keyMatch.get("foreignProperty"));
-                    String contextName = getValueMatching(keyMatch.get("contextName"));
-                    Boolean isLocation = (Boolean) keyMatch.get("isLocation");
-                    if (key.equals(foreignProperty) && (!isLocation && isLocation != null)) {
-                        if (checkValuesFromKeysAreNull(property)) {
-                            HashMap<String, Object> typeValue = new HashMap<String, Object>();
-                            typeValue.put("type", "Property");
-                            typeValue.put("value", property.getValue());
-                            properties.put(contextName, typeValue);
-                            break;
-                        }
-                    } else if (isLocation && isLocation != null) {
-                        HashMap<String, Object> valueGeoLocation = new HashMap<>();
-                        convertToGeoJson(
-                                valueGeoLocation,
-                                (List<Object>) ((HashMap<String, Object>) property.getValue()).get("coordinates"),
-                                (String) ((HashMap<String, Object>) property.getValue()).get("typeGeolocation")
-                        );
-                        properties.put(contextName, valueGeoLocation);
-                        break;
-                    }
-                }
-            }
-            listNGSILD.add(properties);
-            properties = new LinkedHashMap<>();
-        }
-        return listNGSILD;
-    }
-
     private void convertToGeoJson(HashMap<String, Object> value, List<Object> coordinates, String type) {
         value.put("type", "GeoProperty");
         HashMap<Object, Object> valueGeometry = new HashMap<>();
@@ -219,7 +210,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
 
 
     @Override
-    public Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entidadeToImport) {
+    public Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entityToImport) {
         return null;
     }
 }

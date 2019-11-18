@@ -51,10 +51,14 @@ public class NGSILDConverterController {
 
         NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
         try {
+            String contextLink = (String) dataForConvertIntoNGSILDByContext.get("contextLink");
+            List<LinkedHashMap<String, Object>> matchingConfigContent = (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("matchingConfigContent");
+            List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion = (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("dataContentForNGSILDConversion");
             long startTime = System.nanoTime();
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
-                    (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("matchingConfigContent"),
-                    (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("dataContentForNGSILDConversion"),
+                    contextLink,
+                    matchingConfigContent,
+                    dataContentForNGSILDConversion,
                     layerPath
             );
             long endTime = System.nanoTime();

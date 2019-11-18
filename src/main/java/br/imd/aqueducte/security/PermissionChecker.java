@@ -21,8 +21,8 @@ import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 
 public class PermissionChecker {
+    
     private final static String ROLE_AQUEDUCTE = "aqueducte";
-//    private final static String ROLE_AQUEDUCTE = "smart_sync";
 
     /**
      * Check if User from IDM have permission to access Smart Sync API.
@@ -53,7 +53,7 @@ public class PermissionChecker {
                     for (Object role : roles) {
                         JSONObject roleJson = new JSONObject(role.toString());
                         if (roleJson.getString("name").toString().equals(ROLE_AQUEDUCTE)) {
-                            logInfo("Authentication Status: {}", "OKAY");
+                            logInfo("Authentication Status: {}", "SUCCESS");
                             return true;
                         }
                     }

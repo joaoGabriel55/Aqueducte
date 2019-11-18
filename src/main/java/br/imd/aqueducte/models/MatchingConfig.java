@@ -1,13 +1,19 @@
 package br.imd.aqueducte.models;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
 
 public class MatchingConfig {
 
     private String contextName;
+
     private String foreignProperty;
+
+    @JsonProperty
     private boolean isLocation;
-    private Map<Object, Object> fieldsGeolocationSelectedConfigs;
+
+    private List<LocationGeoJsonConfig> locationToGeoJsonConfig;
 
     public String getContextName() {
         return contextName;
@@ -33,11 +39,11 @@ public class MatchingConfig {
         isLocation = location;
     }
 
-    public Map<Object, Object> getFieldsGeolocationSelectedConfigs() {
-        return fieldsGeolocationSelectedConfigs;
+    public List<LocationGeoJsonConfig> getLocationToGeoJsonConfig() {
+        return locationToGeoJsonConfig;
     }
 
-    public void setFieldsGeolocationSelectedConfigs(Map<Object, Object> fieldsGeolocationSelectedConfigs) {
-        this.fieldsGeolocationSelectedConfigs = fieldsGeolocationSelectedConfigs;
+    public void setLocationToGeoJsonConfig(List<LocationGeoJsonConfig> locationToGeoJsonConfig) {
+        this.locationToGeoJsonConfig = locationToGeoJsonConfig;
     }
 }

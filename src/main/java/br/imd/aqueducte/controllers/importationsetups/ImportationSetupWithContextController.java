@@ -2,6 +2,7 @@ package br.imd.aqueducte.controllers.importationsetups;
 
 
 import br.imd.aqueducte.controllers.GenericController;
+import br.imd.aqueducte.models.MatchingConfig;
 import br.imd.aqueducte.models.documents.ImportationSetupWithContext;
 import br.imd.aqueducte.models.documents.ImportationSetupWithoutContext;
 import br.imd.aqueducte.models.response.Response;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
@@ -61,7 +63,12 @@ public class ImportationSetupWithContextController extends GenericController {
             @ModelAttribute("user-id") String userId, @RequestBody ImportationSetupWithContext importationSetupWithContext) {
         Response<ImportationSetupWithContext> response = new Response<>();
         try {
-            userId = "1";
+            List<MatchingConfig> matchingConfigList = importationSetupWithContext.getMatchingConfigList().stream().map(elem -> {
+                if (elem.getLocationToGeoJsonConfig().size() > 0) elem.setLocation(true);
+                return elem;
+            }).collect(Collectors.toList());
+            importationSetupWithContext.setMatchingConfigList(matchingConfigList);
+
             if (importationSetupWithContext.getIdUser() == null && importationSetupWithContext.getId() == null) {
                 importationSetupWithContext.setIdUser(userId);
                 importationSetupWithContext.setDateCreated(new Date());
