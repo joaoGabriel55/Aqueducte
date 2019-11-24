@@ -30,7 +30,7 @@ public class NGSILDConverterController {
             listNGSILD = ngsildTreat.convertToEntityNGSILD(data, layerPath, null);
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
-            System.out.println("Time to conversion NGSI-LD: " + timeElapsed);
+            logInfo("Time to conversion NGSI-LD: {}", timeElapsed);
             response.setData(listNGSILD);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());

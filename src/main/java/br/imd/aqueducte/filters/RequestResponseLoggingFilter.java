@@ -31,7 +31,7 @@ public class RequestResponseLoggingFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
         try {
-            if (false) {
+            if (true) {
                 if (!permissionChecker.checkSmartSyncPerssisionAccess(req.getHeader(USER_TOKEN), (HttpServletRequest) request)) {
                     buildResponseError(res, "You don't have permission to access Smart Sync API");
                     return;
