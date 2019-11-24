@@ -1,0 +1,51 @@
+{
+  "matchingConfigContent": [
+    {
+      "contextName": "LGeoSIMOntology",
+      "foreignProperty": null,
+      "isLocation": false,
+      "locationToGeoJsonConfig": {}
+    },
+    {
+      "contextName": "School",
+      "foreignProperty": null,
+      "isLocation": false,
+      "locationToGeoJsonConfig": {}
+    },
+    {
+      "contextName": "name",
+      "foreignProperty": "nome",
+      "isLocation": false,
+      "locationToGeoJsonConfig": {}
+    },
+    {
+      "contextName": "cod_school",
+      "foreignProperty": "codigo_inep",
+      "isLocation": false,
+      "locationToGeoJsonConfig": {}
+    },
+    {
+      "contextName": "hasStudent",
+      "foreignProperty": null,
+      "isLocation": false,
+      "locationToGeoJsonConfig": {}
+    }
+  ],
+  "dataContentForNGSILDConversion": [
+    {
+      "id": 1,
+      "nome": "Escola Show",
+      "codigo_inep": "Rua Legal"
+    },
+    {
+      "id": 2,
+      "nome": "Leanne Graham",
+      "codigo_inep": "Rua Legal"
+    },
+    {
+      "id": 3,
+      "nome": "Leanne Graham",
+      "codigo_inep": "Rua Legal"
+    }
+  ]
+}

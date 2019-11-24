@@ -30,7 +30,7 @@ public class NGSILDConverterController {
             listNGSILD = ngsildTreat.convertToEntityNGSILD(data, layerPath, null);
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
-            System.out.println("Time to conversion NGSI-LD: " + timeElapsed);
+            logInfo("Time to conversion NGSI-LD: {}", timeElapsed);
             response.setData(listNGSILD);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
@@ -51,10 +51,14 @@ public class NGSILDConverterController {
 
         NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
         try {
+            String contextLink = (String) dataForConvertIntoNGSILDByContext.get("contextLink");
+            List<LinkedHashMap<String, Object>> matchingConfigContent = (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("matchingConfigContent");
+            List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion = (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("dataContentForNGSILDConversion");
             long startTime = System.nanoTime();
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
-                    (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("matchingConfigContent"),
-                    (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("dataContentForNGSILDConversion"),
+                    contextLink,
+                    matchingConfigContent,
+                    dataContentForNGSILDConversion,
                     layerPath
             );
             long endTime = System.nanoTime();

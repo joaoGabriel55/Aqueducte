@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -32,7 +33,8 @@ public class RequestsUtils {
     public final static String USER_TOKEN = "user-token";
     // public static String URL_SGEOL = "http://192.168.7.47/sgeol-dm/"; // MPRN
     public static String URL_SGEOL = "http://sgeolayers.imd.ufrn.br/sgeol-test-sec/"; // Test
-    
+    public static String URL_HDFS = "http://10.7.128.16:9870/webhdfs/v1/";
+
     public static String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
@@ -67,24 +69,26 @@ public class RequestsUtils {
     }
 
     @SuppressWarnings("unchecked")
-	private static Map<String, Object> httpGet(LinkedHashMap<Object, Object> paramsRequest, String fullUrl) throws IOException {
-        URL url = new URL(fullUrl);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setDoOutput(true);
-        con.setRequestMethod("GET");
-        con.setConnectTimeout(10000);
+    private static Map<String, Object> httpGet(LinkedHashMap<Object, Object> paramsRequest, String fullUrl) throws IOException {
+//        URL url = new URL(fullUrl);
+//        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+//        con.setDoOutput(true);
+//        con.setRequestMethod("GET");
+//        con.setConnectTimeout(10000);
+//
+//        LinkedHashMap<String, String> headersParams = (LinkedHashMap<String, String>) paramsRequest.get("headers");
+//        if (headersParams != null && headersParams.size() > 0) {
+//            setHeadersParams(headersParams, con);
+//        }
+//
+//        if (paramsRequest.get("data") != null)
+//            treatBodyData(con, paramsRequest.get("data").toString());
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpGet request = new HttpGet(fullUrl);
+        HttpResponse response = httpClient.execute(request);
 
-        LinkedHashMap<String, String> headersParams = (LinkedHashMap<String, String>) paramsRequest.get("headers");
-        if (headersParams != null) {
-            setHeadersParams(headersParams, con);
-        }
-
-        if (paramsRequest.get("data") != null)
-            treatBodyData(con, paramsRequest.get("data").toString());
-
-        con.connect();
-        Map<String, Object> response = buildResponse(con.getResponseCode(), con.getResponseMessage(), con.getInputStream());
-        return response;
+        Map<String, Object> finalResponse = buildResponse(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), response.getEntity().getContent());
+        return finalResponse;
     }
 
     public static Map<String, Object> httpPost(String url, Object paramsRequest, LinkedHashMap<String, String> headersParams) throws IOException {
@@ -113,12 +117,12 @@ public class RequestsUtils {
     }
 
     @SuppressWarnings("unchecked")
-	private static Map<String, Object> buildResponse(int statusCode, String statusMessage, InputStream inputStream) throws IOException {
+    private static Map<String, Object> buildResponse(int statusCode, String statusMessage, InputStream inputStream) throws IOException {
         Map<String, Object> responseObject = new HashMap<>();
 
         if (statusCode == STATUS_OK) {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, String> jsonObject = mapper.readValue("{ \"data\": " + readBodyReq(inputStream) + "}", Map.class);
+            Map<String, Object> jsonObject = mapper.readValue("{ \"data\": " + readBodyReq(inputStream) + "}", Map.class);
             responseObject.putAll(jsonObject);
             return responseObject;
         }
@@ -173,7 +177,7 @@ public class RequestsUtils {
 
     public static String readBodyReq(InputStream inputStream) throws IOException {
         /* Lendo body */
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         String body = "";
         String temp = null;
         while ((temp = br.readLine()) != null)

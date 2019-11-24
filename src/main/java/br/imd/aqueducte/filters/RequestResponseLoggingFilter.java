@@ -22,39 +22,40 @@ import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 @Order(1)
 public class RequestResponseLoggingFilter implements Filter {
 
-	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
 
-		PermissionChecker permissionChecker = new PermissionChecker();
+        PermissionChecker permissionChecker = new PermissionChecker();
 
-		HttpServletRequest req = (HttpServletRequest) request;
-		HttpServletResponse res = (HttpServletResponse) response;
-		try {
-//			 if (!permissionChecker.checkSmartSyncPerssisionAccess(req.getHeader(USER_TOKEN),
-//			 		(HttpServletRequest) request)) {
-//			 	buildResponseError(res, "You don't have permission to access Smart Sync API");
-//			 	return;
-//			 }
-			chain.doFilter(request, response);
-		} catch (Exception e) {
-			buildResponseError(response, "Internal error.");
-			return;
-		}
-	}
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse res = (HttpServletResponse) response;
+        try {
+            if (true) {
+                if (!permissionChecker.checkSmartSyncPerssisionAccess(req.getHeader(USER_TOKEN), (HttpServletRequest) request)) {
+                    buildResponseError(res, "You don't have permission to access Smart Sync API");
+                    return;
+                }
+            }
+            chain.doFilter(request, response);
+        } catch (Exception e) {
+            buildResponseError(response, "Internal error.");
+            return;
+        }
+    }
 
-	private void buildResponseError(ServletResponse response, String message) throws IOException {
-		Response<String> errorResponse = new Response<String>();
-		errorResponse.getErrors().add(message);
+    private void buildResponseError(ServletResponse response, String message) throws IOException {
+        Response<String> errorResponse = new Response<String>();
+        errorResponse.getErrors().add(message);
 
-		byte[] responseToSend = restResponseBytes(errorResponse);
-		((HttpServletResponse) response).setHeader("Content-Type", "application/json");
-		((HttpServletResponse) response).setStatus(401);
-		response.getOutputStream().write(responseToSend);
-	}
+        byte[] responseToSend = restResponseBytes(errorResponse);
+        ((HttpServletResponse) response).setHeader("Content-Type", "application/json");
+        ((HttpServletResponse) response).setStatus(401);
+        response.getOutputStream().write(responseToSend);
+    }
 
-	private byte[] restResponseBytes(Response<String> errorResponse) throws IOException {
-		String serialized = new ObjectMapper().writeValueAsString(errorResponse);
-		return serialized.getBytes();
-	}
+    private byte[] restResponseBytes(Response<String> errorResponse) throws IOException {
+        String serialized = new ObjectMapper().writeValueAsString(errorResponse);
+        return serialized.getBytes();
+    }
 }
