@@ -184,11 +184,14 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         value.put("type", "GeoProperty");
         HashMap<Object, Object> valueGeometry = new HashMap<>();
 
-        if (!type.equals("Point"))
-            valueGeometry.put("coordinates", parseDoubleCoordinates(coordinates));
-        else
+        if (!type.equals("Point")) {
+            if (!(coordinates instanceof ArrayList))
+                valueGeometry.put("coordinates", parseDoubleCoordinates(coordinates));
+            else
+                valueGeometry.put("coordinates", coordinates);
+        } else {
             valueGeometry.put("coordinates", parseDoubleCoordinates(coordinates).get(0));
-
+        }
         valueGeometry.put("type", type);
         value.put("value", valueGeometry);
     }
