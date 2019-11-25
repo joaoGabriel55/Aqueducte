@@ -74,6 +74,8 @@ public class ImportationSetupWithContextController extends GenericController {
                 importationSetupWithContext.setDateCreated(new Date());
                 importationSetupWithContext.setDateModified(new Date());
             } else if (importationSetupWithContext.getId() != null) {
+                Optional<ImportationSetupWithContext> importationSetupWithContextUpdated = importationSetupWithContextService.findById(importationSetupWithContext.getId());
+                importationSetupWithContext.setDateCreated(importationSetupWithContextUpdated.get().getDateCreated());
                 importationSetupWithContext.setDateModified(new Date());
             }
 
