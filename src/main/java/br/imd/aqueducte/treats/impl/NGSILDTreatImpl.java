@@ -12,8 +12,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static br.imd.aqueducte.utils.RequestsUtils.APP_TOKEN;
-import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
+import static br.imd.aqueducte.utils.PropertiesParams.APP_TOKEN;
+import static br.imd.aqueducte.utils.PropertiesParams.USER_TOKEN;
 
 public class NGSILDTreatImpl implements NGSILDTreat {
     @SuppressWarnings("unchecked")
@@ -96,18 +96,31 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                 String key = property.getKey();
                 for (Object matches : matchingConfig) {
                     LinkedHashMap<Object, Object> keyMatch = (LinkedHashMap<Object, Object>) matches;
+
                     String foreignProperty = getValueMatching(keyMatch.get("foreignProperty"));
                     String contextName = getValueMatching(keyMatch.get("contextName"));
                     Boolean isLocation = (Boolean) keyMatch.get("isLocation");
+                    Boolean hasRelationship = (Boolean) keyMatch.get("hasRelationship");
+
                     if (key.equals(foreignProperty) && (!isLocation && isLocation != null)) {
                         if (checkValuesFromKeysAreNull(property)) {
-                            HashMap<String, Object> typeValue = new HashMap<String, Object>();
-                            typeValue.put("type", "Property");
-                            typeValue.put("value", property.getValue());
-                            properties.put(contextName, typeValue);
-                            break;
+                            if (hasRelationship != null && hasRelationship) {
+                                HashMap<String, Object> typeValue = new HashMap<>();
+                                typeValue.put("type", "Relationship");
+                                typeValue.put("object", property.getValue());
+                                typeValue.put("relationshipConfig", keyMatch.get("relationshipConfig"));
+
+                                properties.put(contextName, typeValue);
+                                break;
+                            } else {
+                                HashMap<String, Object> typeValue = new HashMap<>();
+                                typeValue.put("type", "Property");
+                                typeValue.put("value", property.getValue());
+                                properties.put(contextName, typeValue);
+                                break;
+                            }
                         }
-                    } else if (isLocation && isLocation != null) {
+                    } else if (isLocation != null && isLocation) {
                         HashMap<String, Object> valueGeoLocation = new HashMap<>();
                         convertToGeoJson(
                                 valueGeoLocation,
@@ -117,6 +130,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                         properties.put(contextName, valueGeoLocation);
                         break;
                     }
+
                 }
             }
             listNGSILD.add(properties);
@@ -204,8 +218,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
     }
 
     private boolean checkValuesFromKeysAreNull(Entry<String, Object> property) {
-        if (property.getValue() != null &&
-                property.getValue() != "") {
+        if (property.getValue() != null && property.getValue() != "") {
             return true;
         }
         return false;

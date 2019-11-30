@@ -1,9 +1,5 @@
 package br.imd.aqueducte.security;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -14,23 +10,24 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import br.imd.aqueducte.logger.LoggerMessage;
-import br.imd.aqueducte.utils.RequestsUtils;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.PropertiesParams.URL_SGEOL;
 
 public class PermissionChecker {
-    
+
     private final static String ROLE_AQUEDUCTE = "aqueducte";
 
     /**
      * Check if User from IDM have permission to access Smart Sync API.
      */
-    public boolean checkSmartSyncPerssisionAccess(String userToken, HttpServletRequest req) {
+    public boolean checkSmartSyncPermissionAccess(String userToken, HttpServletRequest req) {
         if (userToken != "" && userToken != null) {
 
-            HttpGet request = new HttpGet(RequestsUtils.URL_SGEOL + "idm/users/info");
+            HttpGet request = new HttpGet(URL_SGEOL + "idm/users/info");
 
             // add request headers
             request.addHeader("user-token", userToken);

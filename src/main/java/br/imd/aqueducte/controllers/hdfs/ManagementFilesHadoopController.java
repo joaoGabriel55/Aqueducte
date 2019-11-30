@@ -1,14 +1,15 @@
 package br.imd.aqueducte.controllers.hdfs;
 
 import br.imd.aqueducte.models.response.Response;
-import br.imd.aqueducte.utils.RequestsUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
-import static br.imd.aqueducte.utils.RequestsUtils.URL_HDFS;
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.PropertiesParams.URL_HDFS;
 
 @RestController
 @RequestMapping("/sync/handleFilesHadoop")
@@ -23,8 +24,10 @@ public class ManagementFilesHadoopController {
         try {
             ResponseEntity<Map> responseEntity = restTemplate.getForEntity(fullUrl, Map.class);
             response.setData(responseEntity.getBody());
+            logInfo("fileStatus", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok().body(response);
@@ -38,8 +41,10 @@ public class ManagementFilesHadoopController {
         try {
             ResponseEntity<Map> responseEntity = restTemplate.getForEntity(fullUrl, Map.class);
             response.setData(responseEntity.getBody());
+            logInfo("contentSummary", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok().body(response);
