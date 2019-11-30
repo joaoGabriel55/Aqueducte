@@ -1,6 +1,5 @@
 package br.imd.aqueducte.controllers;
 
-import br.imd.aqueducte.logger.LoggerMessage;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;

@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/sync")
 @CrossOrigin(origins = "*")
 public class AqueducteController {
-	
-	@GetMapping
-	public void smartSyncHome() {
-		return;
-	}
-	
+
+    @GetMapping
+    public void smartSyncHome() {
+        return;
+    }
+
 }

@@ -3,7 +3,7 @@ HELP.md
 !.mvn/wrapper/maven-wrapper.jar
 
 ### General ###
-/src/main/resources/*.json
+/src/main/resources/files/
 
 ### STS ###
 .apt_generated

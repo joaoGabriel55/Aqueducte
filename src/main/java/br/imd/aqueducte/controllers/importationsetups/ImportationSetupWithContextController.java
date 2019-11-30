@@ -4,7 +4,6 @@ package br.imd.aqueducte.controllers.importationsetups;
 import br.imd.aqueducte.controllers.GenericController;
 import br.imd.aqueducte.models.MatchingConfig;
 import br.imd.aqueducte.models.documents.ImportationSetupWithContext;
-import br.imd.aqueducte.models.documents.ImportationSetupWithoutContext;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.ImportationSetupWithContextService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +34,11 @@ public class ImportationSetupWithContextController extends GenericController {
         try {
             Page<ImportationSetupWithContext> importationSetupWithContextList = importationSetupWithContextService.findAllPageable(page, count);
             response.setData(importationSetupWithContextList);
+            logInfo("fileStatus", null);
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             response.getErrors().add("Error on save Importation Setup with Context");
+            logError(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -51,8 +52,10 @@ public class ImportationSetupWithContextController extends GenericController {
             Optional<ImportationSetupWithContext> importationSetupWithContext = importationSetupWithContextService
                     .findById(id);
             response.setData(importationSetupWithContext.get());
+            logInfo("GET Importation Setup With Context", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
