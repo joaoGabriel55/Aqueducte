@@ -8,7 +8,7 @@ import org.json.JSONArray;
 
 public interface NGSILDTreat {
     List<LinkedHashMap<String, Object>> convertToEntityNGSILD(
-            List<Object> data,
+            Map<String, Object> data,
             String layerPath,
             Map<Object, Object> contextLink);
 

@@ -24,4 +24,20 @@ public class NGSILDUtils {
         linkedHashMapNGSILD.put("id", "urn:ngsi-ld:" + layerType + ":" + uuid);
         linkedHashMapNGSILD.put("type", layerType);
     }
+
+    public boolean checkIsGeoJson(Map<String, Object> jsonData) {
+
+        boolean hasAnyGeoType = jsonData.get("type") != null &&
+                (jsonData.get("type").equals("Polygon") ||
+                        jsonData.get("type").equals("Point") ||
+                        jsonData.get("type").equals("LineString") ||
+                        jsonData.get("type").equals("MultiPoint") ||
+                        jsonData.get("type").equals("MultiLineString") ||
+                        jsonData.get("type").equals("MultiPolygon"));
+
+        if (jsonData.containsKey("type") && jsonData.containsKey("coordinates") && hasAnyGeoType) {
+            return true;
+        }
+        return false;
+    }
 }

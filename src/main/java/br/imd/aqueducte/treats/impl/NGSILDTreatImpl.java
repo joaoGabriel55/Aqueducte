@@ -15,10 +15,19 @@ import java.util.Map.Entry;
 import static br.imd.aqueducte.utils.PropertiesParams.APP_TOKEN;
 import static br.imd.aqueducte.utils.PropertiesParams.USER_TOKEN;
 
+// TODO: Create a method for treat geo location on both conversions cases
 public class NGSILDTreatImpl implements NGSILDTreat {
+
+    private NGSILDUtils ngsildUtils;
+
+    public NGSILDTreatImpl() {
+        this.ngsildUtils = new NGSILDUtils();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
-    public List<LinkedHashMap<String, Object>> convertToEntityNGSILD(List<Object> data, String layerPath,
+    public List<LinkedHashMap<String, Object>> convertToEntityNGSILD(Map<String, Object> data,
+                                                                     String layerPath,
                                                                      Map<Object, Object> contextLink) {
 
         LinkedHashMap<String, Object> linkedHashMapNGSILD = new LinkedHashMap<>();
@@ -26,9 +35,11 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         HashMap<String, Object> objectValue = new HashMap<>();
 
         // Property data provided from external API
-        ArrayList<Object> dataListFromExternalAPI = (ArrayList<Object>) data;
+        List<Object> dataListFromExternalAPI = (List<Object>) data.get("dataContentForNGSILDConversion");
+        List<LinkedHashMap<String, Object>> listContentConverted = new ArrayList<>();
 
-        List<LinkedHashMap<String, Object>> listObjForSgeol = new ArrayList<>();
+        // Geolocation config
+        List<Map<String, String>> geoLocationConfig = (List<Map<String, String>>) data.get("geoLocationConfig");
 
         // Attribute of entity obtained.
         Map.Entry<String, Object> propertiesContent = null;
@@ -40,23 +51,49 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             UUID uuid = UUID.randomUUID();
             ngsildUtils.initDefaultProperties(linkedHashMapNGSILD, null, layerPath, uuid.toString());
 
-            HashMap<String, HashMap<String, Object>> typeAndValueMap = new HashMap<>();
+            HashMap<String, Object> typeAndValueMap = new HashMap<>();
 
             if (ldObj != null) {
+                List<Object> listTwoFields = new ArrayList<>();
                 for (Iterator<Map.Entry<String, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext(); ) {
                     propertiesContent = iterator.next();
-                    if (propertiesContent.getValue() != null && propertiesContent.getValue() instanceof LinkedHashMap) {
-                        LinkedHashMap<Object, Object> linkedHashMap = (LinkedHashMap<Object, Object>) propertiesContent
-                                .getValue();
-                        if (linkedHashMap.containsKey("isLocation") && linkedHashMap.containsKey("coordinates")) {
-                            convertToGeoJson(
-                                    objectValue,
-                                    (List<Object>) linkedHashMap.get("coordinates"),
-                                    (String) linkedHashMap.get("typeGeolocation")
-                            );
-                            typeAndValueMap.put(propertiesContent.getKey(), objectValue);
+                    for (Map<String, String> configElem : geoLocationConfig) {
+                        if (configElem.get("key").equals(propertiesContent.getKey()) && propertiesContent.getValue() != null) {
+                            if ((propertiesContent.getValue() instanceof Map) &&
+                                    this.ngsildUtils.checkIsGeoJson((Map<String, Object>) propertiesContent.getValue())) {
+                                Map<String, Object> geoJsonMap = new HashMap<>();
+                                geoJsonMap.put("type", "GeoProperty");
+                                geoJsonMap.put("value", propertiesContent.getValue());
+                                typeAndValueMap.put(propertiesContent.getKey(), geoJsonMap);
+                                propertiesContent.setValue(null);
+                            } else {
+                                if (!configElem.get("typeOfSelection").equals("twofields")) {
+                                    convertToGeoJson(
+                                            objectValue,
+                                            propertiesContent.getValue(),
+                                            configElem
+                                    );
+                                    typeAndValueMap.put(propertiesContent.getKey(), objectValue);
+                                    propertiesContent.setValue(null);
+                                } else if (configElem.get("typeOfSelection").equals("twofields")) {
+                                    listTwoFields.add(propertiesContent.getValue());
+                                    if (listTwoFields.size() == 2) {
+                                        convertToGeoJson(
+                                                objectValue,
+                                                listTwoFields,
+                                                configElem
+                                        );
+                                        typeAndValueMap.put(configElem.get("singleFieldLocation"), objectValue);
+                                        listTwoFields = new ArrayList<>();
+                                    }
+                                    propertiesContent.setValue(null);
+                                }
+                            }
+                            break;
                         }
-                    } else {
+                        objectValue = new HashMap<>();
+                    }
+                    if (propertiesContent.getValue() != null) {
                         objectValue.put("type", "Property");
                         objectValue.put("value", propertiesContent.getValue());
                         if (propertiesContent.getKey() == "type" || propertiesContent.getKey() == "id") {
@@ -66,16 +103,16 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                         } else {
                             typeAndValueMap.put(propertiesContent.getKey(), objectValue);
                         }
+                        objectValue = new HashMap<>();
                     }
-                    objectValue = new HashMap<>();
                 }
             }
             linkedHashMapNGSILD.putAll(typeAndValueMap);
-            listObjForSgeol.add(linkedHashMapNGSILD);
+            listContentConverted.add(linkedHashMapNGSILD);
             linkedHashMapNGSILD = new LinkedHashMap<>();
         }
 
-        return listObjForSgeol;
+        return listContentConverted;
     }
 
     @SuppressWarnings("unchecked")
@@ -92,6 +129,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             NGSILDUtils ngsildUtils = new NGSILDUtils();
             UUID uuid = UUID.randomUUID();
             ngsildUtils.initDefaultProperties(properties, contextList, layerPath, uuid.toString());
+            List<Object> listTwoFields = new ArrayList<>();
             for (Entry<String, Object> property : element.entrySet()) {
                 String key = property.getKey();
                 for (Object matches : matchingConfig) {
@@ -122,48 +160,49 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                         }
                     } else if (isLocation != null && isLocation) {
                         HashMap<String, Object> valueGeoLocation = new HashMap<>();
-                        convertToGeoJson(
-                                valueGeoLocation,
-                                (List<Object>) ((HashMap<String, Object>) property.getValue()).get("coordinates"),
-                                (String) ((HashMap<String, Object>) property.getValue()).get("typeGeolocation")
-                        );
-                        properties.put(contextName, valueGeoLocation);
-                        break;
+                        List<Map<String, String>> geoLocationConfig = (List<Map<String, String>>) keyMatch.get("geoLocationConfig");
+                        for (Map<String, String> configElem : geoLocationConfig) {
+                            if (configElem.get("key").equals(property.getKey()) && property.getValue() != null) {
+                                if ((property.getValue() instanceof Map) &&
+                                        this.ngsildUtils.checkIsGeoJson((Map<String, Object>) property.getValue())) {
+                                    Map<String, Object> geoJsonMap = new HashMap<>();
+                                    geoJsonMap.put("type", "GeoProperty");
+                                    geoJsonMap.put("value", property.getValue());
+                                    properties.put(contextName, geoJsonMap);
+                                    property.setValue(null);
+                                } else {
+                                    if (!configElem.get("typeOfSelection").equals("twofields")) {
+                                        convertToGeoJson(
+                                                valueGeoLocation,
+                                                property.getValue(),
+                                                configElem
+                                        );
+                                        properties.put(contextName, valueGeoLocation);
+                                        property.setValue(null);
+                                    } else if (configElem.get("typeOfSelection").equals("twofields")) {
+                                        listTwoFields.add(property.getValue());
+                                        if (listTwoFields.size() == 2) {
+                                            convertToGeoJson(
+                                                    valueGeoLocation,
+                                                    listTwoFields,
+                                                    configElem
+                                            );
+                                            properties.put(contextName, valueGeoLocation);
+                                            listTwoFields = new ArrayList<>();
+                                        }
+                                        property.setValue(null);
+                                    }
+                                }
+                                break;
+                            }
+                        }
                     }
-
                 }
             }
             listNGSILD.add(properties);
             properties = new LinkedHashMap<>();
         }
         return listNGSILD;
-    }
-
-//    private HashMap<String, HashMap<String, Object>> convertIntoTypeValueObject(
-//            HashMap<String, HashMap<String, Object>> typeAndValueMap,
-//            Map.Entry<String, Object> propertiesContent,
-//            HashMap<String, Object> content) {
-//        content.put("type", "Property");
-//        content.put("value", propertiesContent.getValue());
-//        if (propertiesContent.getKey() == "type" || propertiesContent.getKey() == "id") {
-//            typeAndValueMap.put(propertiesContent.getKey() + "_", content);
-//        } else if (propertiesContent.getKey().contains(".")) {
-//            typeAndValueMap.put(propertiesContent.getKey().replace(".", "_"), content);
-//        } else {
-//            typeAndValueMap.put(propertiesContent.getKey(), content);
-//        }
-//        return typeAndValueMap;
-//    }
-
-
-    private List<List<Object>> parseDoubleCoordinates(List<Object> coordinates) {
-        List<Object> coordinatesDoubleType = new ArrayList<>();
-        List<List<Object>> coordinatesFinal = new ArrayList<>();
-        for (Object coordinate : coordinates) {
-            coordinatesDoubleType.add(Double.parseDouble(coordinate.toString().replace(",", ".")));
-        }
-        coordinatesFinal.add(coordinatesDoubleType);
-        return coordinatesFinal;
     }
 
     @Override
@@ -194,22 +233,89 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         return jsonArrayResponse;
     }
 
-    private void convertToGeoJson(HashMap<String, Object> value, List<Object> coordinates, String type) {
+    private void dataForGeoJsonFormatProcessor(List<Map<String, String>> geoLocationConfig,
+                                               Entry<String, Object> propertiesContent,
+                                               HashMap<String, Object> typeAndValueMap,
+                                               List<Object> listTwoFields,
+                                               HashMap<String, Object> objectValue,
+                                               boolean refresh) {
+        for (Map<String, String> configElem : geoLocationConfig) {
+            if (configElem.get("key").equals(propertiesContent.getKey()) && propertiesContent.getValue() != null) {
+                if ((propertiesContent.getValue() instanceof Map) &&
+                        this.ngsildUtils.checkIsGeoJson((Map<String, Object>) propertiesContent.getValue())) {
+                    Map<String, Object> geoJsonMap = new HashMap<>();
+                    geoJsonMap.put("type", "GeoProperty");
+                    geoJsonMap.put("value", propertiesContent.getValue());
+                    typeAndValueMap.put(propertiesContent.getKey(), geoJsonMap);
+                    propertiesContent.setValue(null);
+                } else {
+                    if (!configElem.get("typeOfSelection").equals("twofields")) {
+                        convertToGeoJson(
+                                objectValue,
+                                propertiesContent.getValue(),
+                                configElem
+                        );
+                        typeAndValueMap.put(propertiesContent.getKey(), objectValue);
+                        propertiesContent.setValue(null);
+                    } else if (configElem.get("typeOfSelection").equals("twofields")) {
+                        listTwoFields.add(propertiesContent.getValue());
+                        if (listTwoFields.size() == 2) {
+                            convertToGeoJson(
+                                    objectValue,
+                                    listTwoFields,
+                                    configElem
+                            );
+                            typeAndValueMap.put(configElem.get("singleFieldLocation"), objectValue);
+                            listTwoFields = new ArrayList<>();
+                        }
+                        propertiesContent.setValue(null);
+                    }
+                }
+                break;
+            }
+
+            if (refresh) // Renew the Map for avoid wrong data
+                objectValue = new HashMap<>();
+        }
+    }
+
+    private void convertToGeoJson(HashMap<String, Object> value, Object coordinates, Map<String, String> configGeoLocation) {
         value.put("type", "GeoProperty");
         HashMap<Object, Object> valueGeometry = new HashMap<>();
 
-        if (!type.equals("Point")) {
-            if (!(coordinates instanceof ArrayList))
-                valueGeometry.put("coordinates", parseDoubleCoordinates(coordinates));
-            else
-                valueGeometry.put("coordinates", coordinates);
+        if (!configGeoLocation.get("typeGeolocation").equals("Point")) {
+            if (coordinates instanceof ArrayList) {
+                valueGeometry.put("coordinates", parseDoubleCoordinates((List<Object>) coordinates));
+            } else if (coordinates instanceof String) {
+                String[] coordinatesString = ((String) coordinates).split(configGeoLocation.get("delimiter"));
+                List<List<Object>> coordinatesTreated = parseDoubleCoordinates(Arrays.asList(coordinatesString));
+                valueGeometry.put("coordinates", coordinatesTreated);
+            }
         } else {
-            valueGeometry.put("coordinates", parseDoubleCoordinates(coordinates).get(0));
+            if (coordinates instanceof ArrayList) {
+                valueGeometry.put("coordinates", parseDoubleCoordinates((List<Object>) coordinates).get(0));
+            } else if (coordinates instanceof String) {
+                String[] coordinatesString = ((String) coordinates).split(configGeoLocation.get("delimiter"));
+                List<List<Object>> coordinatesTreated = parseDoubleCoordinates(Arrays.asList(coordinatesString));
+                valueGeometry.put("coordinates", coordinatesTreated.get(0));
+            }
         }
-        valueGeometry.put("type", type);
+        valueGeometry.put("type", configGeoLocation.get("typeGeolocation"));
         value.put("value", valueGeometry);
     }
 
+    private List<List<Object>> parseDoubleCoordinates(List<Object> coordinates) {
+        List<Object> coordinatesDoubleType = new ArrayList<>();
+        List<List<Object>> coordinatesFinal = new ArrayList<>();
+        for (Object coordinate : coordinates) {
+            if (coordinate instanceof String)
+                coordinatesDoubleType.add(Double.parseDouble(coordinate.toString().replace(",", ".")));
+            else
+                coordinatesDoubleType.add(coordinate);
+        }
+        coordinatesFinal.add(coordinatesDoubleType);
+        return coordinatesFinal;
+    }
 
     private String getValueMatching(Object value) {
         if (value != null)
