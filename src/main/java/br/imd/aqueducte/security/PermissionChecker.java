@@ -15,11 +15,10 @@ import java.io.IOException;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.PropertiesParams.ROLE_AQUEDUCTE;
 import static br.imd.aqueducte.utils.PropertiesParams.URL_SGEOL;
 
 public class PermissionChecker {
-
-    private final static String ROLE_AQUEDUCTE = "aqueducte";
 
     /**
      * Check if User from IDM have permission to access Smart Sync API.

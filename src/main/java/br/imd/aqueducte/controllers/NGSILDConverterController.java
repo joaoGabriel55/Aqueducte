@@ -23,6 +23,15 @@ public class NGSILDConverterController {
             @PathVariable String layerPath,
             @RequestBody Map<String, Object> data) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
+
+        List<Map<String, Object>> geoLocationConfig = (List<Map<String, Object>>) data.get("geoLocationConfig");
+        if (geoLocationConfig.size() > 2) {
+            String errGeoLocMessage = "Somente é permitido um campo para geolocalização. Tamanho atual: {}";
+            response.getErrors().add(errGeoLocMessage);
+            logError(errGeoLocMessage, geoLocationConfig.size());
+            return ResponseEntity.badRequest().body(response);
+        }
+
         try {
             NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
             List<LinkedHashMap<String, Object>> listNGSILD;
