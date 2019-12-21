@@ -2,8 +2,10 @@ package br.imd.aqueducte.treats.withoutcontext;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import br.imd.aqueducte.models.MatchingConfig;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;

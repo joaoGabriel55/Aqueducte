@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import static br.imd.aqueducte.utils.PropertiesParams.*;
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 
 @RestController
 @RequestMapping("/sync/importToSgeol")
@@ -33,8 +35,10 @@ public class ImportDataToSGEOLController {
             List<String> jsonArrayResponse = ngsildTreat.importToSGEOL(url, appToken, userToken,
                     jsonArrayNGSILD);
             response.setData(jsonArrayResponse);
+            logInfo("POST /importToSgeol", null);
         } catch (Exception e) {
             response.getErrors().add(e.getLocalizedMessage());
+            logError(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
