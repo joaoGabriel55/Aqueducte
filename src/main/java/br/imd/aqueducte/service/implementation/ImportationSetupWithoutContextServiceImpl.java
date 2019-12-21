@@ -1,19 +1,18 @@
 package br.imd.aqueducte.service.implementation;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-
 import br.imd.aqueducte.models.documents.ImportationSetupWithoutContext;
 import br.imd.aqueducte.models.documents.LinkedIdsForRelationship;
 import br.imd.aqueducte.repositories.ImportationSetupWithoutContextRepository;
 import br.imd.aqueducte.service.ImportationSetupWithoutContextService;
 import br.imd.aqueducte.service.LinkedIdsForRelationshipService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ImportationSetupWithoutContextServiceImpl implements ImportationSetupWithoutContextService {
@@ -29,25 +28,25 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
                                                                                     ImportationSetupWithoutContext importationSetupWithoutContext, List<String> fieldsSelectedForRelationship,
                                                                                     boolean isUpdate) {
 
-		if (fieldsSelectedForRelationship != null) {
-			List<LinkedIdsForRelationship> linkedIdsForRelationshipList = linkedIdsForRelationshipService
-					.saveWithoutMapListIdLinkedLinkedIdsForRelationship(fieldsSelectedForRelationship,
-							importationSetupWithoutContext.getId());
-			importationSetupWithoutContext.setLinkedIdsForRelationshipList(linkedIdsForRelationshipList);
-		}
+        if (fieldsSelectedForRelationship != null) {
+            List<LinkedIdsForRelationship> linkedIdsForRelationshipList = linkedIdsForRelationshipService
+                    .saveWithoutMapListIdLinkedLinkedIdsForRelationship(fieldsSelectedForRelationship,
+                            importationSetupWithoutContext.getId());
+            importationSetupWithoutContext.setLinkedIdsForRelationshipList(linkedIdsForRelationshipList);
+        }
 
-		if (importationSetupWithoutContext.getFieldsGeolocationSelected().size() > 0)
-			importationSetupWithoutContext.setSelectedGeolocationData(true);
-		if (importationSetupWithoutContext.getBodyData() != null)
-			importationSetupWithoutContext.setUseBodyData(true);
+        if (importationSetupWithoutContext.getFieldsGeolocationSelected().size() > 0)
+            importationSetupWithoutContext.setSelectedGeolocationData(true);
+        if (importationSetupWithoutContext.getBodyData() != null)
+            importationSetupWithoutContext.setUseBodyData(true);
 
-		if (importationSetupWithoutContext.getIdUser() == null)
-			importationSetupWithoutContext.setIdUser(userId);
+        if (importationSetupWithoutContext.getIdUser() == null)
+            importationSetupWithoutContext.setIdUser(userId);
 
-		if (!isUpdate) {
-			importationSetupWithoutContext.setDateCreated(new Date());
-		}
-		importationSetupWithoutContext.setDateModified(new Date());
+        if (!isUpdate) {
+            importationSetupWithoutContext.setDateCreated(new Date());
+        }
+        importationSetupWithoutContext.setDateModified(new Date());
         return importationSetupWithoutContext;
     }
 
