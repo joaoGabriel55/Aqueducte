@@ -67,7 +67,8 @@ public class ImportationSetupWithContextController extends GenericController {
         Response<ImportationSetupWithContext> response = new Response<>();
         try {
             List<MatchingConfig> matchingConfigList = importationSetupWithContext.getMatchingConfigList().stream().map(elem -> {
-                if (elem.getLocationToGeoJsonConfig().size() > 0) elem.setLocation(true);
+                if (elem.getGeoLocationConfig() != null && elem.getGeoLocationConfig().size() > 0)
+                    elem.setLocation(true);
                 return elem;
             }).collect(Collectors.toList());
             importationSetupWithContext.setMatchingConfigList(matchingConfigList);

@@ -19,6 +19,9 @@ public class ImportationSetupWithContext extends ImportationSetup {
     @NotBlank(message = "Context file name required")
     private String contextFileName;
 
+    @NotBlank(message = "Context file link required")
+    private String contextFileLink;
+
     @NotBlank(message = "Matching config list required")
     private List<MatchingConfig> matchingConfigList;
 
@@ -28,6 +31,14 @@ public class ImportationSetupWithContext extends ImportationSetup {
 
     public void setContextFileName(String contextFileName) {
         this.contextFileName = contextFileName;
+    }
+
+    public String getContextFileLink() {
+        return contextFileLink;
+    }
+
+    public void setContextFileLink(String contextFileLink) {
+        this.contextFileLink = contextFileLink;
     }
 
     public List<MatchingConfig> getMatchingConfigList() {

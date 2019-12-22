@@ -2,7 +2,8 @@ package br.imd.aqueducte.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MatchingConfig {
 
@@ -13,7 +14,7 @@ public class MatchingConfig {
     @JsonProperty
     private boolean isLocation;
 
-    private List<LocationGeoJsonConfig> locationToGeoJsonConfig;
+    private List<GeoLocationConfig> geoLocationConfig;
 
     public String getContextName() {
         return contextName;
@@ -39,11 +40,22 @@ public class MatchingConfig {
         isLocation = location;
     }
 
-    public List<LocationGeoJsonConfig> getLocationToGeoJsonConfig() {
-        return locationToGeoJsonConfig;
+    public List<GeoLocationConfig> getGeoLocationConfig() {
+        return geoLocationConfig;
     }
 
-    public void setLocationToGeoJsonConfig(List<LocationGeoJsonConfig> locationToGeoJsonConfig) {
-        this.locationToGeoJsonConfig = locationToGeoJsonConfig;
+    public void setGeoLocationConfig(List<GeoLocationConfig> geoLocationConfig) {
+        this.geoLocationConfig = geoLocationConfig;
+    }
+
+    public LinkedHashMap<String, Object> toLinkedHashMap() {
+        LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<>();
+        linkedHashMap.put("contextName", this.contextName);
+        linkedHashMap.put("foreignProperty", this.foreignProperty);
+        linkedHashMap.put("isLocation", this.isLocation);
+        List<Map<String, Object>> geoLocationConfigToMapList = geoLocationConfig.stream().map(elem ->
+                elem.toLinkedHashMap()).collect(Collectors.toList());
+        linkedHashMap.put("geoLocationConfig", geoLocationConfigToMapList);
+        return linkedHashMap;
     }
 }

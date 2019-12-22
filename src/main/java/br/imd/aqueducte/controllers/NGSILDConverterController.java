@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 
 @RestController
@@ -19,8 +20,17 @@ public class NGSILDConverterController {
 
     @PostMapping(value = "/{layerPath}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertToNGSILDWithoutContext(
-            @PathVariable(required = true) String layerPath, @RequestBody List<Object> data) {
+            @PathVariable String layerPath,
+            @RequestBody Map<String, Object> data) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
+
+        List<Map<String, Object>> geoLocationConfig = (List<Map<String, Object>>) data.get("geoLocationConfig");
+        if (geoLocationConfig.size() > 2) {
+            String errGeoLocMessage = "Somente é permitido um campo para geolocalização. Tamanho atual: {}";
+            response.getErrors().add(errGeoLocMessage);
+            logError(errGeoLocMessage, geoLocationConfig.size());
+            return ResponseEntity.badRequest().body(response);
+        }
 
         try {
             NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
@@ -33,6 +43,7 @@ public class NGSILDConverterController {
             response.setData(listNGSILD);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
@@ -67,6 +78,7 @@ public class NGSILDConverterController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
     }
