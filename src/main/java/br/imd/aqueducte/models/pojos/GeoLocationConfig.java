@@ -1,6 +1,6 @@
-package br.imd.aqueducte.models;
+package br.imd.aqueducte.models.pojos;
 
-import java.util.LinkedHashMap;
+import java.util.Map;
 
 /*
 {
@@ -59,13 +59,12 @@ public class GeoLocationConfig {
         this.typeGeolocation = typeGeolocation;
     }
 
-    public LinkedHashMap<String, Object> toLinkedHashMap() {
-        LinkedHashMap<String, Object> linkedHashMap = new LinkedHashMap<>();
-        linkedHashMap.put("key", this.key);
-        linkedHashMap.put("typeOfSelection", this.typeOfSelection);
-        linkedHashMap.put("invertCoords", this.invertCoords);
-        linkedHashMap.put("delimiter", this.delimiter);
-        linkedHashMap.put("typeGeolocation", this.typeGeolocation);
-        return linkedHashMap;
+    public GeoLocationConfig fromLinkedHashMap(Map<String, Object> linkedHashMap) {
+        this.key = (String) linkedHashMap.get("key");
+        this.typeOfSelection = (String) linkedHashMap.get("typeOfSelection");
+        this.invertCoords = (boolean) linkedHashMap.get("invertCoords");
+        this.delimiter = (String) linkedHashMap.get("delimiter");
+        this.typeGeolocation = (String) linkedHashMap.get("typeGeolocation");
+        return this;
     }
 }

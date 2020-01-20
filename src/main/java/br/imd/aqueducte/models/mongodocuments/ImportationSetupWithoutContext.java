@@ -1,6 +1,5 @@
-package br.imd.aqueducte.models.documents;
+package br.imd.aqueducte.models.mongodocuments;
 
-import br.imd.aqueducte.models.ImportationSetup;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;

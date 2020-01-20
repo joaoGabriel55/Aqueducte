@@ -2,10 +2,11 @@ package br.imd.aqueducte.controllers.importationsetups;
 
 
 import br.imd.aqueducte.controllers.GenericController;
-import br.imd.aqueducte.models.MatchingConfig;
-import br.imd.aqueducte.models.documents.ImportationSetupWithContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
+import br.imd.aqueducte.models.pojos.MatchingConfig;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.ImportationSetupWithContextService;
+import com.mongodb.DuplicateKeyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -63,8 +64,15 @@ public class ImportationSetupWithContextController extends GenericController {
 
     @PostMapping
     public ResponseEntity<Response<ImportationSetupWithContext>> saveImportationSetupWithContext(
-            @ModelAttribute("user-id") String userId, @RequestBody ImportationSetupWithContext importationSetupWithContext) {
+            @ModelAttribute("user-id") String userId,
+            @RequestBody ImportationSetupWithContext importationSetupWithContext) {
         Response<ImportationSetupWithContext> response = new Response<>();
+
+        if (checkUserIdIsEmpty(userId)) {
+            response.getErrors().add("Without user id");
+            return ResponseEntity.badRequest().body(response);
+        }
+
         try {
             List<MatchingConfig> matchingConfigList = importationSetupWithContext.getMatchingConfigList().stream().map(elem -> {
                 if (elem.getGeoLocationConfig() != null && elem.getGeoLocationConfig().size() > 0)
@@ -87,6 +95,9 @@ public class ImportationSetupWithContextController extends GenericController {
             response.setData(importationSetupWithContextRes);
             logInfo("ImportationSetupWithContext: {}", importationSetupWithContextRes.toString());
             return ResponseEntity.ok().body(response);
+        } catch (DuplicateKeyException e) {
+            response.getErrors().add("Duplicate ID");
+            return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add("Error on save Importation Setup with Context");
             logError("Error on save Importation Setup with Context", e.getMessage());
