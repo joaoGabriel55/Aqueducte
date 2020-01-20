@@ -1,4 +1,4 @@
-package br.imd.aqueducte.models.documents;
+package br.imd.aqueducte.models.mongodocuments;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.annotation.Id;

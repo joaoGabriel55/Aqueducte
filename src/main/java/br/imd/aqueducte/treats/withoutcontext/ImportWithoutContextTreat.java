@@ -2,16 +2,14 @@ package br.imd.aqueducte.treats.withoutcontext;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
-import br.imd.aqueducte.models.MatchingConfig;
 import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import br.imd.aqueducte.models.documents.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
 
 public class ImportWithoutContextTreat {
 

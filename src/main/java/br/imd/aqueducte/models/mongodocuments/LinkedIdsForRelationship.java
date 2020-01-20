@@ -1,4 +1,4 @@
-package br.imd.aqueducte.models.documents;
+package br.imd.aqueducte.models.mongodocuments;
 
 import java.util.List;
 import java.util.Map;

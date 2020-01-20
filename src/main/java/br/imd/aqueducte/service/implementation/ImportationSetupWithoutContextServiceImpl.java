@@ -1,7 +1,7 @@
 package br.imd.aqueducte.service.implementation;
 
-import br.imd.aqueducte.models.documents.ImportationSetupWithoutContext;
-import br.imd.aqueducte.models.documents.LinkedIdsForRelationship;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.mongodocuments.LinkedIdsForRelationship;
 import br.imd.aqueducte.repositories.ImportationSetupWithoutContextRepository;
 import br.imd.aqueducte.service.ImportationSetupWithoutContextService;
 import br.imd.aqueducte.service.LinkedIdsForRelationshipService;
@@ -22,33 +22,6 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
 
     @Autowired
     private LinkedIdsForRelationshipService linkedIdsForRelationshipService;
-
-    @Override
-    public ImportationSetupWithoutContext treatCreateImportationWithoutContextSetup(String userId,
-                                                                                    ImportationSetupWithoutContext importationSetupWithoutContext, List<String> fieldsSelectedForRelationship,
-                                                                                    boolean isUpdate) {
-
-        if (fieldsSelectedForRelationship != null) {
-            List<LinkedIdsForRelationship> linkedIdsForRelationshipList = linkedIdsForRelationshipService
-                    .saveWithoutMapListIdLinkedLinkedIdsForRelationship(fieldsSelectedForRelationship,
-                            importationSetupWithoutContext.getId());
-            importationSetupWithoutContext.setLinkedIdsForRelationshipList(linkedIdsForRelationshipList);
-        }
-
-        if (importationSetupWithoutContext.getFieldsGeolocationSelected().size() > 0)
-            importationSetupWithoutContext.setSelectedGeolocationData(true);
-        if (importationSetupWithoutContext.getBodyData() != null)
-            importationSetupWithoutContext.setUseBodyData(true);
-
-        if (importationSetupWithoutContext.getIdUser() == null)
-            importationSetupWithoutContext.setIdUser(userId);
-
-        if (!isUpdate) {
-            importationSetupWithoutContext.setDateCreated(new Date());
-        }
-        importationSetupWithoutContext.setDateModified(new Date());
-        return importationSetupWithoutContext;
-    }
 
     @SuppressWarnings("deprecation")
     @Override

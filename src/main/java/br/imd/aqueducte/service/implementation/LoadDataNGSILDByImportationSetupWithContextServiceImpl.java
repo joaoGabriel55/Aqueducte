@@ -1,29 +1,31 @@
 package br.imd.aqueducte.service.implementation;
 
-import br.imd.aqueducte.models.GeoLocationConfig;
-import br.imd.aqueducte.models.ImportationSetup;
-import br.imd.aqueducte.models.MatchingConfig;
-import br.imd.aqueducte.models.documents.ImportationSetupWithContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
+import br.imd.aqueducte.models.pojos.DataSetRelationship;
+import br.imd.aqueducte.models.pojos.GeoLocationConfig;
+import br.imd.aqueducte.models.pojos.MatchingConfig;
 import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.treats.JsonFlatConvertTreat;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
 import br.imd.aqueducte.utils.RequestsUtils;
+import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.PropertiesParams.STATUS_OK;
 import static br.imd.aqueducte.utils.PropertiesParams.URL_AQUECONNECT;
 
-
+@SuppressWarnings("ALL")
 public class LoadDataNGSILDByImportationSetupWithContextServiceImpl implements LoadDataNGSILDByImportationSetupService<ImportationSetupWithContext> {
     @Override
     public List<LinkedHashMap<String, Object>> loadData(ImportationSetupWithContext importationSetupWithContext) {
@@ -39,45 +41,44 @@ public class LoadDataNGSILDByImportationSetupWithContextServiceImpl implements L
             List<Object> dataCollectionFlat = (List<Object>) jsonFlatConvertTreat.getJsonFlat(dataFound);
             List<LinkedHashMap<String, Object>> dataForConvert = filterFieldsSelectedIntoArray(dataCollectionFlat, importationSetupWithContext);
 
-            List<LinkedHashMap<String, Object>> linkedHashMapMatchingConfig = importationSetupWithContext
-                    .getMatchingConfigList()
-                    .stream()
-                    .map(elem -> elem.toLinkedHashMap())
-                    .collect(Collectors.toList());
-
             // Convert o NGSI-LD
             NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
-            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
-                    importationSetupWithContext.getContextFileLink(),
-                    linkedHashMapMatchingConfig,
-                    dataForConvert,
-                    importationSetupWithContext.getLayerSelected()
-            );
-            return listConvertedIntoNGSILD;
+            try {
+                List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+                        importationSetupWithContext.getContextFileLink(),
+                        importationSetupWithContext.getMatchingConfigList(),
+                        dataForConvert,
+                        importationSetupWithContext.getLayerSelected()
+                );
+                return listConvertedIntoNGSILD;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
         return null;
     }
 
     @Override
-    public String sendRelationshipMapForAqueconnect(List<Map<String, Map>> relationshipMap) {
+    public int makeDataRelationshipAqueconnect(DataSetRelationship dataSetRelationship) {
         HttpClient httpClient = HttpClientBuilder.create().build();
-        HttpPost request = new HttpPost(URL_AQUECONNECT + "/relationshipsProcessor");
+        HttpPost request = new HttpPost(URL_AQUECONNECT + "relationships");
 
         // TODO: Auth - Parsing the "user-token" for Aqueconnect microservice
 
-        // request.setEntity(entity);
-
+        request.setEntity(getDataSetRelationshipJson(dataSetRelationship));
+        int statusCode = 0;
         try {
             HttpResponse response = httpClient.execute(request);
-            if (response.getStatusLine().getStatusCode() == STATUS_OK) {
-                return "200 Ok";
-            } else {
-                return "400 Bad request";
+            statusCode = response.getStatusLine().getStatusCode();
+            if (response.getStatusLine().getStatusCode() != STATUS_OK) {
+                return statusCode;
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return e.getMessage();
+            return 400;
         }
+        return statusCode;
     }
 
     private Map<String, Object> loadDataWebservice(ImportationSetupWithContext importationSetupWithContext) {
@@ -147,5 +148,11 @@ public class LoadDataNGSILDByImportationSetupWithContextServiceImpl implements L
             }
         }
         return dataFiltered;
+    }
+
+    private StringEntity getDataSetRelationshipJson(DataSetRelationship dataSetRelationship) {
+        String json = new Gson().toJson(dataSetRelationship);
+        StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
+        return entity;
     }
 }

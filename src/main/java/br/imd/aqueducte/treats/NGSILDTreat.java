@@ -1,10 +1,11 @@
 package br.imd.aqueducte.treats;
 
+import br.imd.aqueducte.models.pojos.MatchingConfig;
+import org.json.JSONArray;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.json.JSONArray;
 
 public interface NGSILDTreat {
     List<LinkedHashMap<String, Object>> convertToEntityNGSILD(
@@ -14,7 +15,7 @@ public interface NGSILDTreat {
 
     List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
             String context,
-            List<LinkedHashMap<String, Object>> matchingConfig,
+            List<MatchingConfig> matchingConfig,
             List<LinkedHashMap<String, Object>> contentForConvert,
             String layerPath
     );

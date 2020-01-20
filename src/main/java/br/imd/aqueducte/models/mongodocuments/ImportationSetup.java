@@ -1,4 +1,4 @@
-package br.imd.aqueducte.models;
+package br.imd.aqueducte.models.mongodocuments;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
