@@ -1,7 +1,8 @@
-package br.imd.aqueducte.hdfs.controller;
+package br.imd.aqueducte.hdfs.controllers;
 
-import br.imd.aqueducte.models.RelationshipMap;
-import br.imd.aqueducte.models.documents.ImportationSetupWithContext;
+import br.imd.aqueducte.hdfs.services.HDFSService;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
+import br.imd.aqueducte.models.pojos.DataSetRelationship;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.service.implementation.LoadDataNGSILDByImportationSetupWithContextServiceImpl;
@@ -9,23 +10,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.PropertiesParams.STATUS_OK;
 import static br.imd.aqueducte.utils.PropertiesParams.URL_HDFS;
 
+/**
+ * Make communication between Aqueducte and Aqueconnect
+ */
+@SuppressWarnings("ALL")
 @RestController
 @RequestMapping("/sync/handleFilesHadoop")
 @CrossOrigin(origins = "*")
-public class ManagementFilesHadoopController {
+public class ManagementFilesHDFSController {
 
-    LoadDataNGSILDByImportationSetupService loadDataNGSILDByImportationSetupService;
+    private LoadDataNGSILDByImportationSetupService loadDataNGSILDByImportationSetupService;
 
-    ManagementFilesHadoopController() {
+    ManagementFilesHDFSController() {
         this.loadDataNGSILDByImportationSetupService = new LoadDataNGSILDByImportationSetupWithContextServiceImpl();
     }
 
@@ -63,51 +66,55 @@ public class ManagementFilesHadoopController {
         return ResponseEntity.ok().body(response);
     }
 
-    @PutMapping(value = "/sendFileToHDFS")
-    public ResponseEntity<Response<Long>> test(@RequestBody String path) {
-        Response<Long> response = new Response<>();
-        try {
-//            response.setData(fs.getStatus().getCapacity());
-            logInfo("test", null);
-        } catch (Exception e) {
-            response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getStackTrace());
-            return ResponseEntity.badRequest().body(response);
-        }
-        return ResponseEntity.ok().body(response);
-    }
-
-
-    @PostMapping(value = "/sendDataNGSILDWithContextToHdfs/webservice")
-    public ResponseEntity<Response<Map<String, Object>>> sendDataNGSILDWithContextToHdfs(@RequestBody List<ImportationSetupWithContext> importationSetupWithContextList) {
+    @PostMapping(value = "/sendDataNGSILDWithContextToHdfs/webservice/{importSetupName}")
+    public ResponseEntity<Response<Map<String, Object>>> sendDataNGSILDWithContextToHdfs(
+            @PathVariable String importSetupName,
+            @RequestBody List<ImportationSetupWithContext> importationSetupWithContextList) {
         Response<Map<String, Object>> response = new Response<>();
         Map<String, Object> callerServicesResponseStatusMap = new HashMap<>();
-        List<String> statusResponseHDFS = new ArrayList<>();
+        List<Map<String, String>> statusResponseHDFS = new ArrayList<>();
         for (ImportationSetupWithContext importationSetupWithContext : importationSetupWithContextList) {
-            loadDataNGSILDByImportationSetupService.loadData(importationSetupWithContext);
-            // TODO: Send to HDFS
+            List<LinkedHashMap<String, Object>> dataLoaded = loadDataNGSILDByImportationSetupService.loadData(importationSetupWithContext);
 
-            statusResponseHDFS.add("Data set successfully imported from Importation Setup: " + importationSetupWithContext.getLabel());
+            // Send to Aqueconnect - HDFS
+            HDFSService hdfsService = new HDFSService();
+            int statusCode = hdfsService.sendDataHDFS(
+                    importationSetupWithContext.getIdUser(),
+                    importSetupName,
+                    importationSetupWithContext.getLayerSelected(),
+                    dataLoaded
+            );
+
+            if (statusCode != STATUS_OK) {
+                Map<String, Object> mapResponse = new HashMap<>();
+                mapResponse.put("data_set_imported_from_importation_setup", importationSetupWithContext.getLabel());
+                mapResponse.put("status", statusCode);
+                return ResponseEntity.badRequest().body(response);
+            }
+            // TODO: Get time elapsed
+            Map<String, String> mapResponse = new HashMap<>();
+            mapResponse.put("data_set_imported_from_importation_setup", importationSetupWithContext.getLabel());
+            statusResponseHDFS.add(mapResponse);
         }
         callerServicesResponseStatusMap.put("hdfs_response_status", statusResponseHDFS);
-
-        // Send Relationship Map for Aqueconnect
-        loadDataNGSILDByImportationSetupService.sendRelationshipMapForAqueconnect(null);
-        callerServicesResponseStatusMap.put("aqueconnect_status", "Good!");
-
         response.setData(callerServicesResponseStatusMap);
-
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(value = "/sendRelationshipMapAqueconnect")
-    public ResponseEntity<Response<String>> sendRelationshipMapAqueconnect(@RequestBody List<RelationshipMap> relationshipMap) {
-        Response<String> response = new Response<>();
+    @PostMapping(value = "/dataRelationshipAqueconnect")
+    public ResponseEntity<Response<Map<String, Object>>> dataRelationshipAqueconnect(@RequestBody DataSetRelationship dataSetRelationship) {
+        Response<Map<String, Object>> response = new Response<>();
+        Map<String, Object> serviceResponseStatusMap = new HashMap<>();
 
-        // TODO: Send to Map Aqueconnect Micro service
+        // Send to Map Aqueconnect Micro service
+        int statusCode = loadDataNGSILDByImportationSetupService.makeDataRelationshipAqueconnect(dataSetRelationship);
+        serviceResponseStatusMap.put("aqueconnect_response_status", statusCode);
+        response.setData(serviceResponseStatusMap);
 
+        if (statusCode != STATUS_OK) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        // TODO: Get time elapsed
         return ResponseEntity.ok(response);
     }
-
-
 }

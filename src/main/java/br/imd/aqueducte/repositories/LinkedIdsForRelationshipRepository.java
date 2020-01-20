@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-import br.imd.aqueducte.models.documents.LinkedIdsForRelationship;
+import br.imd.aqueducte.models.mongodocuments.LinkedIdsForRelationship;
 
 public interface LinkedIdsForRelationshipRepository extends MongoRepository<LinkedIdsForRelationship, String> {
 

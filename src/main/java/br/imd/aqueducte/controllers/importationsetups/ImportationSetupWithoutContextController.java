@@ -1,7 +1,7 @@
 package br.imd.aqueducte.controllers.importationsetups;
 
 import br.imd.aqueducte.controllers.GenericController;
-import br.imd.aqueducte.models.documents.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.ImportationSetupWithoutContextService;
 import br.imd.aqueducte.treats.withoutcontext.ImportWithoutContextTreat;
@@ -11,7 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
@@ -55,41 +55,33 @@ public class ImportationSetupWithoutContextController extends GenericController 
         return ResponseEntity.ok(response);
     }
 
-    @SuppressWarnings("unchecked")
     @PostMapping
     public ResponseEntity<Response<ImportationSetupWithoutContext>> saveImportationSetupWithoutContext(
             @ModelAttribute("user-id") String userId, @RequestBody Map<String, Object> objectMap) {
-
         Response<ImportationSetupWithoutContext> response = new Response<>();
-        if (userId == null || userId.trim() == "") {
+
+        if (checkUserIdIsEmpty(userId)) {
             response.getErrors().add("Without user id");
             return ResponseEntity.badRequest().body(response);
         }
+
         try {
-            List<String> fieldsSelectedForRelationship = (List<String>) objectMap.get("fieldsSelectedForRelationship");
             ImportWithoutContextTreat treat = new ImportWithoutContextTreat();
             ImportationSetupWithoutContext impSetupWithoutCxtRequest = treat.convertToImportationSetupModel(objectMap);
 
-            boolean isExistsImportationSetup = false;
-            Optional<ImportationSetupWithoutContext> importationSetupWithoutContextChecked;
-            if (impSetupWithoutCxtRequest.getId() != null) {
-                importationSetupWithoutContextChecked = impSetupWithoutCxtService
-                        .findById(impSetupWithoutCxtRequest.getId());
-
-                if (importationSetupWithoutContextChecked.isPresent()) {
-                    impSetupWithoutCxtRequest
-                            .setDateCreated(importationSetupWithoutContextChecked.get().getDateCreated());
-                    isExistsImportationSetup = true;
+            if (impSetupWithoutCxtRequest.getIdUser() == null && impSetupWithoutCxtRequest.getId() == null) {
+                impSetupWithoutCxtRequest.setIdUser(userId);
+                impSetupWithoutCxtRequest.setDateCreated(new Date());
+                impSetupWithoutCxtRequest.setDateModified(new Date());
+            } else if (impSetupWithoutCxtRequest.getId() != null) {
+                Optional<ImportationSetupWithoutContext> importationSetupWithoutCxtUpdated = impSetupWithoutCxtService.findById(impSetupWithoutCxtRequest.getId());
+                if (importationSetupWithoutCxtUpdated.isPresent()) {
+                    impSetupWithoutCxtRequest.setDateCreated(importationSetupWithoutCxtUpdated.get().getDateCreated());
+                    impSetupWithoutCxtRequest.setDateModified(new Date());
                 }
-            } else {
-                impSetupWithoutCxtRequest = impSetupWithoutCxtService.createOrUpdate(impSetupWithoutCxtRequest);
             }
-            ImportationSetupWithoutContext impSetupWithoutCxtUpdated = impSetupWithoutCxtService
-                    .treatCreateImportationWithoutContextSetup(userId, impSetupWithoutCxtRequest, fieldsSelectedForRelationship,
-                            isExistsImportationSetup);
-            impSetupWithoutCxtService.createOrUpdate(impSetupWithoutCxtUpdated);
-
-            response.setData(impSetupWithoutCxtUpdated);
+            impSetupWithoutCxtService.createOrUpdate(impSetupWithoutCxtRequest);
+            response.setData(impSetupWithoutCxtRequest);
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
             return ResponseEntity.badRequest().body(response);

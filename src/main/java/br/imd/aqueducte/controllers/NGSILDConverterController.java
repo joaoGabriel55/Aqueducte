@@ -1,5 +1,6 @@
 package br.imd.aqueducte.controllers;
 
+import br.imd.aqueducte.models.pojos.MatchingConfig;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
@@ -9,10 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 
+@SuppressWarnings("ALL")
 @RestController
 @RequestMapping("/sync/ngsildConverter")
 @CrossOrigin(origins = "*")
@@ -62,7 +65,12 @@ public class NGSILDConverterController {
         NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
         try {
             String contextLink = (String) dataForConvertIntoNGSILDByContext.get("contextLink");
-            List<LinkedHashMap<String, Object>> matchingConfigContent = (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("matchingConfigContent");
+            List<MatchingConfig> matchingConfigContent = ((List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("matchingConfigContent"))
+                    .stream().map(elem -> {
+                        MatchingConfig matchingConfig = new MatchingConfig();
+                        matchingConfig.fromLinkedHashMap(elem);
+                        return matchingConfig;
+                    }).collect(Collectors.toList());
             List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion = (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("dataContentForNGSILDConversion");
             long startTime = System.nanoTime();
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(

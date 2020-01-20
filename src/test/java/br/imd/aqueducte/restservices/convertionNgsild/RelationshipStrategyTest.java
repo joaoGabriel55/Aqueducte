@@ -92,16 +92,16 @@ public class RelationshipStrategyTest {
         String contextLink = "https://github.com/JorgePereiraUFRN/SGEOL-LD/blob/master/ngsi-ld/city/City_Context.jsonld";
         NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
 
-        List<LinkedHashMap<String, Object>> matchingConfig = getContent(jsonFile, "matchingConfigContent");
-        List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion = getContent(jsonFile, "dataContentForNGSILDConversion");
-        List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
-                contextLink,
-                matchingConfig,
-                dataContentForNGSILDConversion,
-                layerPath
-        );
+//        List<LinkedHashMap<String, Object>> matchingConfig = getContent(jsonFile, "matchingConfigContent");
+//        List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion = getContent(jsonFile, "dataContentForNGSILDConversion");
+//        List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+//                contextLink,
+//                matchingConfig,
+//                dataContentForNGSILDConversion,
+//                layerPath
+//        );
 
-        return listConvertedIntoNGSILD;
+        return null;
     }
 
     private List<LinkedHashMap<String, Object>> getContent(String jsonFile, String key) throws IOException {

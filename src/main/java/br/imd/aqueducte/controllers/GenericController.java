@@ -10,4 +10,8 @@ public class GenericController {
     public String getIdUser(HttpServletRequest request) {
         return (String) request.getAttribute("user-id");
     }
+
+    public boolean checkUserIdIsEmpty(String userId) {
+        return userId == null || userId.trim().equals("");
+    }
 }
