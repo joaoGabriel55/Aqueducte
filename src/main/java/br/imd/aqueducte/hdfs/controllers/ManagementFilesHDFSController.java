@@ -6,6 +6,7 @@ import br.imd.aqueducte.models.pojos.DataSetRelationship;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.service.implementation.LoadDataNGSILDByImportationSetupWithContextServiceImpl;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -85,7 +86,7 @@ public class ManagementFilesHDFSController {
                     dataLoaded
             );
 
-            if (statusCode != STATUS_OK) {
+            if (statusCode != HttpStatus.CREATED.value()) {
                 Map<String, Object> mapResponse = new HashMap<>();
                 mapResponse.put("data_set_imported_from_importation_setup", importationSetupWithContext.getLabel());
                 mapResponse.put("status", statusCode);

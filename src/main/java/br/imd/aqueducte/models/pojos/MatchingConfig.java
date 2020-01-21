@@ -20,6 +20,9 @@ public class MatchingConfig {
     private boolean isTransientField;
 
     @JsonProperty
+    private boolean isPrimaryField;
+
+    @JsonProperty
     private boolean isLocation;
 
     private List<GeoLocationConfig> geoLocationConfig;
@@ -47,6 +50,14 @@ public class MatchingConfig {
 
     public boolean isTransientField() {
         return isTransientField;
+    }
+
+    public boolean isPrimaryField() {
+        return isPrimaryField;
+    }
+
+    public void setPrimaryField(boolean primaryField) {
+        isPrimaryField = primaryField;
     }
 
     public void setTransientField(boolean transientField) {
