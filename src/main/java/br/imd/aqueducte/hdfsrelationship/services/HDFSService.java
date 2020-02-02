@@ -1,4 +1,4 @@
-package br.imd.aqueducte.hdfs.services;
+package br.imd.aqueducte.hdfsrelationship.services;
 
 import com.google.gson.Gson;
 import org.apache.http.HttpResponse;
@@ -16,7 +16,11 @@ import static br.imd.aqueducte.utils.PropertiesParams.URL_AQUECONNECT;
 
 public class HDFSService {
 
-    public int sendDataHDFS(String userId, String importSetupName, String layer, List<LinkedHashMap<String, Object>> dataLoaded) {
+    public int sendDataHDFS(String userId,
+                            String importSetupName,
+                            String layer,
+                            List<LinkedHashMap<String, Object>> dataLoaded
+    ) {
         String urlPath = URL_AQUECONNECT + "hdfs-data-file/" + userId + "/" + importSetupName + "/" + layer + ".json";
         HttpClient httpClient = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(urlPath);

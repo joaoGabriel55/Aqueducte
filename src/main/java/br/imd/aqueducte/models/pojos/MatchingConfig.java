@@ -22,6 +22,8 @@ public class MatchingConfig {
     @JsonProperty
     private boolean isPrimaryField;
 
+    // TODO: isAccumulativeField?
+
     @JsonProperty
     private boolean isLocation;
 

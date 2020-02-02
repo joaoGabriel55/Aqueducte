@@ -1,5 +1,7 @@
 package br.imd.aqueducte.controllers;
 
+import br.imd.aqueducte.models.pojos.GeoLocationConfig;
+import br.imd.aqueducte.models.pojos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.pojos.MatchingConfig;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.treats.NGSILDTreat;
@@ -24,10 +26,10 @@ public class NGSILDConverterController {
     @PostMapping(value = "/{layerPath}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertToNGSILDWithoutContext(
             @PathVariable String layerPath,
-            @RequestBody Map<String, Object> data) {
+            @RequestBody ImportNSILDDataWithoutContextConfig importConfig) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
 
-        List<Map<String, Object>> geoLocationConfig = (List<Map<String, Object>>) data.get("geoLocationConfig");
+        List<GeoLocationConfig> geoLocationConfig = importConfig.getGeoLocationConfig();
         if (geoLocationConfig.size() > 2) {
             String errGeoLocMessage = "Somente é permitido um campo para geolocalização. Tamanho atual: {}";
             response.getErrors().add(errGeoLocMessage);
@@ -39,7 +41,7 @@ public class NGSILDConverterController {
             NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
             List<LinkedHashMap<String, Object>> listNGSILD;
             long startTime = System.nanoTime();
-            listNGSILD = ngsildTreat.convertToEntityNGSILD(data, layerPath, null);
+            listNGSILD = ngsildTreat.convertToEntityNGSILD(importConfig, layerPath, null);
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
             logInfo("Time to conversion NGSI-LD: {}", timeElapsed);

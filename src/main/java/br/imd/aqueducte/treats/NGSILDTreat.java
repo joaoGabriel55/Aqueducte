@@ -1,5 +1,6 @@
 package br.imd.aqueducte.treats;
 
+import br.imd.aqueducte.models.pojos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.pojos.MatchingConfig;
 import org.json.JSONArray;
 
@@ -9,7 +10,7 @@ import java.util.Map;
 
 public interface NGSILDTreat {
     List<LinkedHashMap<String, Object>> convertToEntityNGSILD(
-            Map<String, Object> data,
+            ImportNSILDDataWithoutContextConfig importConfig,
             String layerPath,
             Map<Object, Object> contextLink);
 
@@ -21,6 +22,4 @@ public interface NGSILDTreat {
     );
 
     List<String> importToSGEOL(String url, String appToken, String userToken, JSONArray jsonArray);
-
-    Map<Object, Object> getLinkedIdListForImportDataToSGEOL(Map<Object, Object> entidadeToImport);
 }

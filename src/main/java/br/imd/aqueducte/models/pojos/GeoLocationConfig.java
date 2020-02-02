@@ -2,7 +2,8 @@ package br.imd.aqueducte.models.pojos;
 
 import java.util.Map;
 
-/*
+/**
+JSON structure:
 {
     "key": "localizacao",
     "typeOfSelection": "string",

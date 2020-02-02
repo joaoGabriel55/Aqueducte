@@ -1,6 +1,6 @@
-package br.imd.aqueducte.hdfs.controllers;
+package br.imd.aqueducte.hdfsrelationship.controllers;
 
-import br.imd.aqueducte.hdfs.services.HDFSService;
+import br.imd.aqueducte.hdfsrelationship.services.HDFSService;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
 import br.imd.aqueducte.models.pojos.DataSetRelationship;
 import br.imd.aqueducte.models.response.Response;
@@ -9,14 +9,10 @@ import br.imd.aqueducte.service.implementation.LoadDataNGSILDByImportationSetupW
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.PropertiesParams.STATUS_OK;
-import static br.imd.aqueducte.utils.PropertiesParams.URL_HDFS;
 
 /**
  * Make communication between Aqueducte and Aqueconnect
@@ -31,40 +27,6 @@ public class ManagementFilesHDFSController {
 
     ManagementFilesHDFSController() {
         this.loadDataNGSILDByImportationSetupService = new LoadDataNGSILDByImportationSetupWithContextServiceImpl();
-    }
-
-    @GetMapping(value = "/fileStatus/{path}")
-    public ResponseEntity<Response<Map<String, Object>>> listFileStatusHDFS(@PathVariable String path) {
-        Response<Map<String, Object>> response = new Response<>();
-        RestTemplate restTemplate = new RestTemplate();
-        String fullUrl = URL_HDFS + path + "/?op=LISTSTATUS";
-        try {
-            ResponseEntity<Map> responseEntity = restTemplate.getForEntity(fullUrl, Map.class);
-            response.setData(responseEntity.getBody());
-            logInfo("fileStatus", null);
-        } catch (Exception e) {
-            response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getStackTrace());
-            return ResponseEntity.badRequest().body(response);
-        }
-        return ResponseEntity.ok().body(response);
-    }
-
-    @GetMapping(value = "/contentSummary/{path}")
-    public ResponseEntity<Response<Map<String, Object>>> contentSummary(@PathVariable String path) {
-        Response<Map<String, Object>> response = new Response<>();
-        RestTemplate restTemplate = new RestTemplate();
-        String fullUrl = URL_HDFS + path + "/?op=GETCONTENTSUMMARY";
-        try {
-            ResponseEntity<Map> responseEntity = restTemplate.getForEntity(fullUrl, Map.class);
-            response.setData(responseEntity.getBody());
-            logInfo("contentSummary", null);
-        } catch (Exception e) {
-            response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getStackTrace());
-            return ResponseEntity.badRequest().body(response);
-        }
-        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping(value = "/sendDataNGSILDWithContextToHdfs/webservice/{importSetupName}")
@@ -103,7 +65,8 @@ public class ManagementFilesHDFSController {
     }
 
     @PostMapping(value = "/dataRelationshipAqueconnect")
-    public ResponseEntity<Response<Map<String, Object>>> dataRelationshipAqueconnect(@RequestBody DataSetRelationship dataSetRelationship) {
+    public ResponseEntity<Response<Map<String, Object>>> dataRelationshipAqueconnect(
+            @RequestBody DataSetRelationship dataSetRelationship) {
         Response<Map<String, Object>> response = new Response<>();
         Map<String, Object> serviceResponseStatusMap = new HashMap<>();
 
