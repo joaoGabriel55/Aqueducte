@@ -14,9 +14,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
-import static br.imd.aqueducte.utils.PropertiesParams.APP_TOKEN;
-import static br.imd.aqueducte.utils.PropertiesParams.USER_TOKEN;
+import static br.imd.aqueducte.utils.PropertiesParams.*;
 
 // TODO: Create a method for treat geolocation on both conversions cases
 @SuppressWarnings("ALL")
@@ -37,7 +37,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                                                                      Map<Object, Object> contextLink) {
 
         // Property data provided from external API
-        List<Map<String, Object>> dataListFromExternalAPI = importConfig.getDataContentForNGSILDConversion();
+        List<LinkedHashMap<String, Object>> dataListFromExternalAPI = importConfig.getDataContentForNGSILDConversion();
         List<LinkedHashMap<String, Object>> listContentConverted = new ArrayList<>();
         // Geolocation config
         List<GeoLocationConfig> geoLocationConfig = importConfig.getGeoLocationConfig();
@@ -95,12 +95,13 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                     if (propertiesContent.getValue() != null) {
                         objectValue.put("type", "Property");
                         objectValue.put("value", propertiesContent.getValue());
-                        if (propertiesContent.getKey().contains(".")) {
+                        if (propertiesContent.getKey().equals("id") || propertiesContent.getKey().equals("type")) {
+                            typeAndValueMap.put(this.ngsildUtils.treatIdOrType(propertiesContent.getKey()), objectValue);
+                        } else if (propertiesContent.getKey().contains(".")) {
                             typeAndValueMap.put(propertiesContent.getKey().replace(".", "_"), objectValue);
                         } else {
                             typeAndValueMap.put(propertiesContent.getKey(), objectValue);
                         }
-                        typeAndValueMap.put(this.ngsildUtils.treatIdOrType(propertiesContent.getKey()), objectValue);
                         objectValue = new HashMap<>();
                     }
                 }
@@ -137,7 +138,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                     Boolean isLocation = matches.isLocation();
                     Boolean hasRelationship = matches.isHasRelationship();
 
-                    if (this.ngsildUtils.checkValuesFromKeysAreNotNull(property)) {
+                    if (!this.ngsildUtils.propertyIsLocation(property, isLocation)) {
                         if (key.equals(foreignProperty) && matches.isTransientField()) {
                             HashMap<String, Object> typeValue = new HashMap<>();
                             typeValue.put("type", "Transient");
@@ -162,7 +163,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                                 properties.put(contextName, typeValue);
                             }
                         }
-                    } else if (isLocation != null && isLocation) {
+                    } else if (this.ngsildUtils.propertyIsLocation(property, isLocation)) {
                         HashMap<String, Object> valueGeoLocation = new HashMap<>();
                         for (GeoLocationConfig configElem : matches.getGeoLocationConfig()) {
                             if (configElem.getKey().equals(property.getKey()) && property.getValue() != null) {
@@ -174,7 +175,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                                     properties.put(contextName, geoJsonMap);
                                     property.setValue(null);
                                 } else {
-                                    if (!configElem.getTypeGeolocation().equals("twofields")) {
+                                    if (!configElem.getTypeOfSelection().equals("twofields")) {
                                         this.ngsildUtils.convertToGeoJson(
                                                 valueGeoLocation,
                                                 property.getValue(),
@@ -182,7 +183,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                                         );
                                         properties.put(contextName, valueGeoLocation);
                                         property.setValue(null);
-                                    } else if (configElem.getTypeGeolocation().equals("twofields")) {
+                                    } else if (configElem.getTypeOfSelection().equals("twofields")) {
                                         listTwoFields.add(property.getValue());
                                         if (listTwoFields.size() == 2) {
                                             this.ngsildUtils.convertToGeoJson(
@@ -209,8 +210,9 @@ public class NGSILDTreatImpl implements NGSILDTreat {
     }
 
     @Override
-    public List<String> importToSGEOL(String url, String appToken, String userToken, JSONArray jsonArray) {
+    public List<String> importToSGEOL(String layer, String appToken, String userToken, JSONArray jsonArray) {
         // create headers
+        String url = URL_SGEOL + "v2/" + layer;
         HttpHeaders headers = new HttpHeaders();
         // set `accept` header
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -231,6 +233,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                     });
             if (responseSGEOL.getStatusCode() == HttpStatus.CREATED) {
                 jsonArrayResponse.add(jsonObject.get("id").toString());
+                logInfo("POST /entity imported {}", jsonObject.get("id").toString());
             }
         }
         return jsonArrayResponse;

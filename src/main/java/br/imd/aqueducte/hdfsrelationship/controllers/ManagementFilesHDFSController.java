@@ -5,7 +5,7 @@ import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
 import br.imd.aqueducte.models.pojos.DataSetRelationship;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
-import br.imd.aqueducte.service.implementation.LoadDataNGSILDByImportationSetupWithContextServiceImpl;
+import br.imd.aqueducte.service.implementation.LoadDataNGSILDByImportSetupWithContextServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +26,7 @@ public class ManagementFilesHDFSController {
     private LoadDataNGSILDByImportationSetupService loadDataNGSILDByImportationSetupService;
 
     ManagementFilesHDFSController() {
-        this.loadDataNGSILDByImportationSetupService = new LoadDataNGSILDByImportationSetupWithContextServiceImpl();
+        this.loadDataNGSILDByImportationSetupService = new LoadDataNGSILDByImportSetupWithContextServiceImpl();
     }
 
     @PostMapping(value = "/sendDataNGSILDWithContextToHdfs/webservice/{importSetupName}")

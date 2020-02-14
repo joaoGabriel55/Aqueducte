@@ -1,12 +1,12 @@
 package br.imd.aqueducte.models.pojos;
 
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ImportNSILDDataWithoutContextConfig {
 
     private List<GeoLocationConfig> geoLocationConfig;
-    private List<Map<String, Object>> dataContentForNGSILDConversion;
+    private List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion;
 
     public List<GeoLocationConfig> getGeoLocationConfig() {
         return geoLocationConfig;
@@ -16,11 +16,11 @@ public class ImportNSILDDataWithoutContextConfig {
         this.geoLocationConfig = geoLocationConfig;
     }
 
-    public List<Map<String, Object>> getDataContentForNGSILDConversion() {
+    public List<LinkedHashMap<String, Object>> getDataContentForNGSILDConversion() {
         return dataContentForNGSILDConversion;
     }
 
-    public void setDataContentForNGSILDConversion(List<Map<String, Object>> dataContentForNGSILDConversion) {
+    public void setDataContentForNGSILDConversion(List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion) {
         this.dataContentForNGSILDConversion = dataContentForNGSILDConversion;
     }
 }

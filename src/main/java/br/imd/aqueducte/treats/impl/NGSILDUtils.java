@@ -133,9 +133,9 @@ public class NGSILDUtils {
         return null;
     }
 
-    public boolean checkValuesFromKeysAreNotNull(Map.Entry<String, Object> property) {
+    public boolean propertyIsLocation(Map.Entry<String, Object> property, Boolean isLocation) {
         if (property != null) {
-            return property.getValue() != null && property.getValue() != "";
+            return property.getValue() != null && property.getValue() != "" && (isLocation != null && isLocation);
         }
         return false;
     }

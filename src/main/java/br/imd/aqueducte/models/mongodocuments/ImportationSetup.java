@@ -1,5 +1,7 @@
 package br.imd.aqueducte.models.mongodocuments;
 
+import br.imd.aqueducte.models.pojos.GeoLocationConfig;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -21,18 +23,21 @@ public abstract class ImportationSetup {
     @NotBlank(message = "Label required")
     private String label;
 
-    @NotBlank(message = "Description required")
+    /**
+     * importType: FILE or WEBSERVICE
+     */
+    @NotBlank(message = "Import type required")
+    private String importType;
+
     private String description;
 
-    @NotBlank(message = "Base Url required")
     private String baseUrl;
 
-    @NotBlank(message = "Path required")
     private String path;
 
-    @NotBlank(message = "HTTP verb required")
     private String httpVerb;
 
+    @JsonIgnore
     private boolean isUseBodyData;
 
     private Map<Object, Object> bodyData;
@@ -41,21 +46,34 @@ public abstract class ImportationSetup {
 
     private Map<Object, Object> headersParameters;
 
-    @NotBlank(message = "Data required")
     private String dataSelected;
+
+    /**
+     * File path from HDFS Storage (Aqueconnect microservice)
+     */
+    private String filePath;
+
+    /**
+     * Delimiter for file content stored at HDFS (Aqueconnect microservice)
+     */
+    private String delimiterFileContent;
 
     @NotBlank(message = "Layer required")
     private String layerSelected;
+
+    @NotBlank(message = "Layer path required")
+    private String layerPathSelected;
 
     private List<String> fieldsAvailable;
 
     private List<String> fieldsSelected;
 
+    @JsonIgnore
     private boolean isSelectedGeolocationData;
 
     private List<String> fieldsGeolocationSelected;
 
-    private List<Map<Object, Object>> fieldsGeolocationSelectedConfigs;
+    private List<GeoLocationConfig> fieldsGeolocationSelectedConfigs;
 
     @CreatedDate
     private Date dateCreated;
@@ -85,6 +103,14 @@ public abstract class ImportationSetup {
 
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    public String getImportType() {
+        return importType;
+    }
+
+    public void setImportType(String importType) {
+        this.importType = importType;
     }
 
     public String getDescription() {
@@ -159,12 +185,36 @@ public abstract class ImportationSetup {
         this.dataSelected = dataSelected;
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    public String getDelimiterFileContent() {
+        return delimiterFileContent;
+    }
+
+    public void setDelimiterFileContent(String delimiterFileContent) {
+        this.delimiterFileContent = delimiterFileContent;
+    }
+
     public String getLayerSelected() {
         return layerSelected;
     }
 
     public void setLayerSelected(String layerSelected) {
         this.layerSelected = layerSelected;
+    }
+
+    public String getLayerPathSelected() {
+        return layerPathSelected;
+    }
+
+    public void setLayerPathSelected(String layerPathSelected) {
+        this.layerPathSelected = layerPathSelected;
     }
 
     public List<String> getFieldsAvailable() {
@@ -199,11 +249,11 @@ public abstract class ImportationSetup {
         this.fieldsGeolocationSelected = fieldsGeolocationSelected;
     }
 
-    public List<Map<Object, Object>> getFieldsGeolocationSelectedConfigs() {
+    public List<GeoLocationConfig> getFieldsGeolocationSelectedConfigs() {
         return fieldsGeolocationSelectedConfigs;
     }
 
-    public void setFieldsGeolocationSelectedConfigs(List<Map<Object, Object>> fieldsGeolocationSelectedConfigs) {
+    public void setFieldsGeolocationSelectedConfigs(List<GeoLocationConfig> fieldsGeolocationSelectedConfigs) {
         this.fieldsGeolocationSelectedConfigs = fieldsGeolocationSelectedConfigs;
     }
 

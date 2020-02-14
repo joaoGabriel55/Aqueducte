@@ -27,11 +27,13 @@ public class MatchingConfig {
     @JsonProperty
     private boolean isLocation;
 
+    @JsonProperty
     private List<GeoLocationConfig> geoLocationConfig;
 
     @JsonProperty
     private boolean hasRelationship;
 
+    @JsonProperty
     private RelationshipConfig relationshipConfig;
 
     public String getContextName() {

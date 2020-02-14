@@ -1,6 +1,8 @@
 package br.imd.aqueducte.service.implementation;
 
+import br.imd.aqueducte.models.mongodocuments.ImportationSetup;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
 import br.imd.aqueducte.models.pojos.DataSetRelationship;
 import br.imd.aqueducte.models.pojos.GeoLocationConfig;
 import br.imd.aqueducte.models.pojos.MatchingConfig;
@@ -16,12 +18,12 @@ import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 
 @SuppressWarnings("ALL")
-public abstract class LoadDataNGSILDByImportationSetup {
-    protected Map<String, Object> loadDataWebservice(ImportationSetupWithContext importationSetupWithContext) {
+public abstract class LoadDataNGSILDByImportSetup {
+    protected Map<String, Object> loadDataWebservice(ImportationSetup importationSetup) {
         RequestsUtils requestsUtils = new RequestsUtils();
         Map<String, Object> responseWSResult = new HashMap<>();
         try {
-            responseWSResult = requestsUtils.requestToAPI(mountRequestParams(importationSetupWithContext));
+            responseWSResult = requestsUtils.requestToAPI(mountRequestParams(importationSetup));
             logInfo("Load Data from API", null);
         } catch (IOException e) {
             logError(e.getMessage(), e.getStackTrace());
@@ -31,13 +33,13 @@ public abstract class LoadDataNGSILDByImportationSetup {
         return responseWSResult;
     }
 
-    protected Map<Object, Object> mountRequestParams(ImportationSetupWithContext importationSetupWithContext) {
+    protected Map<Object, Object> mountRequestParams(ImportationSetup importationSetup) {
         Map<Object, Object> params = new HashMap<>();
-        params.put("method", importationSetupWithContext.getHttpVerb());
-        params.put("url", importationSetupWithContext.getBaseUrl() + importationSetupWithContext.getPath());
-        params.put("headers", importationSetupWithContext.getHeadersParameters());
-        params.put("params", importationSetupWithContext.getQueryParameters());
-        params.put("data", importationSetupWithContext.getBodyData());
+        params.put("method", importationSetup.getHttpVerb());
+        params.put("url", importationSetup.getBaseUrl() + importationSetup.getPath());
+        params.put("headers", importationSetup.getHeadersParameters());
+        params.put("params", importationSetup.getQueryParameters());
+        params.put("data", importationSetup.getBodyData());
         return params;
     }
 
@@ -52,7 +54,33 @@ public abstract class LoadDataNGSILDByImportationSetup {
         return null;
     }
 
-    protected List<LinkedHashMap<String, Object>> filterFieldsSelectedIntoArray(List<Object> dataCollection, ImportationSetupWithContext importationSetup) {
+    protected List<LinkedHashMap<String, Object>> filterFieldsSelectedIntoArray(
+            List<Object> dataCollection,
+            ImportationSetupWithoutContext importationSetup
+    ) {
+        List<LinkedHashMap<String, Object>> dataCollectionFiltered = new ArrayList<>();
+        for (Object data : dataCollection) {
+            LinkedHashMap<String, Object> dataFiltered = new LinkedHashMap<>();
+            Map<String, Object> dataMap = (Map<String, Object>) data;
+            for (String fieldSelected : importationSetup.getFieldsSelected()) {
+                if (dataMap.containsKey(fieldSelected)) {
+                    dataFiltered.put(fieldSelected, dataMap.get(fieldSelected));
+                }
+            }
+            for (GeoLocationConfig fieldGeoLocation : importationSetup.getFieldsGeolocationSelectedConfigs()) {
+                if (dataMap.containsKey(fieldGeoLocation.getKey())) {
+                    dataFiltered.put(fieldGeoLocation.getKey(), dataMap.get(fieldGeoLocation.getKey()));
+                }
+            }
+            dataCollectionFiltered.add(dataFiltered);
+        }
+        return dataCollectionFiltered;
+    }
+
+    protected List<LinkedHashMap<String, Object>> filterFieldsSelectedIntoArray(
+            List<Object> dataCollection,
+            ImportationSetupWithContext importationSetup
+    ) {
         List<LinkedHashMap<String, Object>> dataCollectionFiltered = new ArrayList<>();
         for (Object data : dataCollection) {
             LinkedHashMap<String, Object> dataFiltered = new LinkedHashMap<>();

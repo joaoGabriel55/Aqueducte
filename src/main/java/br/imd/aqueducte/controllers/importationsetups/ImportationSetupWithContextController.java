@@ -3,9 +3,9 @@ package br.imd.aqueducte.controllers.importationsetups;
 
 import br.imd.aqueducte.controllers.GenericController;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
-import br.imd.aqueducte.models.pojos.MatchingConfig;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.ImportationSetupWithContextService;
+import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
 import com.mongodb.DuplicateKeyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,9 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
@@ -27,6 +27,9 @@ public class ImportationSetupWithContextController extends GenericController {
 
     @Autowired
     private ImportationSetupWithContextService importationSetupWithContextService;
+
+    @Autowired
+    private LoadDataNGSILDByImportationSetupService<ImportationSetupWithContext> loadDataNGSILDByImportationSetupService;
 
     @GetMapping(value = "{page}/{count}")
     public ResponseEntity<Response<Page<ImportationSetupWithContext>>> findAllImportationSetupWithoutContext(
@@ -72,39 +75,60 @@ public class ImportationSetupWithContextController extends GenericController {
             response.getErrors().add("Without user id");
             return ResponseEntity.badRequest().body(response);
         }
-
+        importationSetupWithContext.setIdUser(userId);
         try {
-            List<MatchingConfig> matchingConfigList = importationSetupWithContext.getMatchingConfigList().stream().map(elem -> {
-                if (elem.getGeoLocationConfig() != null && elem.getGeoLocationConfig().size() > 0)
-                    elem.setLocation(true);
-                return elem;
-            }).collect(Collectors.toList());
-            importationSetupWithContext.setMatchingConfigList(matchingConfigList);
-
-            if (importationSetupWithContext.getIdUser() == null && importationSetupWithContext.getId() == null) {
-                importationSetupWithContext.setIdUser(userId);
+            if (importationSetupWithContext.getId() == null) {
                 importationSetupWithContext.setDateCreated(new Date());
                 importationSetupWithContext.setDateModified(new Date());
-            } else if (importationSetupWithContext.getId() != null) {
-                Optional<ImportationSetupWithContext> importationSetupWithContextUpdated = importationSetupWithContextService.findById(importationSetupWithContext.getId());
-                importationSetupWithContext.setDateCreated(importationSetupWithContextUpdated.get().getDateCreated());
-                importationSetupWithContext.setDateModified(new Date());
+                importationSetupWithContextService.createOrUpdate(importationSetupWithContext);
+                response.setData(importationSetupWithContext);
+            } else {
+                response.getErrors().add("Object inconsistent");
+                return ResponseEntity.badRequest().body(response);
             }
-
-            ImportationSetupWithContext importationSetupWithContextRes = importationSetupWithContextService.createOrUpdate(importationSetupWithContext);
-            response.setData(importationSetupWithContextRes);
-            logInfo("ImportationSetupWithContext: {}", importationSetupWithContextRes.toString());
-            return ResponseEntity.ok().body(response);
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            response.getErrors().add("Error on save Importation Setup with Context");
-            logError("Error on save Importation Setup with Context", e.getMessage());
+            response.getErrors().add(e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        return ResponseEntity.ok(response);
     }
 
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<Response<ImportationSetupWithContext>> updateImportationSetupWithContext(
+            @ModelAttribute("user-id") String userId,
+            @PathVariable String id,
+            @RequestBody ImportationSetupWithContext importationSetupWithoutContext
+    ) {
+        Response<ImportationSetupWithContext> response = new Response<>();
+
+        if (checkUserIdIsEmpty(userId)) {
+            response.getErrors().add("Without user id");
+            return ResponseEntity.badRequest().body(response);
+        } else if (!importationSetupWithoutContext.getId().equals(id)) {
+            response.getErrors().add("Id from payload does not match with id from URL path");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            Optional<ImportationSetupWithContext> importSetup = importationSetupWithContextService.findById(id);
+            if (importSetup.isPresent()) {
+                importationSetupWithoutContext.setDateCreated(importSetup.get().getDateCreated());
+                importationSetupWithoutContext.setDateModified(new Date());
+                importationSetupWithContextService.createOrUpdate(importationSetupWithoutContext);
+                response.setData(importationSetupWithoutContext);
+            }
+        } catch (DuplicateKeyException e) {
+            response.getErrors().add("Duplicate ID");
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Response<String>> deleteImportationSetupWithContext(
@@ -121,5 +145,21 @@ public class ImportationSetupWithContextController extends GenericController {
         }
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping(value = "/load-ngsild-data")
+    public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetupWithoutContext(
+            @RequestBody ImportationSetupWithContext importationSetupWithContext
+    ) {
+        Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
+        try {
+            List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDByImportationSetupService.loadData(importationSetupWithContext);
+            response.setData(ngsildData);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
 
 }

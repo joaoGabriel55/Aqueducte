@@ -1,13 +1,16 @@
 package br.imd.aqueducte.service.implementation;
 
+import br.imd.aqueducte.service.TaskStatusService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-public class TaskStatusServiceImpl {
+@Service
+public class TaskStatusServiceImpl implements TaskStatusService {
     public static final String STATUS_PROCESSING = "processing";
     public static final String STATUS_DONE = "done";
     public static final String STATUS_ERROR = "error";
@@ -18,6 +21,7 @@ public class TaskStatusServiceImpl {
     @Autowired
     private SimpMessagingTemplate messageTemplate;
 
+    @Override
     public Map<String, Object> sendTaskStatusProgress(Map<String, Object> response,
                                                       String taskId,
                                                       Integer taskIndex,

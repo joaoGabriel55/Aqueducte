@@ -10,6 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -20,9 +21,12 @@ import static br.imd.aqueducte.utils.PropertiesParams.STATUS_OK;
 import static br.imd.aqueducte.utils.PropertiesParams.URL_AQUECONNECT;
 
 @SuppressWarnings("ALL")
-public class LoadDataNGSILDByImportationSetupWithContextServiceImpl extends LoadDataNGSILDByImportationSetup implements LoadDataNGSILDByImportationSetupService<ImportationSetupWithContext> {
+@Service
+public class LoadDataNGSILDByImportSetupWithContextServiceImpl
+        extends LoadDataNGSILDByImportSetup
+        implements LoadDataNGSILDByImportationSetupService<ImportationSetupWithContext> {
 
-    public LoadDataNGSILDByImportationSetupWithContextServiceImpl() {
+    public LoadDataNGSILDByImportSetupWithContextServiceImpl() {
         super();
     }
 
@@ -38,7 +42,10 @@ public class LoadDataNGSILDByImportationSetupWithContextServiceImpl extends Load
         if (dataFound instanceof List) {
             // Flat Json collection
             List<Object> dataCollectionFlat = (List<Object>) jsonFlatConvertTreat.getJsonFlat(dataFound);
-            List<LinkedHashMap<String, Object>> dataForConvert = filterFieldsSelectedIntoArray(dataCollectionFlat, importationSetupWithContext);
+            List<LinkedHashMap<String, Object>> dataForConvert = filterFieldsSelectedIntoArray(
+                    dataCollectionFlat,
+                    importationSetupWithContext
+            );
 
             // Convert o NGSI-LD
             NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
