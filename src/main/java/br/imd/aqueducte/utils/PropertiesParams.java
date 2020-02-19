@@ -2,7 +2,6 @@ package br.imd.aqueducte.utils;
 
 public class PropertiesParams {
     public static int STATUS_OK = 200;
-    public static int STATUS_CREATED = 201;
     public static boolean AUTH = true;
     public final static String ROLE_AQUEDUCTE = "aqueducte";
     public final static String APP_TOKEN = "application-token";

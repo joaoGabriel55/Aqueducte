@@ -1,5 +1,8 @@
 package br.imd.aqueducte.controllers;
 
+import br.imd.aqueducte.models.enums.TaskStatus;
+import br.imd.aqueducte.models.enums.TaskType;
+import br.imd.aqueducte.models.mongodocuments.Task;
 import br.imd.aqueducte.models.pojos.GeoLocationConfig;
 import br.imd.aqueducte.models.pojos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.response.Response;
@@ -11,12 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
-import static br.imd.aqueducte.service.implementation.TaskStatusServiceImpl.STATUS_DONE;
-import static br.imd.aqueducte.service.implementation.TaskStatusServiceImpl.STATUS_ERROR;
 import static br.imd.aqueducte.utils.PropertiesParams.APP_TOKEN;
 import static br.imd.aqueducte.utils.PropertiesParams.USER_TOKEN;
 
@@ -36,6 +40,7 @@ public class ImportDataToSGEOLController {
                                                                    @PathVariable Integer taskIndex,
                                                                    @PathVariable String layer,
                                                                    @RequestBody Map<String, Object> dataNGSILD) {
+        String taskTitle = "Importação de dados";
         Response<List<String>> response = new Response<>();
         try {
             JSONArray jsonArrayNGSILD = new JSONArray((ArrayList) dataNGSILD.get("data_ngsild"));
@@ -46,10 +51,27 @@ public class ImportDataToSGEOLController {
         } catch (Exception e) {
             response.getErrors().add(e.getLocalizedMessage());
             logError(e.getMessage(), e.getStackTrace());
-            taskStatusService.sendTaskStatusProgress(new HashMap<>(), taskId, taskIndex, STATUS_ERROR);
+            //TODO: Get USER_ID
+            taskStatusService.sendTaskStatusProgress(new Task(
+                    Integer.parseInt(taskId),
+                    "abc",
+                    taskIndex,
+                    taskTitle,
+                    TaskType.IMPORT_DATA,
+                    TaskStatus.ERROR,
+                    e.getLocalizedMessage()
+            ), "status-task-import-process");
             return ResponseEntity.badRequest().body(response);
         }
-        taskStatusService.sendTaskStatusProgress(new HashMap<>(), taskId, taskIndex, STATUS_DONE);
+        taskStatusService.sendTaskStatusProgress(new Task(
+                Integer.parseInt(taskId),
+                "abc",
+                taskIndex,
+                taskTitle,
+                TaskType.IMPORT_DATA,
+                TaskStatus.DONE,
+                "Importação de dados para camada " + layer
+        ), "status-task-import-process");
         return ResponseEntity.ok(response);
     }
 

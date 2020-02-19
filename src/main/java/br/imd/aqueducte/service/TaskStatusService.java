@@ -1,13 +1,9 @@
 package br.imd.aqueducte.service;
 
+import br.imd.aqueducte.models.mongodocuments.Task;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Component
 public interface TaskStatusService {
-    Map<String, Object> sendTaskStatusProgress(Map<String, Object> response,
-                                           String taskId,
-                                           Integer taskIndex,
-                                           String status);
+    Task sendTaskStatusProgress(Task task, String topicName);
 }
