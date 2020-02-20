@@ -58,7 +58,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                     HashMap<String, Object> objectValue = new HashMap<>();
                     propertiesContent = iterator.next();
                     for (GeoLocationConfig configElem : geoLocationConfig) {
-                        if (configElem.getKey().equals(propertiesContent.getKey()) && propertiesContent.getValue() != null) {
+                        if (configElem.getKey().equalsIgnoreCase(propertiesContent.getKey()) && propertiesContent.getValue() != null) {
                             if ((propertiesContent.getValue() instanceof Map) &&
                                     checkIsGeoJson((Map<String, Object>) propertiesContent.getValue())) {
                                 Map<String, Object> geoJsonMap = new HashMap<>();
@@ -139,17 +139,17 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                     Boolean hasRelationship = matches.isHasRelationship();
 
                     if (!this.ngsildUtils.propertyIsLocation(property, isLocation)) {
-                        if (key.equals(foreignProperty) && matches.isTransientField()) {
+                        if (key.equalsIgnoreCase(foreignProperty) && matches.isTransientField()) {
                             HashMap<String, Object> typeValue = new HashMap<>();
                             typeValue.put("type", "Transient");
                             typeValue.put("value", property.getValue());
                             properties.put(key, typeValue);
-                        } else if (key.equals(foreignProperty) && matches.isPrimaryField()) {
+                        } else if (key.equalsIgnoreCase(foreignProperty) && matches.isPrimaryField()) {
                             HashMap<String, Object> typeValue = new HashMap<>();
                             typeValue.put("type", "Primary");
                             typeValue.put("value", property.getValue());
                             properties.put(key, typeValue);
-                        } else if (key.equals(foreignProperty) && (!isLocation && isLocation != null)) {
+                        } else if (key.equalsIgnoreCase(foreignProperty) && (!isLocation && isLocation != null)) {
                             if (hasRelationship != null && hasRelationship) {
                                 HashMap<String, Object> typeValue = new HashMap<>();
                                 typeValue.put("type", "Relationship");
@@ -166,7 +166,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                     } else if (this.ngsildUtils.propertyIsLocation(property, isLocation)) {
                         HashMap<String, Object> valueGeoLocation = new HashMap<>();
                         for (GeoLocationConfig configElem : matches.getGeoLocationConfig()) {
-                            if (configElem.getKey().equals(property.getKey()) && property.getValue() != null) {
+                            if (configElem.getKey().equalsIgnoreCase(property.getKey()) && property.getValue() != null) {
                                 if ((property.getValue() instanceof Map) &&
                                         checkIsGeoJson((Map<String, Object>) property.getValue())) {
                                     Map<String, Object> geoJsonMap = new HashMap<>();

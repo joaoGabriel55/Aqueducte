@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface ImportationSetupWithContextService extends GenericService<ImportationSetupWithContext> {
-    Page<ImportationSetupWithContext> findAllPageable(int page, int count);
-
+    Page<ImportationSetupWithContext> findByImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+            String importType, int page, int count
+    );
 }

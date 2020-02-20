@@ -14,6 +14,9 @@ import java.util.Map;
 
 public abstract class ImportationSetup {
 
+    public static final String FILE = "FILE";
+    public static final String WEB_SERVICE = "WEB_SERVICE";
+
     @Id
     private String id;
 
@@ -24,7 +27,7 @@ public abstract class ImportationSetup {
     private String label;
 
     /**
-     * importType: FILE or WEBSERVICE
+     * importType: FILE or WEB_SERVICE
      */
     @NotBlank(message = "Import type required")
     private String importType;

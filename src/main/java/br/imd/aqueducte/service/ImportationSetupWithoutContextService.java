@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface ImportationSetupWithoutContextService extends GenericService<ImportationSetupWithoutContext> {
-
-    //TODO Improve that
-    Page<ImportationSetupWithoutContext> findAllLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(int page, int count);
+    Page<ImportationSetupWithoutContext> findByImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+            String importType, int page, int count
+    );
 }

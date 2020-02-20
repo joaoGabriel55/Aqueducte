@@ -7,6 +7,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface ImportationSetupWithoutContextRepository extends MongoRepository<ImportationSetupWithoutContext, String> {
 
-    Page<ImportationSetupWithoutContext> findAllByOrderByDateCreatedDesc(Pageable pages);
+    Page<ImportationSetupWithoutContext> findByImportTypeOrderByDateCreatedDesc(String importType, Pageable pages);
 
 }

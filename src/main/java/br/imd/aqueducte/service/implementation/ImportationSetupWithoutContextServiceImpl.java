@@ -19,10 +19,13 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
 
     @SuppressWarnings("deprecation")
     @Override
-    public Page<ImportationSetupWithoutContext> findAllLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
-            int page, int count) {
+    public Page<ImportationSetupWithoutContext> findByImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+            String importType,
+            int page,
+            int count
+    ) {
         PageRequest pageable = new PageRequest(page, count);
-        return this.importationSetupWithoutContextRepository.findAllByOrderByDateCreatedDesc(pageable);
+        return this.importationSetupWithoutContextRepository.findByImportTypeOrderByDateCreatedDesc(importType, pageable);
     }
 
     @Override

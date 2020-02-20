@@ -27,14 +27,20 @@ public class ImportationSetupWithoutContextController extends GenericController 
     @Autowired
     private LoadDataNGSILDByImportationSetupService<ImportationSetupWithoutContext> loadDataNGSILDByImportationSetupService;
 
-    @GetMapping(value = "{page}/{count}")
-    public ResponseEntity<Response<Page<ImportationSetupWithoutContext>>> findAllImportationSetupWithoutContext(
-            @PathVariable("page") int page, @PathVariable("count") int count) {
-
+    @GetMapping(value = "/{importType}/{page}/{count}")
+    public ResponseEntity<Response<Page<ImportationSetupWithoutContext>>> findImportTypeImportationSetupWithoutContext(
+            @PathVariable("importType") String importType, @PathVariable("page") int page, @PathVariable("count") int count
+    ) {
         Response<Page<ImportationSetupWithoutContext>> response = new Response<>();
         try {
             Page<ImportationSetupWithoutContext> list = impSetupWithoutCxtService
-                    .findAllLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(page, count);
+                    .findByImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+                            importType.toUpperCase(), page, count
+                    );
+            if (!list.hasContent()) {
+                response.getErrors().add("Has not content");
+                return ResponseEntity.badRequest().body(response);
+            }
             response.setData(list);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());

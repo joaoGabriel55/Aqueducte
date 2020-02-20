@@ -31,17 +31,26 @@ public class ImportationSetupWithContextController extends GenericController {
     @Autowired
     private LoadDataNGSILDByImportationSetupService<ImportationSetupWithContext> loadDataNGSILDByImportationSetupService;
 
-    @GetMapping(value = "{page}/{count}")
+    @GetMapping(value = "/{importType}/{page}/{count}")
     public ResponseEntity<Response<Page<ImportationSetupWithContext>>> findAllImportationSetupWithoutContext(
-            @PathVariable("page") int page, @PathVariable("count") int count) {
+            @PathVariable("importType") String importType, @PathVariable("page") int page, @PathVariable("count") int count
+    ) {
         Response<Page<ImportationSetupWithContext>> response = new Response<>();
         try {
-            Page<ImportationSetupWithContext> importationSetupWithContextList = importationSetupWithContextService.findAllPageable(page, count);
+            Page<ImportationSetupWithContext> importationSetupWithContextList = importationSetupWithContextService
+                    .findByImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+                            importType.toUpperCase(), page, count
+                    );
+            if (!importationSetupWithContextList.hasContent()) {
+                response.getErrors().add("Has not content");
+                return ResponseEntity.badRequest().body(response);
+            }
+
             response.setData(importationSetupWithContextList);
             logInfo("fileStatus", null);
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            response.getErrors().add("Error on save Importation Setup with Context");
+            response.getErrors().add("Error on get Importation Setup with Context list");
             logError(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
