@@ -1,6 +1,6 @@
 package br.imd.aqueducte.treats.impl;
 
-import br.imd.aqueducte.models.pojos.GeoLocationConfig;
+import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 
 import java.util.*;
 
@@ -11,6 +11,12 @@ public class NGSILDUtils {
             return key + "_";
         }
         return key;
+    }
+
+    public static String removeSpacesForeignProperty(String value) {
+        if (value != null)
+            return value.toLowerCase().replaceAll("\\s+", "").trim();
+        return null;
     }
 
     public void initDefaultProperties(

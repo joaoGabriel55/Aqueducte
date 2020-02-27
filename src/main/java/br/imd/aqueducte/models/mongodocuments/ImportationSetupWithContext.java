@@ -1,6 +1,6 @@
 package br.imd.aqueducte.models.mongodocuments;
 
-import br.imd.aqueducte.models.pojos.MatchingConfig;
+import br.imd.aqueducte.models.dtos.MatchingConfig;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;

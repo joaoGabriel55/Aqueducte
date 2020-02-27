@@ -1,8 +1,8 @@
 package br.imd.aqueducte.controllers;
 
-import br.imd.aqueducte.models.pojos.GeoLocationConfig;
-import br.imd.aqueducte.models.pojos.ImportNSILDDataWithoutContextConfig;
-import br.imd.aqueducte.models.pojos.MatchingConfig;
+import br.imd.aqueducte.models.dtos.GeoLocationConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDDataWithContextConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
@@ -61,24 +59,16 @@ public class NGSILDConverterController {
     @PostMapping(value = "/withMatchingConfig/{layerPath}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertMatchingConfigIntoNGSILD(
             @PathVariable String layerPath,
-            @RequestBody Map<String, Object> dataForConvertIntoNGSILDByContext) {
+            @RequestBody ImportNSILDDataWithContextConfig importContextConfig) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
 
         NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
         try {
-            String contextLink = (String) dataForConvertIntoNGSILDByContext.get("contextLink");
-            List<MatchingConfig> matchingConfigContent = ((List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("matchingConfigContent"))
-                    .stream().map(elem -> {
-                        MatchingConfig matchingConfig = new MatchingConfig();
-                        matchingConfig.fromLinkedHashMap(elem);
-                        return matchingConfig;
-                    }).collect(Collectors.toList());
-            List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion = (List<LinkedHashMap<String, Object>>) dataForConvertIntoNGSILDByContext.get("dataContentForNGSILDConversion");
             long startTime = System.nanoTime();
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
-                    contextLink,
-                    matchingConfigContent,
-                    dataContentForNGSILDConversion,
+                    importContextConfig.getContextLink(),
+                    importContextConfig.getMatchingConfigContent(),
+                    importContextConfig.getDataContentForNGSILDConversion(),
                     layerPath
             );
             long endTime = System.nanoTime();

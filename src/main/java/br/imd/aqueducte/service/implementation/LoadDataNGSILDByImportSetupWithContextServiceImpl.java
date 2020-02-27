@@ -1,7 +1,7 @@
 package br.imd.aqueducte.service.implementation;
 
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
-import br.imd.aqueducte.models.pojos.DataSetRelationship;
+import br.imd.aqueducte.models.dtos.DataSetRelationship;
 import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.treats.JsonFlatConvertTreat;
 import br.imd.aqueducte.treats.NGSILDTreat;

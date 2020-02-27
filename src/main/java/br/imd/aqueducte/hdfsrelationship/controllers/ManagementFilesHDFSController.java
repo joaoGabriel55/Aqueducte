@@ -2,7 +2,7 @@ package br.imd.aqueducte.hdfsrelationship.controllers;
 
 import br.imd.aqueducte.hdfsrelationship.services.HDFSService;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
-import br.imd.aqueducte.models.pojos.DataSetRelationship;
+import br.imd.aqueducte.models.dtos.DataSetRelationship;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.service.implementation.LoadDataNGSILDByImportSetupWithContextServiceImpl;

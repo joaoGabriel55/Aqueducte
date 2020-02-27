@@ -1,7 +1,7 @@
 package br.imd.aqueducte.treats;
 
-import br.imd.aqueducte.models.pojos.ImportNSILDDataWithoutContextConfig;
-import br.imd.aqueducte.models.pojos.MatchingConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
+import br.imd.aqueducte.models.dtos.MatchingConfig;
 import org.json.JSONArray;
 
 import java.util.LinkedHashMap;

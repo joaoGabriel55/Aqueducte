@@ -1,6 +1,6 @@
 package br.imd.aqueducte.models.mongodocuments;
 
-import br.imd.aqueducte.models.pojos.GeoLocationConfig;
+import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;

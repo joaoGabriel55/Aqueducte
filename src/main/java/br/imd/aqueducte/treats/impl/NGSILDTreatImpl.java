@@ -1,8 +1,8 @@
 package br.imd.aqueducte.treats.impl;
 
-import br.imd.aqueducte.models.pojos.GeoLocationConfig;
-import br.imd.aqueducte.models.pojos.ImportNSILDDataWithoutContextConfig;
-import br.imd.aqueducte.models.pojos.MatchingConfig;
+import br.imd.aqueducte.models.dtos.GeoLocationConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
+import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.treats.impl.NGSILDUtils.removeSpacesForeignProperty;
 import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
 import static br.imd.aqueducte.utils.PropertiesParams.*;
 
@@ -133,7 +134,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                 String key = property.getKey();
                 for (MatchingConfig matches : matchingConfig) {
 
-                    String foreignProperty = matches.getForeignProperty();
+                    String foreignProperty = removeSpacesForeignProperty(matches.getForeignProperty());
                     String contextName = matches.getContextName();
                     Boolean isLocation = matches.isLocation();
                     Boolean hasRelationship = matches.isHasRelationship();

@@ -1,6 +1,6 @@
 package br.imd.aqueducte.service;
 
-import br.imd.aqueducte.models.pojos.DataSetRelationship;
+import br.imd.aqueducte.models.dtos.DataSetRelationship;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
