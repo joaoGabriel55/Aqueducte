@@ -1,14 +1,14 @@
 package br.imd.aqueducte.models.dtos;
 
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ImportNSILDDataWithContextConfig {
 
     // TODO: Think about how put more than one context link.
     private String contextLink;
     private List<MatchingConfig> matchingConfigContent;
-    private List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion;
+    private List<Map<String, Object>> dataContentForNGSILDConversion;
 
     public String getContextLink() {
         return contextLink;
@@ -26,11 +26,11 @@ public class ImportNSILDDataWithContextConfig {
         this.matchingConfigContent = matchingConfigContent;
     }
 
-    public List<LinkedHashMap<String, Object>> getDataContentForNGSILDConversion() {
+    public List<Map<String, Object>> getDataContentForNGSILDConversion() {
         return dataContentForNGSILDConversion;
     }
 
-    public void setDataContentForNGSILDConversion(List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion) {
+    public void setDataContentForNGSILDConversion(List<Map<String, Object>> dataContentForNGSILDConversion) {
         this.dataContentForNGSILDConversion = dataContentForNGSILDConversion;
     }
 }

@@ -52,10 +52,6 @@ public class NGSILDConverterController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * @param dataForConvertIntoNGSILDByContext Contains the lists of matching config and data list for be converted
-     *                                          following that matching config.
-     */
     @PostMapping(value = "/withMatchingConfig/{layerPath}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertMatchingConfigIntoNGSILD(
             @PathVariable String layerPath,

@@ -38,7 +38,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                                                                      Map<Object, Object> contextLink) {
 
         // Property data provided from external API
-        List<LinkedHashMap<String, Object>> dataListFromExternalAPI = importConfig.getDataContentForNGSILDConversion();
+        List<Map<String, Object>> dataListFromExternalAPI = importConfig.getDataContentForNGSILDConversion();
         List<LinkedHashMap<String, Object>> listContentConverted = new ArrayList<>();
         // Geolocation config
         List<GeoLocationConfig> geoLocationConfig = importConfig.getGeoLocationConfig();
@@ -119,7 +119,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
     public List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
             String contextLink,
             List<MatchingConfig> matchingConfig,
-            List<LinkedHashMap<String, Object>> contentForConvert,
+            List<Map<String, Object>> contentForConvert,
             String layerPath) {
         List<LinkedHashMap<String, Object>> listNGSILD = new ArrayList<>();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();

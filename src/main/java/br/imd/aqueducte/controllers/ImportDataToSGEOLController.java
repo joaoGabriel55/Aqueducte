@@ -1,10 +1,11 @@
 package br.imd.aqueducte.controllers;
 
+import br.imd.aqueducte.models.dtos.GeoLocationConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDDataWithContextConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.enums.TaskType;
 import br.imd.aqueducte.models.mongodocuments.Task;
-import br.imd.aqueducte.models.dtos.GeoLocationConfig;
-import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.TaskStatusService;
 import br.imd.aqueducte.treats.NGSILDTreat;
@@ -75,8 +76,6 @@ public class ImportDataToSGEOLController {
         return ResponseEntity.ok(response);
     }
 
-    // TODO: Add "APP_TOKEN" and "USER_TOKEN"
-    // TODO: Task status
     @PostMapping(value = "/file/{layerPath}")
     public ResponseEntity<Response<List<String>>> convertToNGSILDWithoutContextAndImportData(
             @RequestHeader(APP_TOKEN) String appToken,
@@ -111,6 +110,44 @@ public class ImportDataToSGEOLController {
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/file/context/{layerPath}")
+    public ResponseEntity<Response<List<String>>> convertToNGSILDWithContextAndImportData(
+            @RequestHeader(APP_TOKEN) String appToken,
+            @RequestHeader(USER_TOKEN) String userToken,
+            @PathVariable String layerPath,
+            @RequestBody ImportNSILDDataWithContextConfig importConfig
+    ) {
+        Response<List<String>> response = new Response<>();
+
+        NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
+        try {
+            long startTime = System.nanoTime();
+            List<LinkedHashMap<String, Object>> listNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+                    importConfig.getContextLink(),
+                    importConfig.getMatchingConfigContent(),
+                    importConfig.getDataContentForNGSILDConversion(),
+                    layerPath
+            );
+            long endTime = System.nanoTime();
+            long timeElapsed = endTime - startTime;
+            logInfo("Time to convert MatchingConfig Into NGSI-LD: {}", timeElapsed);
+            JSONArray jsonArrayNGSILD = new JSONArray(listNGSILD);
+            try {
+                List<String> jsonArrayResponse = ngsildTreat.importToSGEOL(layerPath, appToken, userToken, jsonArrayNGSILD);
+                response.setData(jsonArrayResponse);
+            } catch (Exception e) {
+                response.getErrors().add(e.getLocalizedMessage());
+                logError(e.getMessage(), e.getStackTrace());
+                return ResponseEntity.badRequest().body(response);
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            logError(e.getMessage(), e.getStackTrace());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 
 }

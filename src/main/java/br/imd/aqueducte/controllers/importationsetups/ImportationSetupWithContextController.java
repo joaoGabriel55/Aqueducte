@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.PropertiesParams.USER_TOKEN;
 
 @RestController
 @RequestMapping("/sync/withContextSetup")
@@ -157,12 +158,14 @@ public class ImportationSetupWithContextController extends GenericController {
 
     @PostMapping(value = "/load-ngsild-data")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetupWithoutContext(
+            @RequestHeader(USER_TOKEN) String userToken,
             @RequestBody ImportationSetupWithContext importationSetupWithContext
     ) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
         try {
-            List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDByImportationSetupService.loadData(importationSetupWithContext);
-            response.setData(ngsildData);
+            response.setData(
+                    this.loadDataNGSILDByImportationSetupService.loadData(importationSetupWithContext, userToken)
+            );
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());

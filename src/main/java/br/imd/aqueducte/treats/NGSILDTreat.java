@@ -17,7 +17,7 @@ public interface NGSILDTreat {
     List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
             String context,
             List<MatchingConfig> matchingConfig,
-            List<LinkedHashMap<String, Object>> contentForConvert,
+            List<Map<String, Object>> contentForConvert,
             String layerPath
     );
 

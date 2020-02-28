@@ -1,21 +1,28 @@
 package br.imd.aqueducte.service.implementation;
 
+import br.imd.aqueducte.models.dtos.GeoLocationConfig;
+import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetup;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
-import br.imd.aqueducte.models.dtos.DataSetRelationship;
-import br.imd.aqueducte.models.dtos.GeoLocationConfig;
-import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.utils.RequestsUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.IOException;
 import java.util.*;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.PropertiesParams.*;
+import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
 @SuppressWarnings("ALL")
 public abstract class LoadDataNGSILDByImportSetup {
@@ -54,11 +61,11 @@ public abstract class LoadDataNGSILDByImportSetup {
         return null;
     }
 
-    protected List<LinkedHashMap<String, Object>> filterFieldsSelectedIntoArray(
+    protected List<Map<String, Object>> filterFieldsSelectedIntoArray(
             List<Object> dataCollection,
             ImportationSetupWithoutContext importationSetup
     ) {
-        List<LinkedHashMap<String, Object>> dataCollectionFiltered = new ArrayList<>();
+        List<Map<String, Object>> dataCollectionFiltered = new ArrayList<>();
         for (Object data : dataCollection) {
             LinkedHashMap<String, Object> dataFiltered = new LinkedHashMap<>();
             Map<String, Object> dataMap = (Map<String, Object>) data;
@@ -77,11 +84,11 @@ public abstract class LoadDataNGSILDByImportSetup {
         return dataCollectionFiltered;
     }
 
-    protected List<LinkedHashMap<String, Object>> filterFieldsSelectedIntoArray(
+    protected List<Map<String, Object>> filterFieldsSelectedIntoArray(
             List<Object> dataCollection,
             ImportationSetupWithContext importationSetup
     ) {
-        List<LinkedHashMap<String, Object>> dataCollectionFiltered = new ArrayList<>();
+        List<Map<String, Object>> dataCollectionFiltered = new ArrayList<>();
         for (Object data : dataCollection) {
             LinkedHashMap<String, Object> dataFiltered = new LinkedHashMap<>();
             Map<String, Object> dataMap = (Map<String, Object>) data;
@@ -114,8 +121,69 @@ public abstract class LoadDataNGSILDByImportSetup {
         return dataFiltered;
     }
 
-    protected StringEntity getDataSetRelationshipJson(DataSetRelationship dataSetRelationship) {
-        String json = new Gson().toJson(dataSetRelationship);
+    protected Map<String, Integer> getFileFields(String userToken, ImportationSetup importationSetup) {
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        StringBuilder url = new StringBuilder();
+        url.append(URL_AQUECONNECT);
+        url.append("file-import-setup-resource/file-fields/");
+        url.append(importationSetup.getIdUser());
+        url.append("?path=" + importationSetup.getFilePath());
+        url.append("&delimiter=" + importationSetup.getDelimiterFileContent());
+
+        HttpGet request = new HttpGet(url.toString());
+        request.setHeader(USER_TOKEN, userToken);
+        try {
+            HttpResponse response = httpClient.execute(request);
+            if (response.getStatusLine().getStatusCode() == STATUS_OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> responseMounted = mapper.readValue(
+                        readBodyReq(response.getEntity().getContent()), Map.class
+                );
+                return (Map<String, Integer>) responseMounted.get("fieldsMap");
+            } else {
+                return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    protected List<Map<String, Object>> convertToJSON(
+            String userToken,
+            ImportationSetup importationSetup,
+            Map<String, Integer> fieldsSelected
+    ) {
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        StringBuilder url = new StringBuilder();
+        url.append(URL_AQUECONNECT);
+        url.append("file-import-setup-resource/convert-to-json/");
+        url.append(importationSetup.getIdUser());
+        url.append("?path=" + importationSetup.getFilePath());
+        url.append("&delimiter=" + importationSetup.getDelimiterFileContent());
+
+        HttpPost request = new HttpPost(url.toString());
+        request.setHeader(USER_TOKEN, userToken);
+        request.setEntity(objectToJson(fieldsSelected));
+        try {
+            HttpResponse response = httpClient.execute(request);
+            if (response.getStatusLine().getStatusCode() == STATUS_OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> responseMounted = mapper.readValue(
+                        readBodyReq(response.getEntity().getContent()), Map.class
+                );
+                return (List<Map<String, Object>>) responseMounted.get("data");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+
+
+    protected StringEntity objectToJson(Object o) {
+        String json = new Gson().toJson(o);
         return new StringEntity(json, ContentType.APPLICATION_JSON);
     }
 }

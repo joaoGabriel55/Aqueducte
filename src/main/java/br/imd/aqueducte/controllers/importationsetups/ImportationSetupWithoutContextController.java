@@ -16,6 +16,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static br.imd.aqueducte.utils.PropertiesParams.USER_TOKEN;
+
 @RestController
 @RequestMapping("/sync/withoutContextSetup")
 @CrossOrigin(origins = "*")
@@ -149,12 +151,15 @@ public class ImportationSetupWithoutContextController extends GenericController 
     // TODO - Pagination ?
     @PostMapping(value = "/load-ngsild-data")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetupWithoutContext(
+
+            @RequestHeader(USER_TOKEN) String userToken,
             @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext
     ) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
         try {
-            List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDByImportationSetupService.loadData(importationSetupWithoutContext);
-            response.setData(ngsildData);
+            response.setData(
+                    this.loadDataNGSILDByImportationSetupService.loadData(importationSetupWithoutContext, userToken)
+            );
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());

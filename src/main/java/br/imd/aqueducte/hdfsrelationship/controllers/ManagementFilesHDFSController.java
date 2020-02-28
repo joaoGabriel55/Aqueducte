@@ -1,8 +1,8 @@
 package br.imd.aqueducte.hdfsrelationship.controllers;
 
 import br.imd.aqueducte.hdfsrelationship.services.HDFSService;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
 import br.imd.aqueducte.models.dtos.DataSetRelationship;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.service.implementation.LoadDataNGSILDByImportSetupWithContextServiceImpl;
@@ -37,7 +37,7 @@ public class ManagementFilesHDFSController {
         Map<String, Object> callerServicesResponseStatusMap = new HashMap<>();
         List<Map<String, String>> statusResponseHDFS = new ArrayList<>();
         for (ImportationSetupWithContext importationSetupWithContext : importationSetupWithContextList) {
-            List<LinkedHashMap<String, Object>> dataLoaded = loadDataNGSILDByImportationSetupService.loadData(importationSetupWithContext);
+            List<LinkedHashMap<String, Object>> dataLoaded = loadDataNGSILDByImportationSetupService.loadDataWebService(importationSetupWithContext);
 
             // Send to Aqueconnect - HDFS
             HDFSService hdfsService = new HDFSService();

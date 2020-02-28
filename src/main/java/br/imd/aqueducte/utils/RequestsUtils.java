@@ -133,7 +133,7 @@ public class RequestsUtils {
         }
     }
 
-    public String readBodyReq(InputStream inputStream) throws IOException {
+    public static String readBodyReq(InputStream inputStream) throws IOException {
         /* Lendo body */
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         String body = "";
