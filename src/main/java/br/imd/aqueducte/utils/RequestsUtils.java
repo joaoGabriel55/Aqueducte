@@ -2,6 +2,7 @@ package br.imd.aqueducte.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -9,6 +10,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
@@ -19,8 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static br.imd.aqueducte.utils.PropertiesParams.STATUS_OK;
 
 public class RequestsUtils {
 
@@ -86,7 +86,7 @@ public class RequestsUtils {
     public Map<String, Object> buildResponse(int statusCode, String statusMessage, InputStream inputStream) throws IOException {
         Map<String, Object> responseObject = new HashMap<>();
 
-        if (statusCode == STATUS_OK) {
+        if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
             ObjectMapper mapper = new ObjectMapper();
             Map<String, Object> jsonObject = mapper.readValue("{ \"data\": " + readBodyReq(inputStream) + "}", Map.class);
             responseObject.putAll(jsonObject);
@@ -154,7 +154,7 @@ public class RequestsUtils {
 
     public StringEntity buildEntity(Object data) {
         String jsonString;
-        if (!(data instanceof ArrayList))
+        if (!(data instanceof ArrayList) && !(data instanceof JSONArray))
             jsonString = new JSONObject(data).toString();
         else
             jsonString = data.toString();

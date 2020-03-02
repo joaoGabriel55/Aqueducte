@@ -4,13 +4,16 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.treats.NGSILDTreat;
+import br.imd.aqueducte.utils.RequestsUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -18,6 +21,7 @@ import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.treats.impl.NGSILDUtils.removeSpacesForeignProperty;
 import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
 import static br.imd.aqueducte.utils.PropertiesParams.*;
+import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
 // TODO: Create a method for treat geolocation on both conversions cases
 @SuppressWarnings("ALL")
@@ -211,33 +215,27 @@ public class NGSILDTreatImpl implements NGSILDTreat {
     }
 
     @Override
-    public List<String> importToSGEOL(String layer, String appToken, String userToken, JSONArray jsonArray) {
+    public List<String> importToSGEOL(String layer, String appToken, String userToken, JSONArray jsonArray) throws IOException {
+        String url = URL_SGEOL + "v2/" + layer + "/batch";
+        RequestsUtils requestsUtils = new RequestsUtils();
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        HttpPost request = new HttpPost(url);
         // create headers
-        String url = URL_SGEOL + "v2/" + layer;
-        HttpHeaders headers = new HttpHeaders();
-        // set `accept` header
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        // set custom header
-        headers.set(APP_TOKEN, appToken);
-        headers.set(USER_TOKEN, userToken);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        requestsUtils.setHeadersParams(headers, request);
+        request.setEntity(requestsUtils.buildEntity(jsonArray));
+        HttpResponse responseSGEOL = httpClient.execute(request);
 
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getMessageConverters().add(new StringHttpMessageConverter());
-        // use `exchange` method for HTTP call
-        List<String> jsonArrayResponse = new ArrayList<>();
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-            HttpEntity<String> entity = new HttpEntity<>(jsonArray.get(i).toString(), headers);
-            ResponseEntity<String> responseSGEOL = restTemplate.exchange(url, HttpMethod.POST, entity,
-                    new ParameterizedTypeReference<String>() {
-                    });
-            if (responseSGEOL.getStatusCode() == HttpStatus.CREATED) {
-                jsonArrayResponse.add(jsonObject.get("id").toString());
-                logInfo("POST /entity imported {}", jsonObject.get("id").toString());
-            }
+        if (responseSGEOL.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> mapFromJson = mapper.readValue(readBodyReq(responseSGEOL.getEntity().getContent()), Map.class);
+            List<String> entitiesId = (List<String>) mapFromJson.get("entities");
+            logInfo("POST /entity imported {}", entitiesId);
+            return entitiesId;
         }
-        return jsonArrayResponse;
+        return null;
     }
 
     /*private void dataForGeoJsonFormatProcessor(List<Map<String, String>> geoLocationConfig,

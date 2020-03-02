@@ -4,6 +4,7 @@ import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import org.json.JSONArray;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,5 +22,5 @@ public interface NGSILDTreat {
             String layerPath
     );
 
-    List<String> importToSGEOL(String url, String appToken, String userToken, JSONArray jsonArray);
+    List<String> importToSGEOL(String url, String appToken, String userToken, JSONArray jsonArray) throws IOException;
 }
