@@ -21,6 +21,4 @@ public interface NGSILDTreat {
             List<Map<String, Object>> contentForConvert,
             String layerPath
     );
-
-    List<String> importToSGEOL(String url, String appToken, String userToken, JSONArray jsonArray) throws IOException;
 }

@@ -4,9 +4,8 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithContextConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.enums.TaskStatus;
-import br.imd.aqueducte.models.enums.TaskType;
-import br.imd.aqueducte.models.mongodocuments.Task;
 import br.imd.aqueducte.models.response.Response;
+import br.imd.aqueducte.service.ImportNGSILDDataService;
 import br.imd.aqueducte.service.TaskStatusService;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
@@ -31,48 +30,43 @@ import static br.imd.aqueducte.utils.PropertiesParams.USER_TOKEN;
 public class ImportDataToSGEOLController {
 
     @Autowired
+    private ImportNGSILDDataService importNGSILDDataService;
+
+    @Autowired
     private TaskStatusService taskStatusService;
 
     @SuppressWarnings("rawtypes")
-    @PostMapping(value = {"/{layer}", "/{layer}/{taskId}/{taskIndex}"})
+    @PostMapping(value = {"/{layer}", "/{layer}/{taskId}"})
     public ResponseEntity<Response<List<String>>> importNGSILDData(@RequestHeader(APP_TOKEN) String appToken,
                                                                    @RequestHeader(USER_TOKEN) String userToken,
                                                                    @PathVariable String taskId,
-                                                                   @PathVariable Integer taskIndex,
                                                                    @PathVariable String layer,
                                                                    @RequestBody Map<String, Object> dataNGSILD) {
-        String taskTitle = "Importação de dados";
         Response<List<String>> response = new Response<>();
         try {
             JSONArray jsonArrayNGSILD = new JSONArray((ArrayList) dataNGSILD.get("data_ngsild"));
-            NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
-            List<String> jsonArrayResponse = ngsildTreat.importToSGEOL(layer, appToken, userToken, jsonArrayNGSILD);
+            List<String> jsonArrayResponse = importNGSILDDataService.importData(
+                    layer, appToken, userToken, jsonArrayNGSILD
+            );
             response.setData(jsonArrayResponse);
             logInfo("POST /importToSgeol", null);
         } catch (Exception e) {
             response.getErrors().add(e.getLocalizedMessage());
             logError(e.getMessage(), e.getStackTrace());
-            //TODO: Get USER_ID
-            taskStatusService.sendTaskStatusProgress(new Task(
-                    Integer.parseInt(taskId),
-                    "abc",
-                    taskIndex,
-                    taskTitle,
-                    TaskType.IMPORT_DATA,
+            taskStatusService.sendTaskStatusProgress(
+                    taskId,
                     TaskStatus.ERROR,
-                    e.getLocalizedMessage()
-            ), "status-task-import-process");
+                    e.getLocalizedMessage(),
+                    "status-task-import-process"
+            );
             return ResponseEntity.badRequest().body(response);
         }
-        taskStatusService.sendTaskStatusProgress(new Task(
-                Integer.parseInt(taskId),
-                "abc",
-                taskIndex,
-                taskTitle,
-                TaskType.IMPORT_DATA,
+        taskStatusService.sendTaskStatusProgress(
+                taskId,
                 TaskStatus.DONE,
-                "Importação de dados para camada " + layer
-        ), "status-task-import-process");
+                "Importação de dados para camada " + layer,
+                "status-task-import-process"
+        );
         return ResponseEntity.ok(response);
     }
 
@@ -97,7 +91,7 @@ public class ImportDataToSGEOLController {
             List<LinkedHashMap<String, Object>> listNGSILD = ngsildTreat.convertToEntityNGSILD(importConfig, layerPath, null);
             JSONArray jsonArrayNGSILD = new JSONArray(listNGSILD);
             try {
-                List<String> jsonArrayResponse = ngsildTreat.importToSGEOL(layerPath, appToken, userToken, jsonArrayNGSILD);
+                List<String> jsonArrayResponse = importNGSILDDataService.importData(layerPath, appToken, userToken, jsonArrayNGSILD);
                 response.setData(jsonArrayResponse);
             } catch (Exception e) {
                 response.getErrors().add(e.getLocalizedMessage());
@@ -135,7 +129,7 @@ public class ImportDataToSGEOLController {
             logInfo("Time to convert MatchingConfig Into NGSI-LD: {}", timeElapsed);
             JSONArray jsonArrayNGSILD = new JSONArray(listNGSILD);
             try {
-                List<String> jsonArrayResponse = ngsildTreat.importToSGEOL(layerPath, appToken, userToken, jsonArrayNGSILD);
+                List<String> jsonArrayResponse = importNGSILDDataService.importData(layerPath, appToken, userToken, jsonArrayNGSILD);
                 response.setData(jsonArrayResponse);
             } catch (Exception e) {
                 response.getErrors().add(e.getLocalizedMessage());

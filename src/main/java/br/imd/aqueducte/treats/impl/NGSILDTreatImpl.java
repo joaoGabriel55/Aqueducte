@@ -214,30 +214,6 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         return listNGSILD;
     }
 
-    @Override
-    public List<String> importToSGEOL(String layer, String appToken, String userToken, JSONArray jsonArray) throws IOException {
-        String url = URL_SGEOL + "v2/" + layer + "/batch";
-        RequestsUtils requestsUtils = new RequestsUtils();
-        HttpClient httpClient = HttpClientBuilder.create().build();
-        HttpPost request = new HttpPost(url);
-        // create headers
-        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-        headers.put(APP_TOKEN, appToken);
-        headers.put(USER_TOKEN, userToken);
-        requestsUtils.setHeadersParams(headers, request);
-        request.setEntity(requestsUtils.buildEntity(jsonArray));
-        HttpResponse responseSGEOL = httpClient.execute(request);
-
-        if (responseSGEOL.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> mapFromJson = mapper.readValue(readBodyReq(responseSGEOL.getEntity().getContent()), Map.class);
-            List<String> entitiesId = (List<String>) mapFromJson.get("entities");
-            logInfo("POST /entity imported {}", entitiesId);
-            return entitiesId;
-        }
-        return null;
-    }
-
     /*private void dataForGeoJsonFormatProcessor(List<Map<String, String>> geoLocationConfig,
                                                 Entry<String, Object> propertiesContent,
                                                 HashMap<String, Object> typeAndValueMap,
