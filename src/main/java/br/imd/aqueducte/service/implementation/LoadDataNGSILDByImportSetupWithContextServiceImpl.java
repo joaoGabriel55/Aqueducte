@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.FILE;
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.WEB_SERVICE;
@@ -113,7 +114,7 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
                     .filter((elem) -> elem.getForeignProperty() != null || elem.getGeoLocationConfig().size() > 0)
                     .map((elemFilted) -> {
                         if (elemFilted.getGeoLocationConfig().size() > 0) {
-                            return elemFilted.getGeoLocationConfig().stream().map((elem) -> elem.getKey());
+                            return elemFilted.getGeoLocationConfig().stream().map((elem) -> elem.getKey()).collect(Collectors.toList());
                         }
                         return elemFilted.getForeignProperty();
                     }).reduce(new ArrayList<String>(), (arrayFinal, elem) -> {

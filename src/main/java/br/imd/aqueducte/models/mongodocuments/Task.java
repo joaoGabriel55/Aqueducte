@@ -2,18 +2,22 @@ package br.imd.aqueducte.models.mongodocuments;
 
 import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.enums.TaskType;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
+import java.util.Date;
 
-@Document
+import static br.imd.aqueducte.utils.MongoDBCollections.TASK;
+
+@Document(value = TASK)
 public class Task {
-    @NotBlank
-    private Integer id;
+    @Id
+    private String id;
     @NotBlank
     private String userId;
-    @NotBlank
-    private Integer index;
     @NotBlank
     private String title;
     @NotBlank
@@ -23,30 +27,38 @@ public class Task {
     @NotBlank
     private String description;
 
+    @CreatedDate
+    private Date dateCreated;
+
+    @LastModifiedDate
+    private Date dateModified;
+
     public Task() {
     }
 
-    public Task(@NotBlank Integer id,
-                @NotBlank String userId,
-                @NotBlank Integer index,
-                @NotBlank String title,
-                @NotBlank TaskType type,
-                @NotBlank TaskStatus status,
-                @NotBlank String description) {
-        this.id = id;
+    public Task(
+            @NotBlank String userId,
+            @NotBlank String title,
+            @NotBlank TaskType type,
+            @NotBlank TaskStatus status,
+            @NotBlank String description,
+            Date dateCreated,
+            Date dateModified
+    ) {
         this.userId = userId;
-        this.index = index;
         this.title = title;
         this.type = type;
         this.status = status;
         this.description = description;
+        this.dateCreated = dateCreated;
+        this.dateModified = dateModified;
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -56,14 +68,6 @@ public class Task {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public Integer getIndex() {
-        return index;
-    }
-
-    public void setIndex(Integer index) {
-        this.index = index;
     }
 
     public String getTitle() {
@@ -96,5 +100,21 @@ public class Task {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getDateModified() {
+        return dateModified;
+    }
+
+    public void setDateModified(Date dateModified) {
+        this.dateModified = dateModified;
     }
 }
