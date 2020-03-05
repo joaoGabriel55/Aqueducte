@@ -43,6 +43,11 @@ public class ImportationSetupWithContextServiceImpl implements ImportationSetupW
     }
 
     @Override
+    public List<ImportationSetupWithContext> findByUserIdAndFilePath(String userId, String filePath) {
+        return this.importationSetupWithContextRepository.findByIdUserAndFilePath(userId, filePath);
+    }
+
+    @Override
     public String delete(String id) {
         Optional<ImportationSetupWithContext> impSetupWithCxt = findById(id);
         if (!impSetupWithCxt.isPresent())

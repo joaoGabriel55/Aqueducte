@@ -53,13 +53,35 @@ public class ImportationSetupWithoutContextController extends GenericController 
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<Response<ImportationSetupWithoutContext>> getByIdImportationSetupWithoutContext(
-            @PathVariable(required = true) String id) {
+            @PathVariable String id) {
 
         Response<ImportationSetupWithoutContext> response = new Response<>();
         try {
             Optional<ImportationSetupWithoutContext> importationSetupWithoutContext = impSetupWithoutCxtService
                     .findById(id);
             response.setData(importationSetupWithoutContext.get());
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping(value = "/user/{userId}")
+    public ResponseEntity<Response<List<ImportationSetupWithoutContext>>> findImportationSetupWithoutContextByFilePathAndUserId(
+            @PathVariable("userId") String userId,
+            @RequestParam("filePath") String filePath
+    ) {
+        Response<List<ImportationSetupWithoutContext>> response = new Response<>();
+
+        if (filePath == "" || filePath == null) {
+            response.getErrors().add("File path must be informed");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            List<ImportationSetupWithoutContext> importationSetupWithoutContextList = impSetupWithoutCxtService.findByUserIdAndFilePath(userId, filePath);
+            response.setData(importationSetupWithoutContextList);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
             return ResponseEntity.badRequest().body(response);

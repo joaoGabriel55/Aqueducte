@@ -20,6 +20,7 @@ public abstract class ImportationSetup {
     @Id
     private String id;
 
+    @NotBlank(message = "User ID is required")
     private String idUser;
 
     @Indexed(unique = true)

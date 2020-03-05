@@ -5,8 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.List;
+
 public interface ImportationSetupWithoutContextRepository extends MongoRepository<ImportationSetupWithoutContext, String> {
 
     Page<ImportationSetupWithoutContext> findByImportTypeOrderByDateCreatedDesc(String importType, Pageable pages);
 
+    List<ImportationSetupWithoutContext> findByIdUserAndFilePath(String userId, String filePath);
 }
