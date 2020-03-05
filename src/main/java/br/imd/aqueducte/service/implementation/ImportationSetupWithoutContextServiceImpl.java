@@ -29,6 +29,11 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
     }
 
     @Override
+    public List<ImportationSetupWithoutContext> findByUserIdAndFilePath(String userId, String filePath) {
+        return this.importationSetupWithoutContextRepository.findByIdUserAndFilePath(userId, filePath);
+    }
+
+    @Override
     public ImportationSetupWithoutContext createOrUpdate(
             ImportationSetupWithoutContext importationSetupWithoutContext) {
         return this.importationSetupWithoutContextRepository.save(importationSetupWithoutContext);
