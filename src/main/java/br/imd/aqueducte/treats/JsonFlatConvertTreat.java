@@ -22,7 +22,7 @@ public class JsonFlatConvertTreat {
                 Map<String, Object> jsonFlatAux = new HashMap<>();
                 Map<String, Object> objectMap = new HashMap<>();
                 objectMap.put(entry.getKey(), entry.getValue());
-                result = convertToJsonFlat(jsonFlatAux, objectMap);
+                result.putAll(convertToJsonFlat(jsonFlatAux, objectMap));
             }
             return result;
         } else if (dataForConversion instanceof List) {
@@ -55,6 +55,11 @@ public class JsonFlatConvertTreat {
             Map<String, Object> jsonFlatAux,
             Object jsonData) {
         Map<String, Object> jsonDataTyped = (Map<String, Object>) jsonData;
+        if (jsonDataTyped.get("data") instanceof List) {
+            jsonDataTyped = (Map<String, Object>) jsonData;
+        } else if (jsonDataTyped.get("data") instanceof Map) {
+            jsonDataTyped = (Map<String, Object>) ((Map<String, Object>) jsonData).get("data");
+        }
         for (Map.Entry<String, Object> entry : jsonDataTyped.entrySet()) {
             if ((entry.getValue() instanceof Map) && !(entry.getValue() instanceof List)) {
                 boolean isGeoJson = checkIsGeoJson((Map<String, Object>) entry.getValue());
