@@ -4,20 +4,22 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithContextConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.enums.TaskStatus;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.service.ImportNGSILDDataService;
+import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.service.TaskStatusService;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
@@ -33,6 +35,12 @@ public class ImportDataToSGEOLController {
     private ImportNGSILDDataService importNGSILDDataService;
 
     @Autowired
+    private LoadDataNGSILDByImportationSetupService<ImportationSetupWithoutContext> importationSetupStandardService;
+
+    @Autowired
+    private LoadDataNGSILDByImportationSetupService<ImportationSetupWithContext> importationSetupContextService;
+
+    @Autowired
     private TaskStatusService taskStatusService;
 
     @SuppressWarnings("rawtypes")
@@ -41,33 +49,70 @@ public class ImportDataToSGEOLController {
                                                                    @RequestHeader(USER_TOKEN) String userToken,
                                                                    @PathVariable String taskId,
                                                                    @PathVariable String layer,
-                                                                   @RequestBody Map<String, Object> dataNGSILD) {
+                                                                   @RequestBody ImportationSetupWithoutContext importationSetup
+    ) {
         Response<List<String>> response = new Response<>();
-        try {
-            JSONArray jsonArrayNGSILD = new JSONArray((ArrayList) dataNGSILD.get("data_ngsild"));
-            List<String> jsonArrayResponse = importNGSILDDataService.importData(
-                    layer, appToken, userToken, jsonArrayNGSILD
-            );
-            response.setData(jsonArrayResponse);
-            logInfo("POST /importToSgeol", null);
-        } catch (Exception e) {
-            response.getErrors().add(e.getLocalizedMessage());
-            logError(e.getMessage(), e.getStackTrace());
-            taskStatusService.sendTaskStatusProgress(
-                    taskId,
-                    TaskStatus.ERROR,
-                    e.getLocalizedMessage(),
-                    "status-task-import-process"
-            );
-            return ResponseEntity.badRequest().body(response);
-        }
-        taskStatusService.sendTaskStatusProgress(
-                taskId,
-                TaskStatus.DONE,
-                "Importação de dados para camada " + layer,
-                "status-task-import-process"
+
+        List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupStandardService.loadData(
+                importationSetup, null
         );
-        return ResponseEntity.ok(response);
+        return importData(appToken, userToken, layer, response, taskId, ngsildData);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @PostMapping(value = {"/{layer}/context", "/{layer}/{taskId}/context"})
+    public ResponseEntity<Response<List<String>>> importNGSILDDataContext(
+            @RequestHeader(APP_TOKEN) String appToken,
+            @RequestHeader(USER_TOKEN) String userToken,
+            @PathVariable String taskId,
+            @PathVariable String layer,
+            @RequestBody ImportationSetupWithContext importationSetup
+    ) {
+        Response<List<String>> response = new Response<>();
+        List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupContextService.loadData(
+                importationSetup, null
+        );
+        return importData(appToken, userToken, layer, response, taskId, ngsildData);
+    }
+
+    private ResponseEntity<Response<List<String>>> importData(
+            String appToken,
+            String userToken,
+            String layer,
+            Response<List<String>> response,
+            String taskId,
+            List<LinkedHashMap<String, Object>> ngsildData
+    ) {
+        if (ngsildData == null || ngsildData.size() == 0) {
+            response.getErrors().add("Nothing to import.");
+            return ResponseEntity.badRequest().body(response);
+        } else {
+            try {
+                JSONArray jsonArrayNGSILD = new JSONArray(ngsildData);
+                List<String> jsonArrayResponse = importNGSILDDataService.importData(
+                        layer, appToken, userToken, jsonArrayNGSILD
+                );
+                response.setData(jsonArrayResponse);
+                logInfo("POST /importToSgeol", null);
+                taskStatusService.sendTaskStatusProgress(
+                        taskId,
+                        TaskStatus.DONE,
+                        "Importação de dados para camada " + layer,
+                        "status-task-import-process"
+                );
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                response.getErrors().add(e.getLocalizedMessage());
+                logError(e.getMessage(), e.getStackTrace());
+                taskStatusService.sendTaskStatusProgress(
+                        taskId,
+                        TaskStatus.ERROR,
+                        response.getErrors().get(0),
+                        "status-task-import-process"
+                );
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        }
     }
 
     @PostMapping(value = "/file/{layerPath}")
