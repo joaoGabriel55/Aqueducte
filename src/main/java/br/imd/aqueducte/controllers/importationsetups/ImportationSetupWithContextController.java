@@ -179,14 +179,35 @@ public class ImportationSetupWithContextController extends GenericController {
     }
 
     @PostMapping(value = "/load-ngsild-data")
-    public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetupWithoutContext(
+    public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetupWithContext(
             @RequestHeader(USER_TOKEN) String userToken,
+            @RequestParam boolean samples,
             @RequestBody ImportationSetupWithContext importationSetupWithContext
     ) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
         try {
+            List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDByImportationSetupService.loadData(
+                    importationSetupWithContext, userToken
+            );
+            response.setData(samples ? getSamples(ngsildData) : ngsildData);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @PostMapping(value = "/load-ngsild-data/count")
+    public ResponseEntity<Response<Integer>> loadCountNGSILDDataFromImportSetupWithoutContext(
+            @RequestHeader(USER_TOKEN) String userToken,
+            @RequestBody ImportationSetupWithContext importationSetupWithContext
+    ) {
+        Response<Integer> response = new Response<>();
+        try {
             response.setData(
-                    this.loadDataNGSILDByImportationSetupService.loadData(importationSetupWithContext, userToken)
+                    this.loadDataNGSILDByImportationSetupService
+                            .loadData(importationSetupWithContext, userToken)
+                            .size()
             );
             return ResponseEntity.ok(response);
         } catch (Exception e) {
