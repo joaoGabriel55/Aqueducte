@@ -1,6 +1,4 @@
-package br.imd.aqueducte.models.pojos;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package br.imd.aqueducte.models.dtos;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,18 +14,14 @@ public class MatchingConfig {
      * Responsible for just link data between differents data sets <br/>
      * <b>Is transient<b/>
      */
-    @JsonProperty
     private boolean isTransientField;
 
-    @JsonProperty
     private boolean isPrimaryField;
 
-    @JsonProperty
     private boolean isLocation;
 
     private List<GeoLocationConfig> geoLocationConfig;
 
-    @JsonProperty
     private boolean hasRelationship;
 
     private RelationshipConfig relationshipConfig;

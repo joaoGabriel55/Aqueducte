@@ -1,22 +1,18 @@
 package br.imd.aqueducte.treats;
 
-import br.imd.aqueducte.utils.NGSILDUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
+
+@SuppressWarnings("ALL")
 public class JsonFlatConvertTreat {
 
     private String keyPath = "";
 
-    private NGSILDUtils ngsildUtils;
-
-    public JsonFlatConvertTreat() {
-        this.ngsildUtils = new NGSILDUtils();
-    }
 
     public Object getJsonFlat(Object dataForConversion) {
         if (dataForConversion instanceof Map) {
@@ -26,7 +22,7 @@ public class JsonFlatConvertTreat {
                 Map<String, Object> jsonFlatAux = new HashMap<>();
                 Map<String, Object> objectMap = new HashMap<>();
                 objectMap.put(entry.getKey(), entry.getValue());
-                result = convertToJsonFlat(jsonFlatAux, objectMap);
+                result.putAll(convertToJsonFlat(jsonFlatAux, objectMap));
             }
             return result;
         } else if (dataForConversion instanceof List) {
@@ -59,9 +55,14 @@ public class JsonFlatConvertTreat {
             Map<String, Object> jsonFlatAux,
             Object jsonData) {
         Map<String, Object> jsonDataTyped = (Map<String, Object>) jsonData;
+        if (jsonDataTyped.get("data") instanceof List) {
+            jsonDataTyped = (Map<String, Object>) jsonData;
+        } else if (jsonDataTyped.get("data") instanceof Map) {
+            jsonDataTyped = (Map<String, Object>) ((Map<String, Object>) jsonData).get("data");
+        }
         for (Map.Entry<String, Object> entry : jsonDataTyped.entrySet()) {
             if ((entry.getValue() instanceof Map) && !(entry.getValue() instanceof List)) {
-                boolean isGeoJson = this.ngsildUtils.checkIsGeoJson((Map<String, Object>) entry.getValue());
+                boolean isGeoJson = checkIsGeoJson((Map<String, Object>) entry.getValue());
                 if (!isGeoJson) {
                     if (keyPath != "")
                         keyPath += "_" + entry.getKey();

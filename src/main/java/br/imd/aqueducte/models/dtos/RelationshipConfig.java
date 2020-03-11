@@ -1,4 +1,4 @@
-package br.imd.aqueducte.models.pojos;
+package br.imd.aqueducte.models.dtos;
 
 public class RelationshipConfig {
 

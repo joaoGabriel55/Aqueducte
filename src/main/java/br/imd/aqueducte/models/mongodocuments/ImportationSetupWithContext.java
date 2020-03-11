@@ -1,14 +1,12 @@
 package br.imd.aqueducte.models.mongodocuments;
 
-import br.imd.aqueducte.models.pojos.MatchingConfig;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import br.imd.aqueducte.models.dtos.MatchingConfig;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Document
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class ImportationSetupWithContext extends ImportationSetup {
 
     public ImportationSetupWithContext() {

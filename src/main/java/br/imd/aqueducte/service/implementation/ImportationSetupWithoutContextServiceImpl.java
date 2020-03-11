@@ -1,16 +1,13 @@
 package br.imd.aqueducte.service.implementation;
 
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
-import br.imd.aqueducte.models.mongodocuments.LinkedIdsForRelationship;
 import br.imd.aqueducte.repositories.ImportationSetupWithoutContextRepository;
 import br.imd.aqueducte.service.ImportationSetupWithoutContextService;
-import br.imd.aqueducte.service.LinkedIdsForRelationshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,15 +17,20 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
     @Autowired
     private ImportationSetupWithoutContextRepository importationSetupWithoutContextRepository;
 
-    @Autowired
-    private LinkedIdsForRelationshipService linkedIdsForRelationshipService;
-
     @SuppressWarnings("deprecation")
     @Override
-    public Page<ImportationSetupWithoutContext> findAllLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
-            int page, int count) {
+    public Page<ImportationSetupWithoutContext> findByImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+            String importType,
+            int page,
+            int count
+    ) {
         PageRequest pageable = new PageRequest(page, count);
-        return this.importationSetupWithoutContextRepository.findAllByOrderByDateCreatedDesc(pageable);
+        return this.importationSetupWithoutContextRepository.findByImportTypeOrderByDateCreatedDesc(importType, pageable);
+    }
+
+    @Override
+    public List<ImportationSetupWithoutContext> findByUserIdAndFilePath(String userId, String filePath) {
+        return this.importationSetupWithoutContextRepository.findByIdUserAndFilePath(userId, filePath);
     }
 
     @Override
@@ -50,7 +52,7 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
     @Override
     public String delete(String id) {
         Optional<ImportationSetupWithoutContext> impSetupWithoutCxt = findById(id);
-        if (!impSetupWithoutCxt.isPresent())
+        if (impSetupWithoutCxt.isEmpty())
             return null;
         String idForDelete = impSetupWithoutCxt.get().getId();
         importationSetupWithoutContextRepository.deleteById(idForDelete);
