@@ -1,4 +1,4 @@
-package br.imd.aqueducte.service;
+package br.imd.aqueducte.services;
 
 import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.mongodocuments.Task;

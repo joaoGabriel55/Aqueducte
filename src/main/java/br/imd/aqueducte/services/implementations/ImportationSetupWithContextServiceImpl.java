@@ -1,8 +1,8 @@
-package br.imd.aqueducte.service.implementation;
+package br.imd.aqueducte.services.implementations;
 
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
 import br.imd.aqueducte.repositories.ImportationSetupWithContextRepository;
-import br.imd.aqueducte.service.ImportationSetupWithContextService;
+import br.imd.aqueducte.services.ImportationSetupWithContextService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

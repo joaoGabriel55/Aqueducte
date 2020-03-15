@@ -3,7 +3,6 @@ package br.imd.aqueducte.services;
 import br.imd.aqueducte.AqueducteApplicationTests;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetup;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
-import br.imd.aqueducte.service.ImportationSetupWithoutContextService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

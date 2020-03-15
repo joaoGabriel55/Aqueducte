@@ -1,10 +1,9 @@
-package br.imd.aqueducte.service.implementation;
+package br.imd.aqueducte.services.implementations;
 
-import br.imd.aqueducte.models.dtos.DataSetRelationship;
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
-import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
+import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.treats.JsonFlatConvertTreat;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
@@ -143,8 +142,8 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
         }
     }
 
-    @Override
-    public int makeDataRelationshipAqueconnect(DataSetRelationship dataSetRelationship) {
-        return 0;
-    }
+//    @Override
+//    public int makeDataRelationshipAqueconnect(DataSetRelationship dataSetRelationship) {
+//        return 0;
+//    }
 }

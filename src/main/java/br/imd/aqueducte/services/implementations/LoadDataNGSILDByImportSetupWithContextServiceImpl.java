@@ -1,26 +1,18 @@
-package br.imd.aqueducte.service.implementation;
+package br.imd.aqueducte.services.implementations;
 
-import br.imd.aqueducte.models.dtos.DataSetRelationship;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
-import br.imd.aqueducte.service.LoadDataNGSILDByImportationSetupService;
+import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.treats.JsonFlatConvertTreat;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.FILE;
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.WEB_SERVICE;
-import static br.imd.aqueducte.utils.PropertiesParams.STATUS_OK;
-import static br.imd.aqueducte.utils.PropertiesParams.URL_AQUECONNECT;
 
 @SuppressWarnings("ALL")
 @Service
@@ -136,27 +128,5 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
         } else {
             return null;
         }
-    }
-
-    @Override
-    public int makeDataRelationshipAqueconnect(DataSetRelationship dataSetRelationship) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
-        HttpPost request = new HttpPost(URL_AQUECONNECT + "relationships");
-
-        // TODO: Auth - Parsing the "user-token" for Aqueconnect microservice
-
-        request.setEntity(objectToJson(dataSetRelationship));
-        int statusCode = 0;
-        try {
-            HttpResponse response = httpClient.execute(request);
-            statusCode = response.getStatusLine().getStatusCode();
-            if (response.getStatusLine().getStatusCode() != STATUS_OK) {
-                return statusCode;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return 400;
-        }
-        return statusCode;
     }
 }

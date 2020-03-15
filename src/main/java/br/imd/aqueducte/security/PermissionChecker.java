@@ -1,11 +1,11 @@
 package br.imd.aqueducte.security;
 
+import br.imd.aqueducte.utils.RequestsUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,6 +17,7 @@ import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.PropertiesParams.ROLE_AQUEDUCTE;
 import static br.imd.aqueducte.utils.PropertiesParams.URL_SGEOL;
+import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 
 public class PermissionChecker {
 
@@ -31,9 +32,8 @@ public class PermissionChecker {
             // add request headers
             request.addHeader("user-token", userToken);
 
-            try (CloseableHttpClient httpClient = HttpClients.createDefault();
-                 CloseableHttpResponse response = httpClient.execute(request)) {
-
+            try {
+                HttpResponse response = getHttpClientInstance().execute(request);
                 // Get HttpResponse Status
                 logInfo("Logging ProtocolVersion: {}", response.getProtocolVersion());
                 logInfo("Logging Status Code: {}", response.getStatusLine().getStatusCode());
@@ -56,7 +56,6 @@ public class PermissionChecker {
                     logInfo("Authentication Status: {}", "WRONG");
 
                 }
-
             } catch (ParseException e) {
                 e.printStackTrace();
                 logError("ParseException: {}", e.getMessage());

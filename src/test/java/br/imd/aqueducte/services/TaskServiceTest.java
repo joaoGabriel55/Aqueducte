@@ -5,7 +5,6 @@ import br.imd.aqueducte.AqueducteApplicationTests;
 import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.enums.TaskType;
 import br.imd.aqueducte.models.mongodocuments.Task;
-import br.imd.aqueducte.service.TaskStatusService;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

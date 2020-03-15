@@ -1,10 +1,10 @@
-package br.imd.aqueducte.service.implementation;
+package br.imd.aqueducte.services.implementations;
 
 import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.enums.TaskType;
 import br.imd.aqueducte.models.mongodocuments.Task;
 import br.imd.aqueducte.repositories.TaskRepository;
-import br.imd.aqueducte.service.TaskStatusService;
+import br.imd.aqueducte.services.TaskStatusService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

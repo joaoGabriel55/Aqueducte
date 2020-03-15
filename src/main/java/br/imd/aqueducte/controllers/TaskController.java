@@ -2,7 +2,7 @@ package br.imd.aqueducte.controllers;
 
 import br.imd.aqueducte.models.mongodocuments.Task;
 import br.imd.aqueducte.models.response.Response;
-import br.imd.aqueducte.service.TaskStatusService;
+import br.imd.aqueducte.services.TaskStatusService;
 import com.mongodb.DuplicateKeyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
