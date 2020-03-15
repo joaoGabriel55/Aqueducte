@@ -1,4 +1,4 @@
-package br.imd.aqueducte.service.implementation;
+package br.imd.aqueducte.services.implementations;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
@@ -14,7 +14,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.IOException;
 import java.util.*;
@@ -22,10 +21,12 @@ import java.util.*;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.PropertiesParams.*;
+import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
 @SuppressWarnings("ALL")
 public abstract class LoadDataNGSILDByImportSetup {
+
     protected Map<String, Object> loadDataWebservice(ImportationSetup importationSetup) {
         RequestsUtils requestsUtils = new RequestsUtils();
         Map<String, Object> responseWSResult = new HashMap<>();
@@ -122,7 +123,6 @@ public abstract class LoadDataNGSILDByImportSetup {
     }
 
     protected Map<String, Integer> getFileFields(String userToken, ImportationSetup importationSetup) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
         StringBuilder url = new StringBuilder();
         url.append(URL_AQUECONNECT);
         url.append("file-import-setup-resource/file-fields/");
@@ -133,7 +133,7 @@ public abstract class LoadDataNGSILDByImportSetup {
         HttpGet request = new HttpGet(url.toString());
         request.setHeader(USER_TOKEN, userToken);
         try {
-            HttpResponse response = httpClient.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == STATUS_OK) {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> responseMounted = mapper.readValue(
@@ -154,7 +154,6 @@ public abstract class LoadDataNGSILDByImportSetup {
             ImportationSetup importationSetup,
             Map<String, Integer> fieldsSelected
     ) {
-        HttpClient httpClient = HttpClientBuilder.create().build();
         StringBuilder url = new StringBuilder();
         url.append(URL_AQUECONNECT);
         url.append("file-import-setup-resource/convert-to-json/");
@@ -166,7 +165,7 @@ public abstract class LoadDataNGSILDByImportSetup {
         request.setHeader(USER_TOKEN, userToken);
         request.setEntity(objectToJson(fieldsSelected));
         try {
-            HttpResponse response = httpClient.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == STATUS_OK) {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> responseMounted = mapper.readValue(

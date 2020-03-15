@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
-import static br.imd.aqueducte.utils.MongoDBCollections.TASK;
+import static br.imd.aqueducte.models.mongodocuments.config.MongoDBCollectionsConfig.TASK;
 
 @Document(value = TASK)
 public class Task {

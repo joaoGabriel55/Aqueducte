@@ -1,4 +1,4 @@
-package br.imd.aqueducte.service;
+package br.imd.aqueducte.services;
 
 import org.json.JSONArray;
 import org.springframework.stereotype.Component;
