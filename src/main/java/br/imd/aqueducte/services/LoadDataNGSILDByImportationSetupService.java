@@ -1,6 +1,5 @@
-package br.imd.aqueducte.service;
+package br.imd.aqueducte.services;
 
-import br.imd.aqueducte.models.dtos.DataSetRelationship;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -15,5 +14,5 @@ public interface LoadDataNGSILDByImportationSetupService<T> {
 
     List<LinkedHashMap<String, Object>> loadDataFile(T importationSetup, String userToken);
 
-    int makeDataRelationshipAqueconnect(DataSetRelationship dataSetRelationship);
+//    int makeDataRelationshipAqueconnect(DataSetRelationship dataSetRelationship);
 }

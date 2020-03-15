@@ -7,22 +7,66 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.ssl.TrustStrategy;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
 import java.io.*;
-import java.net.HttpURLConnection;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RequestsUtils {
+
+    private static HttpClient httpClientInstance;
+
+    public static HttpClient getHttpClientInstance() {
+        if (httpClientInstance == null) {
+            TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
+            SSLContext sslContext = null;
+            try {
+                sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+            }
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+
+            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                    .register("https", sslsf)
+                    .register("http", new PlainConnectionSocketFactory())
+                    .build();
+
+            BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(socketFactoryRegistry);
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setSSLSocketFactory(sslsf)
+                    .setConnectionManager(connectionManager)
+                    .build();
+            httpClientInstance = httpClient;
+            return httpClientInstance;
+        }
+        return httpClientInstance;
+    }
 
     public String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
@@ -52,23 +96,21 @@ public class RequestsUtils {
     }
 
     private Map<String, Object> httpGet(String fullUrl, LinkedHashMap<String, String> headersParams) throws IOException {
-        HttpClient httpClient = HttpClientBuilder.create().build();
         HttpGet request = new HttpGet(fullUrl);
 
         setHeadersParams(headersParams, request);
 
-        HttpResponse response = httpClient.execute(request);
+        HttpResponse response = getHttpClientInstance().execute(request);
         return buildResponse(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), response.getEntity().getContent());
     }
 
     public Map<String, Object> httpPost(String url, Object paramsRequest, LinkedHashMap<String, String> headersParams) throws IOException {
-        HttpClient httpClient = HttpClientBuilder.create().build();
         HttpPost request = new HttpPost(url);
 
         setHeadersParams(headersParams, request);
         request.setEntity(buildEntity(paramsRequest));
 
-        HttpResponse response = httpClient.execute(request);
+        HttpResponse response = getHttpClientInstance().execute(request);
         return buildResponse(response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase(), response.getEntity().getContent());
     }
 
@@ -126,13 +168,6 @@ public class RequestsUtils {
 
     }
 
-    public void treatBodyData(HttpURLConnection con, String jsonInputString) throws IOException {
-        try (OutputStream os = con.getOutputStream()) {
-            byte[] input = jsonInputString.getBytes("utf-8");
-            os.write(input, 0, input.length);
-        }
-    }
-
     public static String readBodyReq(InputStream inputStream) throws IOException {
         /* Lendo body */
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
@@ -142,14 +177,6 @@ public class RequestsUtils {
             body += temp;
 
         return body;
-    }
-
-    public void postMethodRestTemplate(String url, Map<Object, Object> entidadeToImport) {
-
-        RestTemplate rt = new RestTemplate();
-        rt.getMessageConverters().add(new StringHttpMessageConverter());
-
-        rt.postForEntity(url, entidadeToImport, String.class);
     }
 
     public StringEntity buildEntity(Object data) {

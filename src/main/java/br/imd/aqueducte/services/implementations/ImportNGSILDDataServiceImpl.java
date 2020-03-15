@@ -1,6 +1,6 @@
-package br.imd.aqueducte.service.implementation;
+package br.imd.aqueducte.services.implementations;
 
-import br.imd.aqueducte.service.ImportNGSILDDataService;
+import br.imd.aqueducte.services.ImportNGSILDDataService;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -8,7 +8,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONArray;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +22,7 @@ import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
 @Service
 public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
+    private static final HttpClient HTTP_CLIENT_INSTANCE = RequestsUtils.getHttpClientInstance();
 
     public HttpRequestBase requestConfigParams(String url, String appToken, String userToken, JSONArray jsonArray) {
         RequestsUtils requestsUtils = new RequestsUtils();
@@ -38,10 +38,8 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
 
     @Override
     public List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws IOException {
-        String url = URL_SGEOL + "v2/" + layer + "/batch";
-
-        HttpClient httpClient = HttpClientBuilder.create().build();
-        HttpResponse responseSGEOL = httpClient.execute(requestConfigParams(url, appToken, userToken, jsonArray));
+        String url = URL_SGEOL + layer + "/batch";
+        HttpResponse responseSGEOL = HTTP_CLIENT_INSTANCE.execute(requestConfigParams(url, appToken, userToken, jsonArray));
 
         if (responseSGEOL.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
             ObjectMapper mapper = new ObjectMapper();
