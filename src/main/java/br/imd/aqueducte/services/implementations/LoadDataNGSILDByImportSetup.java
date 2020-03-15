@@ -21,12 +21,11 @@ import java.util.*;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.PropertiesParams.*;
+import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
 @SuppressWarnings("ALL")
 public abstract class LoadDataNGSILDByImportSetup {
-
-    private static final HttpClient HTTP_CLIENT_INSTANCE = RequestsUtils.getHttpClientInstance();
 
     protected Map<String, Object> loadDataWebservice(ImportationSetup importationSetup) {
         RequestsUtils requestsUtils = new RequestsUtils();
@@ -134,7 +133,7 @@ public abstract class LoadDataNGSILDByImportSetup {
         HttpGet request = new HttpGet(url.toString());
         request.setHeader(USER_TOKEN, userToken);
         try {
-            HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == STATUS_OK) {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> responseMounted = mapper.readValue(
@@ -166,7 +165,7 @@ public abstract class LoadDataNGSILDByImportSetup {
         request.setHeader(USER_TOKEN, userToken);
         request.setEntity(objectToJson(fieldsSelected));
         try {
-            HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == STATUS_OK) {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> responseMounted = mapper.readValue(

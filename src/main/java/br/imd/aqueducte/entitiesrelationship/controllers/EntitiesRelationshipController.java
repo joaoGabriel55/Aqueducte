@@ -73,14 +73,25 @@ public class EntitiesRelationshipController {
             CompletableFuture<Integer> data2 = entitiesRelationshipService.transferLayerEntitiesAsync(layer2);
             CompletableFuture.allOf(data1, data2).join();
 
+//            int statusTransferData1 = entitiesRelationshipService.transferLayerEntities(layer1);
+//            int statusTransferData2 = entitiesRelationshipService.transferLayerEntities(layer2);
+
             Map<String, String> layersTransferResponse = new LinkedHashMap<>();
+
             int statusTransferData1 = data1.get();
             int statusTransferData2 = data2.get();
+
             layersTransferResponse.put(layer1, statusMessageTransferData(statusTransferData1));
             layersTransferResponse.put(layer2, statusMessageTransferData(statusTransferData2));
 
-            if (statusTransferData1 == STATUS_TRANSFER_NOTHING_TODO ||
+            if (statusTransferData1 == STATUS_TRANSFER_NOTHING_TODO &&
                     statusTransferData2 == STATUS_TRANSFER_NOTHING_TODO) {
+                response.setData(layersTransferResponse);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+
+            if (statusTransferData1 == STATUS_TRANSFER_ERROR &&
+                    statusTransferData2 == STATUS_TRANSFER_ERROR) {
                 response.setData(layersTransferResponse);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }

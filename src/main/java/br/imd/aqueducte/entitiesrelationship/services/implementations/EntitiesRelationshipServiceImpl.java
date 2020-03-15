@@ -236,8 +236,10 @@ public class EntitiesRelationshipServiceImpl implements EntitiesRelationshipServ
         return CompletableFuture.completedFuture(status);
     }
 
-    private int transferLayerEntities(String layer) throws Exception {
+    public int transferLayerEntities(String layer) throws Exception {
         if (layer.contains("_preprocessing")) {
+            boolean statusLayerEntitiesTransfered = false;
+            boolean statusLayerDeleted = false;
             int status = 0;
             try {
                 int offset = 0;
@@ -249,16 +251,16 @@ public class EntitiesRelationshipServiceImpl implements EntitiesRelationshipServ
                         return STATUS_TRANSFER_NOTHING_TODO;
                     }
                     JSONArray entitiesJsonArray = new JSONArray(entities);
-                    List<String> entitiesIds = importNGSILDDataService.importData(
-                            "aluno_test1",
-                            "",
-                            "",
-                            entitiesJsonArray
+                    statusLayerEntitiesTransfered = entityOperationsService.tranferPreprocessingLayerEntitesToFinalLayer(
+                            layer, layerDestiny
                     );
                     offset++;
                 }
-                entityOperationsService.deleteDataFromPreprocessingLayer(layer);
-                return STATUS_TRANSFER_OK;
+                statusLayerDeleted = entityOperationsService.deleteDataFromPreprocessingLayer(layer);
+                if (statusLayerDeleted && statusLayerEntitiesTransfered)
+                    return STATUS_TRANSFER_OK;
+                else
+                    return STATUS_TRANSFER_ERROR;
             } catch (Exception e) {
                 e.printStackTrace();
                 return STATUS_TRANSFER_ERROR;

@@ -35,9 +35,8 @@ import java.util.Map;
 
 public class RequestsUtils {
 
-    private static HttpClient httpClientInstance;
-
     public static HttpClient getHttpClientInstance() {
+        HttpClient httpClientInstance = null;
         if (httpClientInstance == null) {
             TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
             SSLContext sslContext = null;

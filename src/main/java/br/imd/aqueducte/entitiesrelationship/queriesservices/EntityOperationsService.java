@@ -1,25 +1,24 @@
 package br.imd.aqueducte.entitiesrelationship.queriesservices;
 
-import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.utils.PropertiesParams.URL_SGEOL;
+import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
 @SuppressWarnings("ALL")
@@ -28,8 +27,7 @@ public class EntityOperationsService {
     public static final String FIND_ENTITY_BY_DOCUMENT = "/find-by-document";
     private static final String FIND_ENTITY_BY_ID = "/find-by-id";
     private static final String PREPROCESSING_LAYER_ENTITIES = "preprocessing/";
-
-    private static final HttpClient HTTP_CLIENT_INSTANCE = RequestsUtils.getHttpClientInstance();
+    private static final String TRANSFER_LAYER_ENTITIES = "preprocessing/transfer-layer-entities/";
 
     private static EntityOperationsService instance;
 
@@ -43,7 +41,7 @@ public class EntityOperationsService {
     public List<Map<String, Object>> getEntitiesPageable(String layer, int limit, int offset) throws Exception {
         HttpGet request = new HttpGet(URL_SGEOL + layer + "?limit=" + limit + "&offset=" + offset);
         try {
-            HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 ObjectMapper mapper = new ObjectMapper();
                 Object jsonArray = mapper.readValue(
@@ -65,7 +63,7 @@ public class EntityOperationsService {
         String uri = URL_SGEOL + layer + FIND_ENTITY_BY_ID + "?entity-id=" + id;
         HttpGet request = new HttpGet(uri);
         try {
-            HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> entity = mapper.readValue(
@@ -101,7 +99,7 @@ public class EntityOperationsService {
         StringEntity entity = new StringEntity(query.toString(), ContentType.APPLICATION_JSON);
         request.setEntity(entity);
         try {
-            HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 ObjectMapper mapper = new ObjectMapper();
                 List<Map<String, Object>> jsonArray = mapper.readValue(
@@ -126,11 +124,31 @@ public class EntityOperationsService {
 
     }
 
+
+    public boolean tranferPreprocessingLayerEntitesToFinalLayer(String preprocessingLayer, String finalLayer) throws IOException {
+        HttpPost request = new HttpPost(
+                URL_SGEOL + TRANSFER_LAYER_ENTITIES + preprocessingLayer + "/" + finalLayer
+        );
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        try {
+            HttpResponse response = getHttpClientInstance().execute(request);
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
+                return true;
+            }
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IOException();
+        }
+
+    }
+
+
     public boolean deleteEntityTempProperty(String layer, String entityId, String propertyName) throws Exception {
         String uri = URL_SGEOL + layer + "/property?entity-id=" + entityId + "&property-name=" + propertyName;
         HttpDelete request = new HttpDelete(uri);
         try {
-            HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
                 return true;
             else
@@ -146,7 +164,7 @@ public class EntityOperationsService {
         String uri = URL_SGEOL + PREPROCESSING_LAYER_ENTITIES + preprocessinglayer;
         HttpDelete request = new HttpDelete(uri);
         try {
-            HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
                 return true;
             else

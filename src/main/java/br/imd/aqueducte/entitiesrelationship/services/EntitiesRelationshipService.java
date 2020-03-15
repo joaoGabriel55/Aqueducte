@@ -16,4 +16,6 @@ public interface EntitiesRelationshipService {
 
     CompletableFuture<Integer> transferLayerEntitiesAsync(String layer) throws Exception;
 
+    int transferLayerEntities(String layer) throws Exception;
+
 }

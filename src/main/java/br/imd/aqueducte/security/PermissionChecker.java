@@ -17,9 +17,9 @@ import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.PropertiesParams.ROLE_AQUEDUCTE;
 import static br.imd.aqueducte.utils.PropertiesParams.URL_SGEOL;
+import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 
 public class PermissionChecker {
-    private static final HttpClient HTTP_CLIENT_INSTANCE = RequestsUtils.getHttpClientInstance();
 
     /**
      * Check if User from IDM have permission to access Smart Sync API.
@@ -33,7 +33,7 @@ public class PermissionChecker {
             request.addHeader("user-token", userToken);
 
             try {
-                HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+                HttpResponse response = getHttpClientInstance().execute(request);
                 // Get HttpResponse Status
                 logInfo("Logging ProtocolVersion: {}", response.getProtocolVersion());
                 logInfo("Logging Status Code: {}", response.getStatusLine().getStatusCode());

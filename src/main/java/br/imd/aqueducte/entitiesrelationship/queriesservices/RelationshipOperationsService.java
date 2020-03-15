@@ -17,6 +17,7 @@ import java.util.*;
 
 import static br.imd.aqueducte.entitiesrelationship.queriesservices.EntityOperationsService.FIND_ENTITY_BY_DOCUMENT;
 import static br.imd.aqueducte.utils.PropertiesParams.URL_SGEOL;
+import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
 @SuppressWarnings("ALL")
@@ -24,8 +25,6 @@ public class RelationshipOperationsService {
 
     private static final String RELATIONSHIP = "/relationship";
     private static final String FIND_BY_RELATIONSHIP_FILTER = "/find-by-relationship-filter";
-
-    private static final HttpClient HTTP_CLIENT_INSTANCE = RequestsUtils.getHttpClientInstance();
 
     private static RelationshipOperationsService instance;
 
@@ -120,12 +119,12 @@ public class RelationshipOperationsService {
             postRequest.setEntity(entity);
             // TODO: Avoid update relationship which already done.
             try {
-                HttpResponse response = HTTP_CLIENT_INSTANCE.execute(postRequest);
+                HttpResponse response = getHttpClientInstance().execute(postRequest);
 
                 if (response.getStatusLine().getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                     HttpPut putRequest = new HttpPut(uri);
                     putRequest.setEntity(entity);
-                    response = HTTP_CLIENT_INSTANCE.execute(putRequest);
+                    response = getHttpClientInstance().execute(putRequest);
                 }
                 if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED || response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     return true;
@@ -161,7 +160,7 @@ public class RelationshipOperationsService {
         StringEntity entity = new StringEntity(query.toString(), ContentType.APPLICATION_JSON);
         request.setEntity(entity);
         try {
-            HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 ObjectMapper mapper = new ObjectMapper();
                 List<Map<String, Object>> jsonArray = mapper.readValue(
@@ -181,7 +180,7 @@ public class RelationshipOperationsService {
         String uri = URL_SGEOL + layer + RELATIONSHIP + "?entity-id=" + entityId + "&relationship-name=" + relationshipName;
         HttpGet request = new HttpGet(uri);
         try {
-            HttpResponse response = HTTP_CLIENT_INSTANCE.execute(request);
+            HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> relationships = mapper.readValue(

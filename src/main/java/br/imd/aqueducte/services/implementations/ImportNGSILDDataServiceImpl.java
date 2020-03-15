@@ -18,11 +18,11 @@ import java.util.Map;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.PropertiesParams.*;
+import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
 @Service
 public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
-    private static final HttpClient HTTP_CLIENT_INSTANCE = RequestsUtils.getHttpClientInstance();
 
     public HttpRequestBase requestConfigParams(String url, String appToken, String userToken, JSONArray jsonArray) {
         RequestsUtils requestsUtils = new RequestsUtils();
@@ -39,7 +39,7 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
     @Override
     public List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws IOException {
         String url = URL_SGEOL + layer + "/batch";
-        HttpResponse responseSGEOL = HTTP_CLIENT_INSTANCE.execute(requestConfigParams(url, appToken, userToken, jsonArray));
+        HttpResponse responseSGEOL = getHttpClientInstance().execute(requestConfigParams(url, appToken, userToken, jsonArray));
 
         if (responseSGEOL.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
             ObjectMapper mapper = new ObjectMapper();
