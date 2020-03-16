@@ -1,10 +1,8 @@
 package br.imd.aqueducte.security;
 
-import br.imd.aqueducte.utils.RequestsUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -15,8 +13,8 @@ import java.io.IOException;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
-import static br.imd.aqueducte.utils.PropertiesParams.ROLE_AQUEDUCTE;
-import static br.imd.aqueducte.utils.PropertiesParams.URL_SGEOL;
+import static br.imd.aqueducte.config.PropertiesParams.ROLE_AQUEDUCTE;
+import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
 import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 
 public class PermissionChecker {
@@ -48,7 +46,7 @@ public class PermissionChecker {
 
                     for (Object role : roles) {
                         JSONObject roleJson = new JSONObject(role.toString());
-                        if (roleJson.getString("name").toString().equals(ROLE_AQUEDUCTE)) {
+                        if (roleJson.getString("name").equals(ROLE_AQUEDUCTE)) {
                             logInfo("Authentication Status: {}", "SUCCESS");
                             return true;
                         }

@@ -57,7 +57,7 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
             NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
             try {
                 List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
-                        importationSetupWithContext.getContextFileLink(),
+                        getContextLinks(importationSetupWithContext.getContextSources().values()),
                         importationSetupWithContext.getMatchingConfigList(),
                         dataForConvert,
                         importationSetupWithContext.getLayerSelected()
@@ -71,7 +71,6 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
         return null;
     }
 
-    //TODO: Limit?
     @Override
     public List<LinkedHashMap<String, Object>> loadDataFile(ImportationSetupWithContext importationSetup, String userToken) {
         try {
@@ -82,7 +81,7 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
                 List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(userToken, importationSetup, fieldsFiltered);
                 NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
                 List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
-                        importationSetup.getContextFileLink(),
+                        getContextLinks(importationSetup.getContextSources().values()),
                         importationSetup.getMatchingConfigList(),
                         fileConvertedIntoJSON,
                         importationSetup.getLayerSelected()
@@ -128,5 +127,10 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
         } else {
             return null;
         }
+    }
+
+    private List<String> getContextLinks(Collection<String> links) {
+        List<String> linkList = links.stream().map((e) -> e).collect(Collectors.toList());
+        return linkList;
     }
 }

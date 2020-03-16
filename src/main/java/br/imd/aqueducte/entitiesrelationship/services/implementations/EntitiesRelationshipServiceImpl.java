@@ -56,41 +56,45 @@ public class EntitiesRelationshipServiceImpl implements EntitiesRelationshipServ
                 }
                 for (Object entity : entities) {
                     Map<String, Object> entityMap = (Map<String, Object>) entity;
-                    if (typeProperties.equals(PropertyNGSILD.PROPERTY)) {
-                        if (entityMap.containsKey(property1)) {
-                            Object linkProperty1Value = getValue((Map<String, Object>) entityMap.get(property1));
-                            if (linkProperty1Value != null) {
-                                List<String> response = entityOperationsService.findByDocument(
+                    if (entityMap.containsKey(property1)) {
+                        Object linkProperty1Value = getValue((Map<String, Object>) entityMap.get(property1));
+                        if (linkProperty1Value != null) {
+                            List<String> response = new ArrayList<>();
+                            if (typeProperties.equals(PropertyNGSILD.PROPERTY)) {
+                                response = entityOperationsService.findByDocument(
                                         layer2,
                                         property2,
                                         linkProperty1Value,
                                         setup.getPropertiesLinked().get(1).isTemporaryProperty(),
                                         "",
                                         "");
-                                for (String idFromLayerEntity2 : response) {
-                                    boolean status = relationshipOperationsService.relationshipEntities(
+                            } else if (typeProperties.equals(PropertyNGSILD.GEOPROPERTY)) {
+                                // TODO: finByDistance
+                            }
+                            for (String idFromLayerEntity2 : response) {
+                                boolean status = relationshipOperationsService.relationshipEntities(
+                                        layer1,
+                                        layer2,
+                                        entityMap.get("id").toString(),
+                                        idFromLayerEntity2,
+                                        setup.getRelationships()
+                                );
+                                if (status)
+                                    statusOperation = STATUS_RELATIONSHIP_OK;
+
+                                if (statusOperation == STATUS_RELATIONSHIP_OK) {
+                                    deleteTempProperties(
+                                            setup.getPropertiesLinked(),
                                             layer1,
                                             layer2,
                                             entityMap.get("id").toString(),
                                             idFromLayerEntity2,
-                                            setup.getRelationships()
+                                            property1,
+                                            property2
                                     );
-                                    if (status)
-                                        statusOperation = STATUS_RELATIONSHIP_OK;
-
-                                    if (statusOperation == STATUS_RELATIONSHIP_OK) {
-                                        deleteTempProperties(
-                                                setup.getPropertiesLinked(),
-                                                layer1,
-                                                layer2,
-                                                entityMap.get("id").toString(),
-                                                idFromLayerEntity2,
-                                                property1,
-                                                property2
-                                        );
-                                    }
                                 }
                             }
+
                         }
                     }
                 }

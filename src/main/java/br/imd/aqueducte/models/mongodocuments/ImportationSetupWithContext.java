@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Map;
 
 @Document
 public class ImportationSetupWithContext extends ImportationSetup {
@@ -13,29 +14,18 @@ public class ImportationSetupWithContext extends ImportationSetup {
         super();
     }
 
-    @NotBlank(message = "Context file name required")
-    private String contextFileName;
-
-    @NotBlank(message = "Context file link required")
-    private String contextFileLink;
+    @NotBlank(message = "Context source(s) is required")
+    private Map<String, String> contextSources;
 
     @NotBlank(message = "Matching config list required")
     private List<MatchingConfig> matchingConfigList;
 
-    public String getContextFileName() {
-        return contextFileName;
+    public Map<String, String> getContextSources() {
+        return contextSources;
     }
 
-    public void setContextFileName(String contextFileName) {
-        this.contextFileName = contextFileName;
-    }
-
-    public String getContextFileLink() {
-        return contextFileLink;
-    }
-
-    public void setContextFileLink(String contextFileLink) {
-        this.contextFileLink = contextFileLink;
+    public void setContextSources(Map<String, String> contextSources) {
+        this.contextSources = contextSources;
     }
 
     public List<MatchingConfig> getMatchingConfigList() {
