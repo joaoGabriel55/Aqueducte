@@ -5,7 +5,6 @@ import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONArray;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
-import static br.imd.aqueducte.utils.PropertiesParams.*;
+import static br.imd.aqueducte.config.PropertiesParams.*;
 import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 

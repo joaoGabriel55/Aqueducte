@@ -1,10 +1,8 @@
 package br.imd.aqueducte.entitiesrelationship.queriesservices;
 
-import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -16,7 +14,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static br.imd.aqueducte.entitiesrelationship.queriesservices.EntityOperationsService.FIND_ENTITY_BY_DOCUMENT;
-import static br.imd.aqueducte.utils.PropertiesParams.URL_SGEOL;
+import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
 import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 

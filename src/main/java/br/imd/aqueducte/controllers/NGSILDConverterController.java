@@ -62,7 +62,7 @@ public class NGSILDConverterController {
         try {
             long startTime = System.nanoTime();
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
-                    importContextConfig.getContextLink(),
+                    importContextConfig.getContextLinks(),
                     importContextConfig.getMatchingConfigContent(),
                     importContextConfig.getDataContentForNGSILDConversion(),
                     layerPath

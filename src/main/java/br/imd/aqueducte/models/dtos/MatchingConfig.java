@@ -14,17 +14,11 @@ public class MatchingConfig {
      * Responsible for just link data between differents data sets <br/>
      * <b>Is transient<b/>
      */
-    private boolean isTransientField;
-
-    private boolean isPrimaryField;
+    private boolean isTemporaryField;
 
     private boolean isLocation;
 
     private List<GeoLocationConfig> geoLocationConfig;
-
-    private boolean hasRelationship;
-
-    private RelationshipConfig relationshipConfig;
 
     public String getContextName() {
         return contextName;
@@ -42,20 +36,12 @@ public class MatchingConfig {
         this.foreignProperty = foreignProperty;
     }
 
-    public boolean isTransientField() {
-        return isTransientField;
+    public boolean isTemporaryField() {
+        return isTemporaryField;
     }
 
-    public boolean isPrimaryField() {
-        return isPrimaryField;
-    }
-
-    public void setPrimaryField(boolean primaryField) {
-        isPrimaryField = primaryField;
-    }
-
-    public void setTransientField(boolean transientField) {
-        isTransientField = transientField;
+    public void setTemporaryField(boolean temporaryField) {
+        isTemporaryField = temporaryField;
     }
 
     public boolean isLocation() {
@@ -74,30 +60,12 @@ public class MatchingConfig {
         this.geoLocationConfig = geoLocationConfig;
     }
 
-    public boolean isHasRelationship() {
-        return hasRelationship;
-    }
-
-    public void setHasRelationship(boolean hasRelationship) {
-        this.hasRelationship = hasRelationship;
-    }
-
-    public RelationshipConfig getRelationshipConfig() {
-        return relationshipConfig;
-    }
-
-    public void setRelationshipConfig(RelationshipConfig relationshipConfig) {
-        this.relationshipConfig = relationshipConfig;
-    }
-
     public MatchingConfig fromLinkedHashMap(LinkedHashMap<String, Object> linkedHashMap) {
         this.contextName = (String) linkedHashMap.get("contextName");
         this.foreignProperty = (String) linkedHashMap.get("foreignProperty");
         this.isLocation = (boolean) linkedHashMap.get("isLocation");
         this.geoLocationConfig = (List<GeoLocationConfig>) linkedHashMap.get("geoLocationConfig");
-        this.hasRelationship = (boolean) linkedHashMap.get("hasRelationship");
-        this.relationshipConfig = (RelationshipConfig) linkedHashMap.get("relationshipConfig");
-        this.isTransientField = (boolean) linkedHashMap.get("isTransientField");
+        this.isTemporaryField = (boolean) linkedHashMap.get("temporaryField");
         return this;
     }
 }

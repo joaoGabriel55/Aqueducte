@@ -19,7 +19,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.List;
 
-import static br.imd.aqueducte.utils.PropertiesParams.URL_SGEOL;
+import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
 
 @RestController
 @RequestMapping("/sync")

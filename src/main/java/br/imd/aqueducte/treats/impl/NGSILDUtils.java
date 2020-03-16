@@ -4,6 +4,8 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 
 import java.util.*;
 
+import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
+
 @SuppressWarnings("ALL")
 public class NGSILDUtils {
     public String treatIdOrType(String key) {
@@ -144,5 +146,48 @@ public class NGSILDUtils {
             return property.getValue() != null && property.getValue() != "" && (isLocation != null && isLocation);
         }
         return false;
+    }
+
+    public LinkedHashMap<String, Object> propertyGeoJsonFormat(List<GeoLocationConfig> geoLocationConfig,
+                                                               Map.Entry<String, Object> property,
+                                                               List<Object> listTwoFields,
+                                                               LinkedHashMap<String, Object> properties,
+                                                               String contextName) {
+        HashMap<String, Object> valueGeoLocation = new HashMap<>();
+        for (GeoLocationConfig configElem : geoLocationConfig) {
+            if (configElem.getKey().equalsIgnoreCase(property.getKey()) && property.getValue() != null) {
+                if ((property.getValue() instanceof Map) &&
+                        checkIsGeoJson((Map<String, Object>) property.getValue())) {
+                    Map<String, Object> geoJsonMap = new HashMap<>();
+                    geoJsonMap.put("type", "GeoProperty");
+                    geoJsonMap.put("value", property.getValue());
+                    properties.put(contextName, geoJsonMap);
+                    property.setValue(null);
+                } else {
+                    if (!configElem.getTypeOfSelection().equals("twofields")) {
+                        convertToGeoJson(
+                                valueGeoLocation,
+                                property.getValue(),
+                                configElem
+                        );
+                        properties.put(contextName, valueGeoLocation);
+                        property.setValue(null);
+                    } else if (configElem.getTypeOfSelection().equals("twofields")) {
+                        listTwoFields.add(property.getValue());
+                        if (listTwoFields.size() == 2) {
+                            convertToGeoJson(
+                                    valueGeoLocation,
+                                    listTwoFields,
+                                    configElem
+                            );
+                            properties.put(contextName, valueGeoLocation);
+                            listTwoFields = new ArrayList<>();
+                        }
+                        property.setValue(null);
+                    }
+                }
+            }
+        }
+        return properties;
     }
 }

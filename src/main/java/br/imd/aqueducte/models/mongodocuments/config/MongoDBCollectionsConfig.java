@@ -1,6 +1,6 @@
 package br.imd.aqueducte.models.mongodocuments.config;
 
-import static br.imd.aqueducte.utils.PropertiesParams.TEST_ENV;
+import static br.imd.aqueducte.config.PropertiesParams.TEST_ENV;
 
 public class MongoDBCollectionsConfig {
 
