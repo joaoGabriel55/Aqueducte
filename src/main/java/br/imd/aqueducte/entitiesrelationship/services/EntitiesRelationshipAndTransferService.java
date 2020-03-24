@@ -1,12 +1,12 @@
 package br.imd.aqueducte.entitiesrelationship.services;
 
-import br.imd.aqueducte.models.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;
 
 @Component
-public interface EntitiesRelationshipService {
+public interface EntitiesRelationshipAndTransferService {
 
     int relationshipManyToMany(EntitiesRelationshipSetup setup);
 

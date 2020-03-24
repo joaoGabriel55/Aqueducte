@@ -1,8 +1,8 @@
 package br.imd.aqueducte.entitiesrelationship.controllers;
 
-import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipService;
-import br.imd.aqueducte.models.dtos.PropertyNGSILD;
-import br.imd.aqueducte.models.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.entitiesrelationship.business.EntitiesRelationshipSetupValidate;
+import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipAndTransferService;
+import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
 import br.imd.aqueducte.models.response.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,39 +10,39 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static br.imd.aqueducte.entitiesrelationship.services.implementations.EntitiesRelationshipServiceImpl.*;
-import static br.imd.aqueducte.models.enums.RelationshipType.*;
+import static br.imd.aqueducte.entitiesrelationship.services.implementations.EntitiesRelationshipAndTransferServiceImpl.*;
+import static br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType.*;
 
 @RestController
-@RequestMapping("/sync/entitiesRelationship")
+@RequestMapping("/sync/entitiesRelationshipAndTransfer")
 @CrossOrigin(origins = "*")
-public class EntitiesRelationshipController {
+public class EntitiesRelationshipAndTransferController {
 
     @Autowired
-    private EntitiesRelationshipService entitiesRelationshipService;
+    private EntitiesRelationshipAndTransferService entitiesRelationshipAndTransferService;
 
-    private boolean validatePropertyType(List<PropertyNGSILD> propertiesLinked) {
-        return propertiesLinked.get(0).getType().equals(propertiesLinked.get(1).getType());
-    }
+    @Autowired
+    private EntitiesRelationshipSetupValidate validator;
 
     // TODO: Auth
     @PostMapping
     public ResponseEntity<Response<String>> makeEntitiesRelationship(@RequestBody EntitiesRelationshipSetup setup) {
         Response<String> response = new Response<>();
-
         try {
             int status = STATUS_RELATIONSHIP_NOTHING_TODO;
-            if (validatePropertyType(setup.getPropertiesLinked())) {
+            if (validator.validatePropertyType(setup.getPropertiesLinked())) {
                 if (setup.getRelationshipType().equals(MANY_TO_MANY))
-                    status = this.entitiesRelationshipService.relationshipManyToMany(setup);
+                    status = this.entitiesRelationshipAndTransferService.relationshipManyToMany(setup);
                 else if (setup.getRelationshipType().equals(ONE_TO_MANY))
-                    status = this.entitiesRelationshipService.relationshipOneToMany(setup);
+                    status = this.entitiesRelationshipAndTransferService.relationshipOneToMany(setup);
                 else if (setup.getRelationshipType().equals(ONE_TO_ONE))
-                    status = this.entitiesRelationshipService.relationshipOneToOne(setup);
+                    status = this.entitiesRelationshipAndTransferService.relationshipOneToOne(setup);
+            } else {
+                response.getErrors().add("Types of Properties not equals");
+                return ResponseEntity.badRequest().body(response);
             }
 
             if (status == STATUS_RELATIONSHIP_ERROR) {
@@ -69,12 +69,9 @@ public class EntitiesRelationshipController {
         Response<Map<String, String>> response = new Response<>();
 
         try {
-            CompletableFuture<Integer> data1 = entitiesRelationshipService.transferLayerEntitiesAsync(layer1);
-            CompletableFuture<Integer> data2 = entitiesRelationshipService.transferLayerEntitiesAsync(layer2);
+            CompletableFuture<Integer> data1 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(layer1);
+            CompletableFuture<Integer> data2 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(layer2);
             CompletableFuture.allOf(data1, data2).join();
-
-//            int statusTransferData1 = entitiesRelationshipService.transferLayerEntities(layer1);
-//            int statusTransferData2 = entitiesRelationshipService.transferLayerEntities(layer2);
 
             Map<String, String> layersTransferResponse = new LinkedHashMap<>();
 

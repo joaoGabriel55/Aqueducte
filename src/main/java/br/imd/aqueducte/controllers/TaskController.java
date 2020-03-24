@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @RestController
@@ -48,15 +49,15 @@ public class TaskController extends GenericController {
     }
 
     @PostMapping
-    public ResponseEntity<Response<Task>> saveImportationSetupWithContext(@ModelAttribute("user-id") String userId,
+    public ResponseEntity<Response<Task>> saveImportationSetupWithContext(HttpServletRequest request,
                                                                           @RequestBody Task task
     ) {
         Response<Task> response = new Response<>();
-        if (checkUserIdIsEmpty(userId)) {
+        if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
             return ResponseEntity.badRequest().body(response);
         }
-        task.setUserId(userId);
+        task.setUserId(idUser);
         try {
             if (task.getId() != null) {
                 if (taskStatusService.findById(task.getId()).isPresent()) {

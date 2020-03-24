@@ -12,14 +12,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
+import static br.imd.aqueducte.config.PropertiesParams.USER_TOKEN;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
-import static br.imd.aqueducte.config.PropertiesParams.USER_TOKEN;
 
 @RestController
 @RequestMapping("/sync/withContextSetup")
@@ -82,7 +83,7 @@ public class ImportationSetupWithContextController extends GenericController {
     ) {
         Response<List<ImportationSetupWithContext>> response = new Response<>();
 
-        if (filePath == "" || filePath == null) {
+        if (filePath.equals("") || filePath == null) {
             response.getErrors().add("File path must be informed");
             return ResponseEntity.badRequest().body(response);
         }
@@ -99,15 +100,14 @@ public class ImportationSetupWithContextController extends GenericController {
 
     @PostMapping
     public ResponseEntity<Response<ImportationSetupWithContext>> saveImportationSetupWithContext(
-            @ModelAttribute("user-id") String userId,
+            HttpServletRequest request,
             @RequestBody ImportationSetupWithContext importationSetupWithContext) {
         Response<ImportationSetupWithContext> response = new Response<>();
-
-        if (checkUserIdIsEmpty(userId)) {
+        if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
             return ResponseEntity.badRequest().body(response);
         }
-        importationSetupWithContext.setIdUser(userId);
+        importationSetupWithContext.setIdUser(idUser);
         try {
             if (importationSetupWithContext.getId() == null) {
                 importationSetupWithContext.setDateCreated(new Date());
@@ -130,13 +130,13 @@ public class ImportationSetupWithContextController extends GenericController {
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<Response<ImportationSetupWithContext>> updateImportationSetupWithContext(
-            @ModelAttribute("user-id") String userId,
+            HttpServletRequest request,
             @PathVariable String id,
             @RequestBody ImportationSetupWithContext importationSetupWithoutContext
     ) {
         Response<ImportationSetupWithContext> response = new Response<>();
 
-        if (checkUserIdIsEmpty(userId)) {
+        if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
             return ResponseEntity.badRequest().body(response);
         } else if (!importationSetupWithoutContext.getId().equals(id)) {

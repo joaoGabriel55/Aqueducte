@@ -1,4 +1,4 @@
-package br.imd.aqueducte.models.dtos;
+package br.imd.aqueducte.models.entitiesrelationship.dtos;
 
 public class PropertyNGSILD {
     public static final String GEOPROPERTY = "GeoProperty";

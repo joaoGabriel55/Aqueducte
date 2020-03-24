@@ -22,7 +22,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
     <name>Aqueducte</name>
-    <description>Importator e conversor de dados</description>
+    <description>Import and Convert data to NGSI-LD protocol</description>
 
     <properties>
         <start-class>br.imd.aqueducte.AqueducteApplication</start-class>
@@ -72,6 +72,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>

@@ -1,13 +1,17 @@
-package br.imd.aqueducte.treats.impl;
+package br.imd.aqueducte.treats;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
 import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
 
 @SuppressWarnings("ALL")
 public class NGSILDUtils {
+    private static final String CONTEXT_SOURCE = URL_SGEOL + "context-sources/";
+
     public String treatIdOrType(String key) {
         if (key.equals("type") || key.equals("id")) {
             return key + "_";
@@ -31,8 +35,10 @@ public class NGSILDUtils {
         List<String> contextListDefault = new ArrayList<>();
         contextListDefault
                 .add("https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld");
+
         if (contextList != null) {
-            contextListDefault.addAll(contextList);
+            List<String> contextLinks = contextList.stream().map((link) -> CONTEXT_SOURCE + link).collect(Collectors.toList());
+            contextListDefault.addAll(contextLinks);
         }
 
         linkedHashMapNGSILD.put("@context", contextListDefault);

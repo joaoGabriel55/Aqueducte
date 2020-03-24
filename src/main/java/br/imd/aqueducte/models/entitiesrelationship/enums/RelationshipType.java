@@ -1,4 +1,4 @@
-package br.imd.aqueducte.models.enums;
+package br.imd.aqueducte.models.entitiesrelationship.enums;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
