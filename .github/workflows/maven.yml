@@ -7,8 +7,9 @@ jobs:
 
     runs-on: ubuntu-latest
     
-    docker:
-      - image: mongo:3.4.4-jessie
+    container: 
+      image: mongo:3.4.4-jessie
+      
         
     steps:
     - uses: actions/checkout@v1
