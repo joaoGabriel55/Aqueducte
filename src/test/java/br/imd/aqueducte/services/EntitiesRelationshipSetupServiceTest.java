@@ -2,6 +2,7 @@ package br.imd.aqueducte.services;
 
 import br.imd.aqueducte.AqueducteApplicationTests;
 import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipSetupService;
+import br.imd.aqueducte.models.entitiesrelationship.enums.EntitiesRelationshipSetupStatus;
 import br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType;
 import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
 import org.junit.After;
@@ -36,16 +37,19 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
         EntitiesRelationshipSetup setup1 = new EntitiesRelationshipSetup();
         setup1.setIdUser("123456");
         setup1.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup1.setStatus(EntitiesRelationshipSetupStatus.DONE);
         service.createOrUpdate(setup1);
 
         EntitiesRelationshipSetup setup2 = new EntitiesRelationshipSetup();
         setup2.setIdUser("123456");
         setup2.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup2.setStatus(EntitiesRelationshipSetupStatus.DONE);
         service.createOrUpdate(setup2);
 
         EntitiesRelationshipSetup setup3 = new EntitiesRelationshipSetup();
         setup3.setIdUser("123456");
         setup3.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup3.setStatus(EntitiesRelationshipSetupStatus.DONE);
         service.createOrUpdate(setup3);
 
         setupsToRemove.add(setup1.getId());
@@ -65,6 +69,7 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
         EntitiesRelationshipSetup setup = new EntitiesRelationshipSetup();
         setup.setIdUser("123456");
         setup.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup.setStatus(EntitiesRelationshipSetupStatus.DONE);
         EntitiesRelationshipSetup setupCreated = service.createOrUpdate(setup);
         Optional<EntitiesRelationshipSetup> setupFound = service.findById(setupCreated.getId());
         assertTrue(setupFound.isPresent());
@@ -72,10 +77,45 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
     }
 
     @Test
+    public void findByStatusTest() {
+        EntitiesRelationshipSetup setup1 = new EntitiesRelationshipSetup();
+        setup1.setIdUser("123456");
+        setup1.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup1.setStatus(EntitiesRelationshipSetupStatus.PENDING);
+        service.createOrUpdate(setup1);
+
+        EntitiesRelationshipSetup setup2 = new EntitiesRelationshipSetup();
+        setup2.setIdUser("123456");
+        setup2.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup2.setStatus(EntitiesRelationshipSetupStatus.DONE);
+        service.createOrUpdate(setup2);
+
+        EntitiesRelationshipSetup setup3 = new EntitiesRelationshipSetup();
+        setup3.setIdUser("123456");
+        setup3.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup3.setStatus(EntitiesRelationshipSetupStatus.PENDING);
+        service.createOrUpdate(setup3);
+
+        setupsToRemove.add(setup1.getId());
+        setupsToRemove.add(setup2.getId());
+        setupsToRemove.add(setup3.getId());
+
+        List<EntitiesRelationshipSetup> setupsFound = service.findByStatus(
+                EntitiesRelationshipSetupStatus.PENDING.name()
+        );
+        assertEquals(2, setupsFound.size());
+
+        service.delete(setup1.getId());
+        service.delete(setup2.getId());
+        service.delete(setup3.getId());
+    }
+
+    @Test
     public void saveTest() {
         EntitiesRelationshipSetup setup = new EntitiesRelationshipSetup();
         setup.setIdUser("123456");
         setup.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup.setStatus(EntitiesRelationshipSetupStatus.DONE);
         EntitiesRelationshipSetup setupCreated = service.createOrUpdate(setup);
         assertEquals(setup, setupCreated);
         service.delete(setupCreated.getId());
@@ -86,6 +126,7 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
         EntitiesRelationshipSetup setup = new EntitiesRelationshipSetup();
         setup.setIdUser("123456");
         setup.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup.setStatus(EntitiesRelationshipSetupStatus.DONE);
         EntitiesRelationshipSetup setupCreated = service.createOrUpdate(setup);
         setup.setRelationshipType(RelationshipType.ONE_TO_MANY);
         EntitiesRelationshipSetup setupUpdated = service.createOrUpdate(setupCreated);
@@ -98,6 +139,7 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
         EntitiesRelationshipSetup setup = new EntitiesRelationshipSetup();
         setup.setIdUser("123456");
         setup.setRelationshipType(RelationshipType.ONE_TO_ONE);
+        setup.setStatus(EntitiesRelationshipSetupStatus.DONE);
         EntitiesRelationshipSetup setupCreated = service.createOrUpdate(setup);
         String setupIdDeleted = service.delete(setupCreated.getId());
         assertEquals(setupCreated.getId(), setupIdDeleted);

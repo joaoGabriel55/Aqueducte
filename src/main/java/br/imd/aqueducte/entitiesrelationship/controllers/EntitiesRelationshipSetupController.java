@@ -59,6 +59,25 @@ public class EntitiesRelationshipSetupController extends GenericController {
         }
     }
 
+    @GetMapping("/")
+    public ResponseEntity<Response<List<EntitiesRelationshipSetup>>> getByStatus(
+            @RequestParam("status") String status) {
+        Response<List<EntitiesRelationshipSetup>> response = new Response<>();
+        if (!validator.validateStatusParam(status)) {
+            response.getErrors().add("Status not exists");
+            return ResponseEntity.badRequest().body(response);
+        }
+        try {
+            List<EntitiesRelationshipSetup> entitiesRelationshipSetups = service.findByStatus(status);
+            response.setData(entitiesRelationshipSetups);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getErrors().add(e.getLocalizedMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<Response<EntitiesRelationshipSetup>> save(
             HttpServletRequest request,

@@ -1,4 +1,4 @@
-package br.imd.aqueducte.filters;
+package br.imd.aqueducte.security.filters;
 
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.security.PermissionChecker;

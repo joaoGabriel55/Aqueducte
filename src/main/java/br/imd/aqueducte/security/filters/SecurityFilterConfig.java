@@ -1,4 +1,4 @@
-package br.imd.aqueducte.filters;
+package br.imd.aqueducte.security.filters;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

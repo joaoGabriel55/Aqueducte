@@ -2,6 +2,7 @@ package br.imd.aqueducte.models.entitiesrelationship.mongodocuments;
 
 import br.imd.aqueducte.models.entitiesrelationship.dtos.LayerSetup;
 import br.imd.aqueducte.models.entitiesrelationship.dtos.PropertyNGSILD;
+import br.imd.aqueducte.models.entitiesrelationship.enums.EntitiesRelationshipSetupStatus;
 import br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,6 +49,9 @@ public class EntitiesRelationshipSetup {
      */
     @NotBlank
     private Map<String, String> relationships;
+
+    @NotBlank
+    private EntitiesRelationshipSetupStatus status;
 
     @CreatedDate
     private Date dateCreated;

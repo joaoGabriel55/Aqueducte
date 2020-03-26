@@ -7,6 +7,8 @@ import br.imd.aqueducte.services.implementations.GenericServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class EntitiesRelationshipSetupServiceImpl
         extends GenericServiceImpl<EntitiesRelationshipSetup>
@@ -15,8 +17,8 @@ public class EntitiesRelationshipSetupServiceImpl
     @Autowired
     private EntitiesRelationshipSetupRepository repository;
 
-//    @Override
-//    public List<EntitiesRelationshipSetup> findByStatus(String status) {
-//        return this.repository.findByStatus(status);
-//    }
+    @Override
+    public List<EntitiesRelationshipSetup> findByStatus(String status) {
+        return this.repository.findByStatus(status);
+    }
 }

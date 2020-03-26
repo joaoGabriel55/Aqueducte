@@ -1,8 +1,8 @@
 package br.imd.aqueducte.entitiesrelationship.services.implementations;
 
+import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipAndTransferService;
 import br.imd.aqueducte.entitiesrelationship.sgeolqueriesservices.EntityOperationsService;
 import br.imd.aqueducte.entitiesrelationship.sgeolqueriesservices.RelationshipOperationsService;
-import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipAndTransferService;
 import br.imd.aqueducte.models.entitiesrelationship.dtos.PropertyNGSILD;
 import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
 import br.imd.aqueducte.services.ImportNGSILDDataService;
