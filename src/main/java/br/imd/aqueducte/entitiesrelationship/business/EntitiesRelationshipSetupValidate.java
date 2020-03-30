@@ -86,17 +86,19 @@ public class EntitiesRelationshipSetupValidate {
     private boolean validateRelationshipsProperties(EntitiesRelationshipSetup setup) {
         if (setup.getRelationships().size() == 0 || setup.getRelationships().size() > 2)
             return false;
-        for (LayerSetup layerSetup : setup.getLayerSetup()) {
-            for (Map.Entry<String, String> relationship : setup.getRelationships().entrySet()) {
-                if (relationship.getKey().equals("") ||
-                        (relationship.getValue() == null || relationship.getValue().equals(""))
-                ) {
-                    return false;
-                } else if (!relationship.getKey().equals(layerSetup.getPath())) {
-                    return false;
-                }
+
+        if (!setup.getRelationships().containsKey(setup.getLayerSetup().get(0).getPath()) ||
+                !setup.getRelationships().containsKey(setup.getLayerSetup().get(1).getPath()))
+            return false;
+
+        for (Map.Entry<String, String> relationship : setup.getRelationships().entrySet()) {
+            if (relationship.getKey().equals("") ||
+                    (relationship.getValue() == null || relationship.getValue().equals(""))
+            ) {
+                return false;
             }
         }
+
         return true;
     }
 
