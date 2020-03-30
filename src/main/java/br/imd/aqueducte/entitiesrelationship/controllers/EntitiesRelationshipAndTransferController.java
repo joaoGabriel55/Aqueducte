@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,7 +34,8 @@ public class EntitiesRelationshipAndTransferController {
         Response<String> response = new Response<>();
         try {
             int status = STATUS_RELATIONSHIP_NOTHING_TODO;
-            if (validator.validatePropertyType(setup.getPropertiesLinked())) {
+            List<String> validatorMessage = validator.validateEntitiesRelationshipSetup(setup);
+            if (validatorMessage.size() == 0) {
                 if (setup.getRelationshipType().equals(MANY_TO_MANY))
                     status = this.entitiesRelationshipAndTransferService.relationshipManyToMany(setup);
                 else if (setup.getRelationshipType().equals(ONE_TO_MANY))
@@ -41,7 +43,7 @@ public class EntitiesRelationshipAndTransferController {
                 else if (setup.getRelationshipType().equals(ONE_TO_ONE))
                     status = this.entitiesRelationshipAndTransferService.relationshipOneToOne(setup);
             } else {
-                response.getErrors().add("Types of Properties not equals");
+                response.getErrors().addAll(validatorMessage);
                 return ResponseEntity.badRequest().body(response);
             }
 

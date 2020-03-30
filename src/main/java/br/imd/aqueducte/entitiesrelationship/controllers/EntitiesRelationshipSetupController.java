@@ -87,7 +87,8 @@ public class EntitiesRelationshipSetupController extends GenericController {
             response.getErrors().add("Without user id");
             return ResponseEntity.badRequest().body(response);
         }
-        if (validator.validatePropertyType(entitiesRelationshipSetup.getPropertiesLinked())) {
+        List<String> validatorMessage = validator.validateEntitiesRelationshipSetup(entitiesRelationshipSetup);
+        if (validatorMessage.size() == 0) {
             entitiesRelationshipSetup.setIdUser(idUser);
             try {
                 entitiesRelationshipSetup.setDateCreated(new Date());
@@ -101,7 +102,7 @@ public class EntitiesRelationshipSetupController extends GenericController {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
         }
-        response.getErrors().add("Types of Properties not equals");
+        response.getErrors().addAll(validatorMessage);
         return ResponseEntity.badRequest().body(response);
     }
 
@@ -116,6 +117,11 @@ public class EntitiesRelationshipSetupController extends GenericController {
             return ResponseEntity.badRequest().body(response);
         } else if (!entitiesRelationshipSetup.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
+            return ResponseEntity.badRequest().body(response);
+        }
+        List<String> validatorMessage = validator.validateEntitiesRelationshipSetup(entitiesRelationshipSetup);
+        if (validatorMessage.size() != 0) {
+            response.getErrors().addAll(validatorMessage);
             return ResponseEntity.badRequest().body(response);
         }
         try {
