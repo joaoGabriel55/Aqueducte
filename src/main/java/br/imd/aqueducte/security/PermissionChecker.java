@@ -11,10 +11,10 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.config.PropertiesParams.ROLE_AQUEDUCTE;
 import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 
 public class PermissionChecker {
@@ -23,9 +23,9 @@ public class PermissionChecker {
      * Check if User from IDM have permission to access Smart Sync API.
      */
     public boolean checkSmartSyncPermissionAccess(String userToken, HttpServletRequest req) {
-        if (userToken != "" && userToken != null) {
-
-            HttpGet request = new HttpGet(URL_SGEOL + "idm/users/info");
+        if (userToken != null && !userToken.equals("")) {
+            String IDM_URL = URL_SGEOL.replace("/v2", "");
+            HttpGet request = new HttpGet(IDM_URL + "idm/users/info");
 
             // add request headers
             request.addHeader("user-token", userToken);

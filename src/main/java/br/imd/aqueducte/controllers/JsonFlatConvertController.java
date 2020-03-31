@@ -1,7 +1,7 @@
 package br.imd.aqueducte.controllers;
 
 import br.imd.aqueducte.models.response.Response;
-import br.imd.aqueducte.treats.JsonFlatConvertTreat;
+import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,12 +20,12 @@ public class JsonFlatConvertController {
      * Json data converter to flat json data.
      * */
     @PostMapping
-    public ResponseEntity<Response<Object>> jsonFlatConvert(@RequestBody Object dataForConversion) {
+    public ResponseEntity<Response<Object>> getFlatJSON(@RequestBody Object dataForConversion) {
 
         Response<Object> response = new Response<>();
-        JsonFlatConvertTreat jsonFlatConvertTreat = new JsonFlatConvertTreat();
+        JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
         try {
-            Object jsonFlatData = jsonFlatConvertTreat.getJsonFlat(dataForConversion);
+            Object jsonFlatData = jsonFlatTreatImpl.getFlatJSON(dataForConversion);
             response.setData(jsonFlatData);
             logInfo("POST /jsonFlat", null);
         } catch (Exception e) {
@@ -37,12 +37,12 @@ public class JsonFlatConvertController {
     }
 
     @PostMapping(value = "/arrayKeys")
-    public ResponseEntity<Response<List<String>>> getKeysFromArrayFields(@RequestBody Map<String, Object> dataForConversion) {
+    public ResponseEntity<Response<List<String>>> getKeysCollectionFromJSON(@RequestBody Map<String, Object> dataForConversion) {
 
         Response<List<String>> response = new Response<>();
-        JsonFlatConvertTreat jsonFlatConvertTreat = new JsonFlatConvertTreat();
+        JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
         try {
-            List<String> jsonFlatCollection = jsonFlatConvertTreat.getArrayKeysFromJsonData(dataForConversion);
+            List<String> jsonFlatCollection = jsonFlatTreatImpl.getKeysCollectionFromJSON(dataForConversion);
             response.setData(jsonFlatCollection);
             logInfo("POST /arrayKeys", null);
         } catch (Exception e) {

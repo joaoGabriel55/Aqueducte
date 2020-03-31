@@ -4,7 +4,7 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
-import br.imd.aqueducte.treats.JsonFlatConvertTreat;
+import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.FILE;
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.WEB_SERVICE;
 
+@SuppressWarnings("ALL")
 @Service
 public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
         extends LoadDataNGSILDByImportSetup
@@ -35,22 +36,22 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
 
     @Override
     public List<LinkedHashMap<String, Object>> loadDataWebService(ImportationSetupWithoutContext importationSetup) {
-        JsonFlatConvertTreat jsonFlatConvertTreat = new JsonFlatConvertTreat();
+        JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
 
         // Load data from Webservice
         Map<String, Object> responseWSResult = loadDataWebservice(importationSetup);
         Object dataFound = null;
         if (responseWSResult.get("data") instanceof ArrayList) {
-            List<Map<String, Object>> responseListWSResultFlat = (List<Map<String, Object>>) jsonFlatConvertTreat.getJsonFlat(responseWSResult.get("data"));
+            List<Map<String, Object>> responseListWSResultFlat = (List<Map<String, Object>>) jsonFlatTreatImpl.getFlatJSON(responseWSResult.get("data"));
             dataFound = responseListWSResultFlat;
         } else {
-            Map<String, Object> responseWSResultFlat = (Map<String, Object>) jsonFlatConvertTreat.getJsonFlat(responseWSResult.get("data"));
+            Map<String, Object> responseWSResultFlat = (Map<String, Object>) jsonFlatTreatImpl.getFlatJSON(responseWSResult.get("data"));
             dataFound = findDataRecursive(responseWSResultFlat, importationSetup.getDataSelected());
         }
         // Get data chosen
         if (dataFound instanceof List) {
             // Flat Json collection
-            List<Object> dataCollectionFlat = (List<Object>) jsonFlatConvertTreat.getJsonFlat(dataFound);
+            List<Object> dataCollectionFlat = (List<Object>) jsonFlatTreatImpl.getFlatJSON(dataFound);
             List<Map<String, Object>> dataForConvert = filterFieldsSelectedIntoArray(
                     dataCollectionFlat,
                     importationSetup

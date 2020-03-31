@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.config.PropertiesParams.APP_TOKEN;
 import static br.imd.aqueducte.config.PropertiesParams.USER_TOKEN;
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 
 @RestController
 @RequestMapping("/sync/importToSgeol")
@@ -43,7 +43,6 @@ public class ImportDataToSGEOLController {
     @Autowired
     private TaskStatusService taskStatusService;
 
-    @SuppressWarnings("rawtypes")
     @PostMapping(value = {"/{layer}", "/{layer}/{taskId}"})
     public ResponseEntity<Response<List<String>>> importNGSILDData(@RequestHeader(APP_TOKEN) String appToken,
                                                                    @RequestHeader(USER_TOKEN) String userToken,
@@ -59,7 +58,6 @@ public class ImportDataToSGEOLController {
         return importData(appToken, userToken, layer, response, taskId, ngsildData);
     }
 
-    @SuppressWarnings("rawtypes")
     @PostMapping(value = {"/{layer}/context", "/{layer}/{taskId}/context"})
     public ResponseEntity<Response<List<String>>> importNGSILDDataContext(
             @RequestHeader(APP_TOKEN) String appToken,

@@ -1,4 +1,4 @@
-package br.imd.aqueducte.models.mongodocuments.config;
+package br.imd.aqueducte.models.config;
 
 import static br.imd.aqueducte.config.PropertiesParams.TEST_ENV;
 
