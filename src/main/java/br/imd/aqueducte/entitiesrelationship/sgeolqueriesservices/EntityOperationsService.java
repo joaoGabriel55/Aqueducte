@@ -1,4 +1,4 @@
-package br.imd.aqueducte.entitiesrelationship.queriesservices;
+package br.imd.aqueducte.entitiesrelationship.sgeolqueriesservices;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -28,6 +28,7 @@ public class EntityOperationsService {
     private static final String FIND_ENTITY_BY_ID = "/find-by-id";
     private static final String PREPROCESSING_LAYER_ENTITIES = "preprocessing/";
     private static final String TRANSFER_LAYER_ENTITIES = "preprocessing/transfer-layer-entities/";
+    private static final String CONTAINED_IN = "/contained-in";
 
     private static EntityOperationsService instance;
 
@@ -116,14 +117,44 @@ public class EntityOperationsService {
             e.printStackTrace();
         }
         return new ArrayList<>();
-//        create headers
-//        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-//        headers.put(APP_TOKEN, appToken);
-//        headers.put(USER_TOKEN, userToken);
-//        requestsUtils.setHeadersParams(headers, request);
-
     }
 
+    /**
+     * This method call the SGEOL contained-in service. That service, look entities contained in a specific layer,
+     * using GeoProperties
+     */
+    public List<String> findContainedIn(String layer,
+                                        String containerLayer,
+                                        String containerEntityId,
+                                        int limit,
+                                        int offset,
+                                        String appToken,
+                                        String userToken) {
+        String uri = URL_SGEOL + layer + CONTAINED_IN +
+                "?container-layer=" + containerLayer +
+                "&container-entity=" + containerEntityId +
+                "&limit=" + limit +
+                "&offset=" + offset;
+        HttpGet request = new HttpGet(uri);
+        try {
+            HttpResponse response = getHttpClientInstance().execute(request);
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                ObjectMapper mapper = new ObjectMapper();
+                List<Map<String, Object>> jsonArray = mapper.readValue(
+                        readBodyReq(response.getEntity().getContent()), List.class
+                );
+                List<String> entitiesId = jsonArray
+                        .stream()
+                        .map((elem) -> elem.get("id").toString())
+                        .collect(Collectors.toList());
+
+                return entitiesId;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new ArrayList<>();
+    }
 
     public boolean tranferPreprocessingLayerEntitesToFinalLayer(String preprocessingLayer, String finalLayer) throws IOException {
         HttpPost request = new HttpPost(

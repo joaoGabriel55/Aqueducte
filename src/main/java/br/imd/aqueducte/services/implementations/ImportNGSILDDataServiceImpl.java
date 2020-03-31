@@ -15,8 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.config.PropertiesParams.*;
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
@@ -38,6 +38,9 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
     @Override
     public List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws IOException {
         String url = URL_SGEOL + layer + "/batch";
+        if (layer.contains("preprocessing"))
+            url = URL_SGEOL + "preprocessing/" + layer;
+
         HttpResponse responseSGEOL = getHttpClientInstance().execute(requestConfigParams(url, appToken, userToken, jsonArray));
 
         if (responseSGEOL.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {

@@ -4,11 +4,12 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.treats.NGSILDTreat;
+import br.imd.aqueducte.utils.NGSILDUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
 
-import static br.imd.aqueducte.treats.impl.NGSILDUtils.removeSpacesForeignProperty;
+import static br.imd.aqueducte.utils.NGSILDUtils.removeSpacesForeignProperty;
 
 // TODO: Create a method for treat geolocation on both conversions cases
 @SuppressWarnings("ALL")
@@ -86,12 +87,11 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             String layerPath) {
         List<LinkedHashMap<String, Object>> listNGSILD = new ArrayList<>();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
-        List<String> contextList = contextLinks;
         Map<Object, Integer> indexes = new HashMap<>();
         for (Map<String, Object> element : contentForConvert) {
             NGSILDUtils ngsildUtils = new NGSILDUtils();
             UUID uuid = UUID.randomUUID();
-            ngsildUtils.initDefaultProperties(properties, contextList, layerPath, uuid.toString());
+            ngsildUtils.initDefaultProperties(properties, contextLinks, layerPath, uuid.toString());
             List<Object> listTwoFields = new ArrayList<>();
             for (Entry<String, Object> property : element.entrySet()) {
                 String key = property.getKey();

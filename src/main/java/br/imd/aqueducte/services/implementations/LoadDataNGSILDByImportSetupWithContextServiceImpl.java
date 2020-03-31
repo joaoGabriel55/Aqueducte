@@ -3,7 +3,7 @@ package br.imd.aqueducte.services.implementations;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
-import br.imd.aqueducte.treats.JsonFlatConvertTreat;
+import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
 import org.springframework.stereotype.Service;
@@ -38,16 +38,16 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
 
     @Override
     public List<LinkedHashMap<String, Object>> loadDataWebService(ImportationSetupWithContext importationSetupWithContext) {
-        JsonFlatConvertTreat jsonFlatConvertTreat = new JsonFlatConvertTreat();
+        JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
 
         // Load data from Webservice
         Map<String, Object> responseWSResult = loadDataWebservice(importationSetupWithContext);
-        Map<String, Object> responseWSResultFlat = (Map<String, Object>) jsonFlatConvertTreat.getJsonFlat(responseWSResult);
+        Map<String, Object> responseWSResultFlat = (Map<String, Object>) jsonFlatTreatImpl.getFlatJSON(responseWSResult);
         // Get data chosen
         Object dataFound = findDataRecursive(responseWSResultFlat, importationSetupWithContext.getDataSelected());
         if (dataFound instanceof List) {
             // Flat Json collection
-            List<Object> dataCollectionFlat = (List<Object>) jsonFlatConvertTreat.getJsonFlat(dataFound);
+            List<Object> dataCollectionFlat = (List<Object>) jsonFlatTreatImpl.getFlatJSON(dataFound);
             List<Map<String, Object>> dataForConvert = filterFieldsSelectedIntoArray(
                     dataCollectionFlat,
                     importationSetupWithContext

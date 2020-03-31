@@ -1,4 +1,6 @@
-package br.imd.aqueducte.treats;
+package br.imd.aqueducte.treats.impl;
+
+import br.imd.aqueducte.treats.JsonFlatTreat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,12 +11,12 @@ import java.util.stream.Collectors;
 import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
 
 @SuppressWarnings("ALL")
-public class JsonFlatConvertTreat {
+public class JsonFlatTreatImpl implements JsonFlatTreat {
 
     private String keyPath = "";
 
-
-    public Object getJsonFlat(Object dataForConversion) {
+    @Override
+    public Object getFlatJSON(Object dataForConversion) {
         if (dataForConversion instanceof Map) {
             Map<String, Object> result = new HashMap<>();
             Map<String, Object> dataMap = (Map<String, Object>) dataForConversion;
@@ -37,7 +39,8 @@ public class JsonFlatConvertTreat {
         return null;
     }
 
-    public List<String> getArrayKeysFromJsonData(Map<String, Object> dataForConversion) {
+    @Override
+    public List<String> getKeysCollectionFromJSON(Map<String, Object> dataForConversion) {
         return getKeysArray(dataForConversion);
     }
 

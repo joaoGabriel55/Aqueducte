@@ -1,4 +1,4 @@
-package br.imd.aqueducte.filters;
+package br.imd.aqueducte.security.filters;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

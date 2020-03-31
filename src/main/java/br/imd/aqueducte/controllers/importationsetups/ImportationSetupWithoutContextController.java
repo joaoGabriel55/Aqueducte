@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -91,15 +92,15 @@ public class ImportationSetupWithoutContextController extends GenericController 
 
     @PostMapping
     public ResponseEntity<Response<ImportationSetupWithoutContext>> saveImportationSetupWithoutContext(
-            @ModelAttribute("user-id") String userId,
+            HttpServletRequest request,
             @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext) {
         Response<ImportationSetupWithoutContext> response = new Response<>();
 
-        if (checkUserIdIsEmpty(userId)) {
+        if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
             return ResponseEntity.badRequest().body(response);
         }
-        importationSetupWithoutContext.setIdUser(userId);
+        importationSetupWithoutContext.setIdUser(idUser);
         try {
             if (importationSetupWithoutContext.getId() == null) {
                 importationSetupWithoutContext.setDateCreated(new Date());
@@ -122,13 +123,13 @@ public class ImportationSetupWithoutContextController extends GenericController 
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<Response<ImportationSetupWithoutContext>> updateImportationSetupWithoutContext(
-            @ModelAttribute("user-id") String userId,
+            HttpServletRequest request,
             @PathVariable String id,
             @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext
     ) {
         Response<ImportationSetupWithoutContext> response = new Response<>();
 
-        if (checkUserIdIsEmpty(userId)) {
+        if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
             return ResponseEntity.badRequest().body(response);
         } else if (!importationSetupWithoutContext.getId().equals(id)) {
