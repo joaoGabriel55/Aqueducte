@@ -4,12 +4,12 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.treats.NGSILDTreat;
-import br.imd.aqueducte.treats.NGSILDUtils;
+import br.imd.aqueducte.utils.NGSILDUtils;
 
 import java.util.*;
 import java.util.Map.Entry;
 
-import static br.imd.aqueducte.treats.NGSILDUtils.removeSpacesForeignProperty;
+import static br.imd.aqueducte.utils.NGSILDUtils.removeSpacesForeignProperty;
 
 // TODO: Create a method for treat geolocation on both conversions cases
 @SuppressWarnings("ALL")

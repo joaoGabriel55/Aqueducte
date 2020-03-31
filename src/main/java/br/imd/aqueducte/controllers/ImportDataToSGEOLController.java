@@ -43,7 +43,6 @@ public class ImportDataToSGEOLController {
     @Autowired
     private TaskStatusService taskStatusService;
 
-    @SuppressWarnings("rawtypes")
     @PostMapping(value = {"/{layer}", "/{layer}/{taskId}"})
     public ResponseEntity<Response<List<String>>> importNGSILDData(@RequestHeader(APP_TOKEN) String appToken,
                                                                    @RequestHeader(USER_TOKEN) String userToken,

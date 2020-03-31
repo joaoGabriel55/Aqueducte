@@ -1,4 +1,4 @@
-package br.imd.aqueducte.treats;
+package br.imd.aqueducte.utils;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 

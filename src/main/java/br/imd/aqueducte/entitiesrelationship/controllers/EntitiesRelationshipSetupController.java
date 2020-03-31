@@ -3,6 +3,7 @@ package br.imd.aqueducte.entitiesrelationship.controllers;
 import br.imd.aqueducte.controllers.GenericController;
 import br.imd.aqueducte.entitiesrelationship.business.EntitiesRelationshipSetupValidate;
 import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipSetupService;
+import br.imd.aqueducte.models.entitiesrelationship.enums.EntitiesRelationshipSetupStatus;
 import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
 import br.imd.aqueducte.models.response.Response;
 import com.mongodb.DuplicateKeyException;
@@ -88,23 +89,25 @@ public class EntitiesRelationshipSetupController extends GenericController {
             return ResponseEntity.badRequest().body(response);
         }
         List<String> validatorMessage = validator.validateEntitiesRelationshipSetup(entitiesRelationshipSetup);
-        if (validatorMessage.size() == 0) {
-            entitiesRelationshipSetup.setIdUser(idUser);
-            try {
-                entitiesRelationshipSetup.setDateCreated(new Date());
-                entitiesRelationshipSetup.setDateModified(new Date());
-                EntitiesRelationshipSetup entitiesRelationshipSetups = service.createOrUpdate(entitiesRelationshipSetup);
-                response.setData(entitiesRelationshipSetups);
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            } catch (Exception e) {
-                e.printStackTrace();
-                response.getErrors().add(e.getLocalizedMessage());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-            }
+        if (validatorMessage.size() != 0 && !entitiesRelationshipSetup.getStatus().equals(EntitiesRelationshipSetupStatus.PENDING)) {
+            response.getErrors().addAll(validatorMessage);
+            return ResponseEntity.badRequest().body(response);
         }
-        response.getErrors().addAll(validatorMessage);
-        return ResponseEntity.badRequest().body(response);
+
+        entitiesRelationshipSetup.setIdUser(idUser);
+        try {
+            entitiesRelationshipSetup.setDateCreated(new Date());
+            entitiesRelationshipSetup.setDateModified(new Date());
+            EntitiesRelationshipSetup entitiesRelationshipSetups = service.createOrUpdate(entitiesRelationshipSetup);
+            response.setData(entitiesRelationshipSetups);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.getErrors().add(e.getLocalizedMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
+
 
     @PatchMapping("/{id}")
     public ResponseEntity<Response<EntitiesRelationshipSetup>> update(
@@ -120,7 +123,7 @@ public class EntitiesRelationshipSetupController extends GenericController {
             return ResponseEntity.badRequest().body(response);
         }
         List<String> validatorMessage = validator.validateEntitiesRelationshipSetup(entitiesRelationshipSetup);
-        if (validatorMessage.size() != 0) {
+        if (validatorMessage.size() != 0 && !entitiesRelationshipSetup.getStatus().equals(EntitiesRelationshipSetupStatus.PENDING)) {
             response.getErrors().addAll(validatorMessage);
             return ResponseEntity.badRequest().body(response);
         }

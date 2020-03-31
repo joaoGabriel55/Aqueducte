@@ -17,19 +17,19 @@ public class EntitiesRelationshipSetupValidate {
     public List<String> validateEntitiesRelationshipSetup(EntitiesRelationshipSetup setup) {
         List<String> errors = new ArrayList<>();
         if (!validatePropertyType(setup.getPropertiesLinked()))
-            errors.add("Types of Properties not equals");
+            errors.add("Tipos de propriedades diferentes");
         if (!validateLayerSetup(setup.getLayerSetup()))
-            errors.add("Layer path and name is required");
+            errors.add("Layer path e o nome são requeridos");
         if (!validateContextSources(setup.getLayerSetup()))
-            errors.add("Context Source is required");
+            errors.add("Fontes de Contexto são necessárias");
         if (!validatePropertiesLinked(setup.getPropertiesLinked()))
-            errors.add("Property Linked must be contain name or entity id");
+            errors.add("Propriedades devem conter o nome ou o ID da Entity");
         if (!validateRelationshipType(setup.getRelationshipType()))
-            errors.add("Relationship type is invalid. Must be: \"ONE_TO_ONE\", \"ONE_TO_MANY\" or \"MANY_TO_MANY\"");
+            errors.add("Tipo de relacionamento é inválido. Deve ser: \"ONE_TO_ONE\", \"ONE_TO_MANY\" or \"MANY_TO_MANY\"");
         if (!validateRelationshipsProperties(setup))
-            errors.add("Relationships are invalid");
+            errors.add("Relacionamento(s) inválido(s)");
         if (!validateStatus(setup.getStatus()))
-            errors.add("Status is invalid");
+            errors.add("Status é inválido");
         return errors;
     }
 
@@ -50,14 +50,12 @@ public class EntitiesRelationshipSetupValidate {
         if (layerSetup.size() != 2)
             return false;
         for (LayerSetup setup : layerSetup) {
-            if (setup.getContextSources().size() != 2) {
+            if (setup.getContextSources().size() == 0)
                 return false;
-            } else {
-                for (Map<String, String> contextSource : setup.getContextSources()) {
-                    for (Map.Entry<String, String> entry : contextSource.entrySet()) {
-                        if (entry.getKey().equals("") || entry.getValue().equals("")) {
-                            return false;
-                        }
+            for (Map<String, String> contextSource : setup.getContextSources()) {
+                for (Map.Entry<String, String> entry : contextSource.entrySet()) {
+                    if (entry.getKey().equals("") || entry.getValue().equals("")) {
+                        return false;
                     }
                 }
             }
@@ -87,8 +85,8 @@ public class EntitiesRelationshipSetupValidate {
         if (setup.getRelationships().size() == 0 || setup.getRelationships().size() > 2)
             return false;
 
-        if (!setup.getRelationships().containsKey(setup.getLayerSetup().get(0).getPath()) ||
-                !setup.getRelationships().containsKey(setup.getLayerSetup().get(1).getPath()))
+        if (!(setup.getRelationships().containsKey(setup.getLayerSetup().get(0).getPath()) ||
+                setup.getRelationships().containsKey(setup.getLayerSetup().get(1).getPath())))
             return false;
 
         for (Map.Entry<String, String> relationship : setup.getRelationships().entrySet()) {
@@ -98,7 +96,6 @@ public class EntitiesRelationshipSetupValidate {
                 return false;
             }
         }
-
         return true;
     }
 
