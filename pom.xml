@@ -10,19 +10,19 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <groupId>br.imd.aqueducte</groupId>
+    <artifactId>aqueducte</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>aqueducte</name>
+    <description>Import and Convert data to NGSI-LD protocol</description>
+
     <repositories>
         <repository>
             <id>spring-milestones</id>
             <url>http://repo.spring.io/libs-release</url>
         </repository>
     </repositories>
-
-    <groupId>br.imd.aqueducte</groupId>
-    <artifactId>Aqueducte</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
-    <name>Aqueducte</name>
-    <description>Import and Convert data to NGSI-LD protocol</description>
 
     <properties>
         <start-class>br.imd.aqueducte.AqueducteApplication</start-class>
