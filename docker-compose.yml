@@ -1,0 +1,29 @@
+# mvn clean -Dmaven.test.skip=true install
+version: '3.1'
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: "mongodb"
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+      - MONGODB_USER=root
+      - MONGODB_PASS=root
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - 27017:27017
+
+  springboot-docker-compose-app-container:
+    image: aqueducte-docker-compose-app:1
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - /data/aqueducte-docker-compose-app
+    ports:
+      - "8083:8083"
+    links:
+      - mongodb
+    depends_on:
+      - mongodb

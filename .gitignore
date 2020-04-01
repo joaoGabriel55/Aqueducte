@@ -1,7 +1,8 @@
 HELP.md
 /target/
 !.mvn/wrapper/maven-wrapper.jar
-
+/data/
+/db/
 ### General ###
 /src/main/resources/files/
 
