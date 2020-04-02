@@ -1,4 +1,4 @@
-package br.imd.aqueducte.entitiesrelationship.sgeolqueriesservices;
+package br.imd.aqueducte.services.sgeolqueriesservices;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -6,6 +6,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.json.JSONObject;
@@ -117,6 +118,24 @@ public class EntityOperationsService {
             e.printStackTrace();
         }
         return new ArrayList<>();
+    }
+
+    public boolean updateEntity(String id, LinkedHashMap<String, Object> entity, String layer) {
+        entity.put("id", id);
+        JSONObject entityJson = new JSONObject(entity);
+        HttpPut request = new HttpPut(URL_SGEOL + layer);
+        StringEntity stringEntity = new StringEntity(entityJson.toString(), ContentType.APPLICATION_JSON);
+        request.setEntity(stringEntity);
+        try {
+            HttpResponse response = getHttpClientInstance().execute(request);
+            if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                return true;
+            }
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     /**
