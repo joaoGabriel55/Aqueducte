@@ -12,6 +12,7 @@ import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.services.TaskStatusService;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
+import br.imd.aqueducte.utils.NGSILDUtils;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,7 @@ import static br.imd.aqueducte.config.PropertiesParams.USER_TOKEN;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 
+@SuppressWarnings("ALL")
 @RestController
 @RequestMapping("/sync/importToSgeol")
 @CrossOrigin(origins = "*")
@@ -55,6 +57,10 @@ public class ImportDataToSGEOLController {
         List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupStandardService.loadData(
                 importationSetup, null
         );
+        updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, appToken, userToken);
+        if (response.getErrors().size() > 0) {
+            return ResponseEntity.badRequest().body(response);
+        }
         return importData(appToken, userToken, layer, response, taskId, ngsildData);
     }
 
@@ -70,7 +76,31 @@ public class ImportDataToSGEOLController {
         List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupContextService.loadData(
                 importationSetup, null
         );
+        updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, appToken, userToken);
+        if (response.getErrors().size() > 0) {
+            return ResponseEntity.badRequest().body(response);
+        }
         return importData(appToken, userToken, layer, response, taskId, ngsildData);
+    }
+
+    private void updateData(
+            String primaryField,
+            List<LinkedHashMap<String, Object>> ngsildData,
+            String layer,
+            Response<List<String>> response,
+            String appToken,
+            String userToken
+
+    ) {
+        NGSILDUtils utils = new NGSILDUtils();
+        if (primaryField != null && !primaryField.equals("")) {
+            int entitiesUpdated = importNGSILDDataService.updateDataAlreadyImported(
+                    layer, appToken, userToken, ngsildData, utils.treatIdOrType(primaryField)
+            );
+            if (entitiesUpdated == 0) {
+                response.getErrors().add("Todos os dados foram atualizados. Nada para importar");
+            }
+        }
     }
 
     private ResponseEntity<Response<List<String>>> importData(
@@ -92,15 +122,17 @@ public class ImportDataToSGEOLController {
                 );
                 response.setData(jsonArrayResponse);
                 logInfo("POST /importToSgeol", null);
-                taskStatusService.sendTaskStatusProgress(
-                        taskId,
-                        TaskStatus.DONE,
-                        "Importação de dados para camada " + layer,
-                        "status-task-import-process"
-                );
+                if (taskId != null && !taskId.equals("")) {
+                    taskStatusService.sendTaskStatusProgress(
+                            taskId,
+                            TaskStatus.DONE,
+                            "Layer: " + layer,
+                            "status-task-import-process"
+                    );
+                }
                 return ResponseEntity.ok(response);
             } catch (Exception e) {
-                response.getErrors().add(e.getLocalizedMessage());
+                response.getErrors().add("Erro interno");
                 logError(e.getMessage(), e.getStackTrace());
                 taskStatusService.sendTaskStatusProgress(
                         taskId,
@@ -132,6 +164,10 @@ public class ImportDataToSGEOLController {
         }
         try {
             List<LinkedHashMap<String, Object>> listNGSILD = ngsildTreat.convertToEntityNGSILD(importConfig, layerPath, null);
+            updateData(importConfig.getPrimaryField(), listNGSILD, layerPath, response, appToken, userToken);
+            if (response.getErrors().size() > 0) {
+                return ResponseEntity.badRequest().body(response);
+            }
             JSONArray jsonArrayNGSILD = new JSONArray(listNGSILD);
             try {
                 List<String> jsonArrayResponse = importNGSILDDataService.importData(layerPath, appToken, userToken, jsonArrayNGSILD);
@@ -170,6 +206,10 @@ public class ImportDataToSGEOLController {
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
             logInfo("Time to convert MatchingConfig Into NGSI-LD: {}", timeElapsed);
+            updateData(importConfig.getPrimaryField(), listNGSILD, layerPath, response, appToken, userToken);
+            if (response.getErrors().size() > 0) {
+                return ResponseEntity.badRequest().body(response);
+            }
             JSONArray jsonArrayNGSILD = new JSONArray(listNGSILD);
             try {
                 List<String> jsonArrayResponse = importNGSILDDataService.importData(layerPath, appToken, userToken, jsonArrayNGSILD);

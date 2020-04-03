@@ -8,16 +8,8 @@ public class GenericController {
 
     protected String idUser;
 
-//    @ModelAttribute("user-id")
-//    public String getIdUser(HttpServletRequest request) {
-//        this.idUser = (String) request.getAttribute("user-id");
-//        this.idUser = "123456";
-//        return idUser;
-//    }
-
     public boolean checkUserIdIsEmpty(HttpServletRequest request) {
-//        this.idUser = (String) request.getAttribute("user-id");
-        this.idUser = "123456";
+        this.idUser = (String) request.getAttribute("user-id");
         return this.idUser == null || this.idUser.trim().equals("");
     }
 

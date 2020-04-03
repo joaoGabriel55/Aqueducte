@@ -1,26 +1,18 @@
 package br.imd.aqueducte.models.dtos;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.List;
 import java.util.Map;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class ImportNSILDDataWithoutContextConfig {
 
+    private String primaryField;
     private List<GeoLocationConfig> geoLocationConfig;
     private List<Map<String, Object>> dataContentForNGSILDConversion;
-
-    public List<GeoLocationConfig> getGeoLocationConfig() {
-        return geoLocationConfig;
-    }
-
-    public void setGeoLocationConfig(List<GeoLocationConfig> geoLocationConfig) {
-        this.geoLocationConfig = geoLocationConfig;
-    }
-
-    public List<Map<String, Object>> getDataContentForNGSILDConversion() {
-        return dataContentForNGSILDConversion;
-    }
-
-    public void setDataContentForNGSILDConversion(List<Map<String, Object>> dataContentForNGSILDConversion) {
-        this.dataContentForNGSILDConversion = dataContentForNGSILDConversion;
-    }
 }

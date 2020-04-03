@@ -1,6 +1,7 @@
 package br.imd.aqueducte.services.implementations;
 
 import br.imd.aqueducte.services.ImportNGSILDDataService;
+import br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -20,8 +21,11 @@ import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
 
+@SuppressWarnings("ALL")
 @Service
 public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
+
+    private EntityOperationsService entityOperationsService = EntityOperationsService.getInstance();
 
     public HttpRequestBase requestConfigParams(String url, String appToken, String userToken, JSONArray jsonArray) {
         RequestsUtils requestsUtils = new RequestsUtils();
@@ -33,6 +37,28 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
         requestsUtils.setHeadersParams(headers, request);
         request.setEntity(requestsUtils.buildEntity(jsonArray));
         return request;
+    }
+
+    @Override
+    public int updateDataAlreadyImported(String layer, String appToken, String userToken, List<LinkedHashMap<String, Object>> ngsildData, String primaryField) {
+        ngsildData.removeIf(entity -> {
+            if (!entity.containsKey(primaryField))
+                return false;
+            Map<String, Object> value = (Map<String, Object>) entity.get(primaryField);
+            if (value == null)
+                return false;
+            List<String> entityId = entityOperationsService.findByDocument(
+                    layer, primaryField, value.get("value"), false, appToken, userToken
+            );
+            if (entityId != null && entityId.size() != 0) {
+                if (entityOperationsService.updateEntity(entityId.get(0), entity, layer)) {
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        });
+        return ngsildData.size();
     }
 
     @Override

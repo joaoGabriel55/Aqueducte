@@ -1,4 +1,4 @@
-package br.imd.aqueducte.entitiesrelationship.sgeolqueriesservices;
+package br.imd.aqueducte.services.sgeolqueriesservices;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -13,7 +13,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.*;
 
-import static br.imd.aqueducte.entitiesrelationship.sgeolqueriesservices.EntityOperationsService.FIND_ENTITY_BY_DOCUMENT;
+import static br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService.FIND_ENTITY_BY_DOCUMENT;
 import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
 import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
