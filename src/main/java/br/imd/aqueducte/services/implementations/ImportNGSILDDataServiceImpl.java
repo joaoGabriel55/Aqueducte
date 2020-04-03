@@ -40,9 +40,13 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
     }
 
     @Override
-    public void updateDataAlreadyImported(String layer, String appToken, String userToken, List<LinkedHashMap<String, Object>> ngsildData, String primaryField) {
+    public int updateDataAlreadyImported(String layer, String appToken, String userToken, List<LinkedHashMap<String, Object>> ngsildData, String primaryField) {
         ngsildData.removeIf(entity -> {
+            if (!entity.containsKey(primaryField))
+                return false;
             Map<String, Object> value = (Map<String, Object>) entity.get(primaryField);
+            if (value == null)
+                return false;
             List<String> entityId = entityOperationsService.findByDocument(
                     layer, primaryField, value.get("value"), false, appToken, userToken
             );
@@ -54,6 +58,7 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
             }
             return false;
         });
+        return ngsildData.size();
     }
 
     @Override
