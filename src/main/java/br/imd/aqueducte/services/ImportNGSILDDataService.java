@@ -10,7 +10,7 @@ import java.util.List;
 @Component
 public interface ImportNGSILDDataService {
 
-    void updateDataAlreadyImported(
+    int updateDataAlreadyImported(
             String layer,
             String appToken,
             String userToken,
