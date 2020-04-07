@@ -11,11 +11,7 @@ import java.util.Map.Entry;
 
 import static br.imd.aqueducte.utils.NGSILDUtils.removeSpacesForeignProperty;
 
-// TODO: Create a method for treat geolocation on both conversions cases
-@SuppressWarnings("ALL")
 public class NGSILDTreatImpl implements NGSILDTreat {
-
-    private final String locationField = "location";
 
     private NGSILDUtils ngsildUtils;
 
@@ -23,7 +19,6 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         this.ngsildUtils = new NGSILDUtils();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<LinkedHashMap<String, Object>> convertToEntityNGSILD(ImportNSILDDataWithoutContextConfig importConfig,
                                                                      String layerPath,
@@ -32,23 +27,22 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         // Property data provided from external API
         List<Map<String, Object>> dataListFromExternalAPI = importConfig.getDataContentForNGSILDConversion();
         List<LinkedHashMap<String, Object>> listContentConverted = new ArrayList<>();
+
         // Geolocation config
         List<GeoLocationConfig> geoLocationConfig = importConfig.getGeoLocationConfig();
-
-        for (int i = 0; i < dataListFromExternalAPI.size(); i++) {
+        for (Map<String, Object> objectMap : dataListFromExternalAPI) {
             LinkedHashMap<String, Object> linkedHashMapNGSILD = new LinkedHashMap<>();
-            NGSILDUtils ngsildUtils = new NGSILDUtils();
             LinkedHashMap<String, Object> ldObj;
-            ldObj = (LinkedHashMap<String, Object>) dataListFromExternalAPI.get(i);
+            ldObj = (LinkedHashMap<String, Object>) objectMap;
             UUID uuid = UUID.randomUUID();
             this.ngsildUtils.initDefaultProperties(linkedHashMapNGSILD, null, layerPath, uuid.toString());
             LinkedHashMap<String, Object> typeAndValueMap = new LinkedHashMap<>();
             if (ldObj != null) {
                 List<Object> listTwoFields = new ArrayList<>();
-                for (Iterator<Map.Entry<String, Object>> iterator = ldObj.entrySet().iterator(); iterator.hasNext(); ) {
+                for (Entry<String, Object> property : ldObj.entrySet()) {
                     HashMap<String, Object> objectValue = new HashMap<>();
-                    Map.Entry<String, Object> property = iterator.next();
                     if (geoLocationConfig != null && geoLocationConfig.size() > 0) {
+                        String locationField = "location";
                         typeAndValueMap.putAll(this.ngsildUtils.propertyGeoJsonFormat(
                                 geoLocationConfig,
                                 property,
@@ -67,24 +61,22 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                         } else {
                             typeAndValueMap.put(property.getKey(), objectValue);
                         }
-                        objectValue = new HashMap<>();
                     }
                 }
             }
             linkedHashMapNGSILD.putAll(typeAndValueMap);
             listContentConverted.add(linkedHashMapNGSILD);
-            linkedHashMapNGSILD = new LinkedHashMap<>();
         }
         return listContentConverted;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
             List<String> contextLinks,
             List<MatchingConfig> matchingConfig,
             List<Map<String, Object>> contentForConvert,
-            String layerPath) {
+            String layerPath
+    ) {
         List<LinkedHashMap<String, Object>> listNGSILD = new ArrayList<>();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
         Map<Object, Integer> indexes = new HashMap<>();
@@ -96,15 +88,17 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             for (Entry<String, Object> property : element.entrySet()) {
                 String key = property.getKey();
                 for (MatchingConfig matches : matchingConfig) {
-
                     String foreignProperty = removeSpacesForeignProperty(matches.getForeignProperty());
                     String contextName = matches.getContextName();
                     Boolean isLocation = matches.isLocation();
 
                     if (!this.ngsildUtils.propertyIsLocation(property, isLocation)) {
                         if (key.equalsIgnoreCase(foreignProperty) && matches.isTemporaryField()) {
-                            properties.put(foreignProperty, getTempProperty(property.getValue()));
-                        } else if (key.equalsIgnoreCase(foreignProperty) && (!isLocation && isLocation != null)) {
+                            properties.put(
+                                    this.ngsildUtils.treatIdOrType(foreignProperty),
+                                    getTempProperty(property.getValue())
+                            );
+                        } else if (key.equalsIgnoreCase(foreignProperty) && !isLocation) {
                             HashMap<String, Object> typeValue = new HashMap<>();
                             typeValue.put("type", "Property");
                             typeValue.put("value", property.getValue());

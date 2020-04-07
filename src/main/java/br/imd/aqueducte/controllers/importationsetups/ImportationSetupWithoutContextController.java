@@ -18,7 +18,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static br.imd.aqueducte.config.PropertiesParams.USER_TOKEN;
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 
+@SuppressWarnings("ALL")
 @RestController
 @RequestMapping("/sync/withoutContextSetup")
 @CrossOrigin(origins = "*")
@@ -32,7 +35,9 @@ public class ImportationSetupWithoutContextController extends GenericController 
 
     @GetMapping(value = "/{importType}/{page}/{count}")
     public ResponseEntity<Response<Page<ImportationSetupWithoutContext>>> findImportTypeImportationSetupWithoutContext(
-            @PathVariable("importType") String importType, @PathVariable("page") int page, @PathVariable("count") int count
+            @PathVariable("importType") String importType,
+            @PathVariable("page") int page,
+            @PathVariable("count") int count
     ) {
         Response<Page<ImportationSetupWithoutContext>> response = new Response<>();
         try {
@@ -42,20 +47,23 @@ public class ImportationSetupWithoutContextController extends GenericController 
                     );
             if (!list.hasContent()) {
                 response.getErrors().add("Has not content");
+                logError(response.getErrors().get(0), null);
                 return ResponseEntity.badRequest().body(response);
             }
             response.setData(list);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        logInfo("GET findImportTypeImportationSetupWithoutContext", null);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<Response<ImportationSetupWithoutContext>> getByIdImportationSetupWithoutContext(
-            @PathVariable String id) {
-
+            @PathVariable String id
+    ) {
         Response<ImportationSetupWithoutContext> response = new Response<>();
         try {
             Optional<ImportationSetupWithoutContext> importationSetupWithoutContext = impSetupWithoutCxtService
@@ -63,8 +71,10 @@ public class ImportationSetupWithoutContextController extends GenericController 
             response.setData(importationSetupWithoutContext.get());
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        logInfo("GET getByIdImportationSetupWithoutContext", null);
         return ResponseEntity.ok(response);
     }
 
@@ -77,6 +87,7 @@ public class ImportationSetupWithoutContextController extends GenericController 
 
         if (filePath == "" || filePath == null) {
             response.getErrors().add("File path must be informed");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -85,19 +96,22 @@ public class ImportationSetupWithoutContextController extends GenericController 
             response.setData(importationSetupWithoutContextList);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        logInfo("GET findImportationSetupWithoutContextByFilePathAndUserId", null);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<Response<ImportationSetupWithoutContext>> saveImportationSetupWithoutContext(
             HttpServletRequest request,
-            @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext) {
+            @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext
+    ) {
         Response<ImportationSetupWithoutContext> response = new Response<>();
-
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         }
         importationSetupWithoutContext.setIdUser(idUser);
@@ -109,15 +123,19 @@ public class ImportationSetupWithoutContextController extends GenericController 
                 response.setData(importationSetupWithoutContext);
             } else {
                 response.getErrors().add("Object inconsistent");
+                logError(response.getErrors().get(0), null);
                 return ResponseEntity.badRequest().body(response);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        logInfo("POST saveImportationSetupWithoutContext", null);
         return ResponseEntity.ok(response);
     }
 
@@ -131,9 +149,11 @@ public class ImportationSetupWithoutContextController extends GenericController 
 
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         } else if (!importationSetupWithoutContext.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -147,11 +167,14 @@ public class ImportationSetupWithoutContextController extends GenericController 
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        logInfo("PUT updateImportationSetupWithoutContext", null);
         return ResponseEntity.ok(response);
     }
 
@@ -160,14 +183,15 @@ public class ImportationSetupWithoutContextController extends GenericController 
             @PathVariable(required = true) String id) {
         Response<String> response = new Response<>();
         try {
-
             String idDeleted = impSetupWithoutCxtService.delete(id);
             if (idDeleted != null)
                 response.setData(idDeleted);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        logInfo("DELETE deleteImportationSetupWithoutContext", null);
         return ResponseEntity.ok(response);
     }
 
@@ -183,6 +207,7 @@ public class ImportationSetupWithoutContextController extends GenericController 
                     importationSetupWithoutContext, userToken
             );
             response.setData(samples ? getSamples(ngsildData) : ngsildData);
+            logInfo("POST loadNGSILDDataFromImportSetupWithoutContext", null);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
@@ -205,6 +230,7 @@ public class ImportationSetupWithoutContextController extends GenericController 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }
