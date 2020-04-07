@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+
+@SuppressWarnings("ALL")
 @RestController
 @RequestMapping("/sync/task")
 @CrossOrigin(origins = "*")
@@ -33,12 +37,15 @@ public class TaskController extends GenericController {
                 Task taskSent = taskStatusService.sendTaskStatusProgress(taskId, task.getStatus(), task.getDescription(), topicName);
                 if (taskSent == null) {
                     response.getErrors().add("Error on send message to web socket topic");
+                    logError(response.getErrors().get(0), null);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
                 }
                 response.setData(taskSent);
+                logInfo("POST receiveSendAndSaveTaskToWebSocketTopic", null);
             } catch (Exception e) {
                 e.printStackTrace();
                 response.getErrors().add(e.getLocalizedMessage());
+                logError(response.getErrors().get(0), e.getMessage());
                 return ResponseEntity.badRequest().body(response);
             }
         } else {
@@ -55,6 +62,7 @@ public class TaskController extends GenericController {
         Response<Task> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         }
         task.setUserId(idUser);
@@ -62,21 +70,26 @@ public class TaskController extends GenericController {
             if (task.getId() != null) {
                 if (taskStatusService.findById(task.getId()).isPresent()) {
                     response.getErrors().add("Task already exists");
+                    logError(response.getErrors().get(0), null);
                     return ResponseEntity.badRequest().body(response);
                 }
                 response.getErrors().add("Object inconsistent");
+                logError(response.getErrors().get(0), null);
                 return ResponseEntity.badRequest().body(response);
             } else {
                 task.setDateCreated(new Date());
                 task.setDateModified(new Date());
                 Task taskCreated = taskStatusService.createOrUpdate(task);
                 response.setData(taskCreated);
+                logInfo("POST saveImportationSetupWithContext", null);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -90,31 +103,35 @@ public class TaskController extends GenericController {
                                                                         @RequestParam String status
     ) {
         Response<Page<Task>> response = new Response<>();
-        if ((type == "" || type == null) && (status == "" || status == null)) {
+        if ((type == null || type.equals("")) && (status == null || status.equals(""))) {
             Page<Task> tasks = taskStatusService.findByUserId(userId, page, count);
             response.setData(tasks);
-        } else if ((type != "" || type != null) && (status == "" || status == null)) {
+        } else if ((type != null && !type.equals("")) && (status == null || status.equals(""))) {
             Page<Task> tasks = taskStatusService.findByUserIdAndType(userId, type, page, count);
             if (tasks == null) {
                 response.getErrors().add("The \"type\" informed not exists");
+                logError(response.getErrors().get(0), null);
                 return ResponseEntity.badRequest().body(response);
             }
             response.setData(tasks);
-        } else if ((type == "" || type == null) && (status != "" || status != null)) {
+        } else if ((type == null && type.equals("")) && (status != null || !status.equals(""))) {
             Page<Task> tasks = taskStatusService.findByUserIdAndStatus(userId, status, page, count);
             if (tasks == null) {
                 response.getErrors().add("The \"status\" informed not exists");
+                logError(response.getErrors().get(0), null);
                 return ResponseEntity.badRequest().body(response);
             }
             response.setData(tasks);
-        } else if ((type != "" || type != null) && (status != "" || status != null)) {
+        } else if ((type != null || !type.equals("")) && (status != null || !status.equals(""))) {
             Page<Task> tasks = taskStatusService.findByUserIdAndTypeAndStatus(userId, type, status, page, count);
             if (tasks == null && !tasks.hasContent()) {
                 response.getErrors().add("The \"type\" \"status\" informed not exists");
+                logError(response.getErrors().get(0), null);
                 return ResponseEntity.badRequest().body(response);
             }
             response.setData(tasks);
         }
+        logInfo("GET findByUserIdWithFilters", null);
         return ResponseEntity.ok().body(response);
     }
 

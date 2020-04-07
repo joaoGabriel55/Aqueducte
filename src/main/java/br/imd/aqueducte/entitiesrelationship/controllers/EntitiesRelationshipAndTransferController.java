@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static br.imd.aqueducte.entitiesrelationship.services.implementations.EntitiesRelationshipAndTransferServiceImpl.*;
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
+import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType.*;
 
 @RestController
@@ -61,6 +63,7 @@ public class EntitiesRelationshipAndTransferController {
                                 setup.getLayerSetup().get(0).getName(),
                         "status-relationship-process"
                 );
+                logError(response.getErrors().get(0), null);
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -74,6 +77,7 @@ public class EntitiesRelationshipAndTransferController {
                                 setup.getLayerSetup().get(0).getName(),
                         "status-relationship-process"
                 );
+                logError(response.getErrors().get(0), null);
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
 
@@ -97,6 +101,7 @@ public class EntitiesRelationshipAndTransferController {
                     "status-relationship-process"
             );
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
         taskStatusService.sendTaskStatusProgress(
@@ -107,6 +112,7 @@ public class EntitiesRelationshipAndTransferController {
                         setup.getLayerSetup().get(0).getName(),
                 "status-relationship-process"
         );
+        logInfo("POST makeEntitiesRelationship", null);
         return ResponseEntity.ok().body(response);
     }
 
@@ -165,9 +171,11 @@ public class EntitiesRelationshipAndTransferController {
                             layer2 + "(" + layersTransferResponse.get(layer2) + ")",
                     "status-transfer-process"
             );
+            logInfo("POST transferDataWithRelationshipToOriginLayer", null);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (final Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

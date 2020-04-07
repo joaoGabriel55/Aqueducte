@@ -18,10 +18,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static br.imd.aqueducte.config.PropertiesParams.USER_TOKEN;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 
+@SuppressWarnings("ALL")
 @RestController
 @RequestMapping("/sync/withContextSetup")
 @CrossOrigin(origins = "*")
@@ -49,11 +49,11 @@ public class ImportationSetupWithContextController extends GenericController {
             }
 
             response.setData(importationSetupWithContextList);
-            logInfo("fileStatus", null);
+            logInfo("GET findAllImportationSetupWithoutContext", null);
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             response.getErrors().add("Error on get Importation Setup with Context list");
-            logError(e.getMessage(), e.getStackTrace());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -66,11 +66,11 @@ public class ImportationSetupWithContextController extends GenericController {
         try {
             Optional<ImportationSetupWithContext> importationSetupWithContext = importationSetupWithContextService
                     .findById(id);
-            response.setData(importationSetupWithContext.get());
+            importationSetupWithContext.ifPresent(response::setData);
             logInfo("GET Importation Setup With Context", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getStackTrace());
+            logError(e.getMessage(), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
@@ -83,16 +83,19 @@ public class ImportationSetupWithContextController extends GenericController {
     ) {
         Response<List<ImportationSetupWithContext>> response = new Response<>();
 
-        if (filePath.equals("") || filePath == null) {
+        if (filePath == null || filePath.equals("")) {
             response.getErrors().add("File path must be informed");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         }
 
         try {
             List<ImportationSetupWithContext> importationSetupWithContextList = importationSetupWithContextService.findByUserIdAndFilePath(userId, filePath);
             response.setData(importationSetupWithContextList);
+            logInfo("GET findImportationSetupWithContextByFilePathAndUserId", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(e.getMessage(), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
@@ -105,6 +108,7 @@ public class ImportationSetupWithContextController extends GenericController {
         Response<ImportationSetupWithContext> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         }
         importationSetupWithContext.setIdUser(idUser);
@@ -114,15 +118,19 @@ public class ImportationSetupWithContextController extends GenericController {
                 importationSetupWithContext.setDateModified(new Date());
                 importationSetupWithContextService.createOrUpdate(importationSetupWithContext);
                 response.setData(importationSetupWithContext);
+                logInfo("POST saveImportationSetupWithContext", null);
             } else {
                 response.getErrors().add("Object inconsistent");
+                logError(response.getErrors().get(0), null);
                 return ResponseEntity.badRequest().body(response);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
@@ -138,9 +146,11 @@ public class ImportationSetupWithContextController extends GenericController {
 
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         } else if (!importationSetupWithoutContext.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
+            logError(response.getErrors().get(0), null);
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -151,12 +161,15 @@ public class ImportationSetupWithContextController extends GenericController {
                 importationSetupWithoutContext.setDateModified(new Date());
                 importationSetupWithContextService.createOrUpdate(importationSetupWithoutContext);
                 response.setData(importationSetupWithoutContext);
+                logInfo("PUT updateImportationSetupWithContext", null);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
@@ -164,15 +177,18 @@ public class ImportationSetupWithContextController extends GenericController {
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Response<String>> deleteImportationSetupWithContext(
-            @PathVariable(required = true) String id) {
+            @PathVariable(required = true) String id
+    ) {
         Response<String> response = new Response<>();
         try {
-
             String idDeleted = importationSetupWithContextService.delete(id);
-            if (idDeleted != null)
+            if (idDeleted != null) {
                 response.setData(idDeleted);
+                logInfo("DELETE deleteImportationSetupWithContext", null);
+            }
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
@@ -189,9 +205,11 @@ public class ImportationSetupWithContextController extends GenericController {
                     importationSetupWithContext, ""
             );
             response.setData(samples ? getSamples(ngsildData) : ngsildData);
+            logInfo("POST loadNGSILDDataFromImportSetupWithContext", null);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -207,9 +225,11 @@ public class ImportationSetupWithContextController extends GenericController {
                             .loadData(importationSetupWithContext, "")
                             .size()
             );
+            logInfo("POST loadCountNGSILDDataFromImportSetupWithoutContext", null);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            logError(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }

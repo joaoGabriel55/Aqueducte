@@ -2,7 +2,7 @@ package br.imd.aqueducte.config;
 
 public class PropertiesParams {
     public static boolean AUTH = true;
-    public static final boolean TEST_ENV = true;
+    public static final boolean TEST_ENV = false;
     public static int STATUS_OK = 200;
     public final static String ROLE_AQUEDUCTE = "aqueducte";
     public final static String APP_TOKEN = "application-token";
