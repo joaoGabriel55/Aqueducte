@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AqueducteController {
 
     @GetMapping
-    public void smartSyncHome() {
-        return;
+    public void aqueducte() {
     }
 
 }

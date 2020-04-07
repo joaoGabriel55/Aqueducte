@@ -15,7 +15,6 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
@@ -24,7 +23,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.net.ssl.SSLContext;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -37,44 +39,26 @@ public class RequestsUtils {
 
     public static HttpClient getHttpClientInstance() {
         HttpClient httpClientInstance = null;
-        if (httpClientInstance == null) {
-            TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
-            SSLContext sslContext = null;
-            try {
-                sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (KeyManagementException e) {
-                e.printStackTrace();
-            } catch (KeyStoreException e) {
-                e.printStackTrace();
-            }
+        TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
+        try {
+            SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
-
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register("https", sslsf)
                     .register("http", new PlainConnectionSocketFactory())
                     .build();
 
             BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager(socketFactoryRegistry);
-            CloseableHttpClient httpClient = HttpClients.custom()
+            httpClientInstance = HttpClients.custom()
                     .setSSLSocketFactory(sslsf)
                     .setConnectionManager(connectionManager)
                     .build();
-            httpClientInstance = httpClient;
-            return httpClientInstance;
+        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+            e.printStackTrace();
         }
         return httpClientInstance;
     }
 
-    public String readAll(Reader rd) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        int cp;
-        while ((cp = rd.read()) != -1) {
-            sb.append((char) cp);
-        }
-        return sb.toString();
-    }
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> requestToAPI(Map<Object, Object> paramsRequest) throws IOException {
@@ -151,31 +135,31 @@ public class RequestsUtils {
     }
 
     private String getQueryParams(LinkedHashMap<String, String> queryParams) {
-        String queryParamsString = "";
+        StringBuilder queryParamsString = new StringBuilder();
         int count = 1;
         for (Map.Entry<String, String> entry : queryParams.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
             if (count == queryParams.entrySet().size())
-                queryParamsString += key + "=" + value;
+                queryParamsString.append(key).append("=").append(value);
             else
-                queryParamsString += key + "=" + value + "&";
+                queryParamsString.append(key).append("=").append(value).append("&");
             count++;
         }
 
-        return queryParamsString;
+        return queryParamsString.toString();
 
     }
 
     public static String readBodyReq(InputStream inputStream) throws IOException {
-        /* Lendo body */
+        /* Reading body */
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-        String body = "";
-        String temp = null;
+        StringBuilder body = new StringBuilder();
+        String temp;
         while ((temp = br.readLine()) != null)
-            body += temp;
+            body.append(temp);
 
-        return body;
+        return body.toString();
     }
 
     public StringEntity buildEntity(Object data) {
@@ -185,8 +169,7 @@ public class RequestsUtils {
         else
             jsonString = data.toString();
 
-        StringEntity entity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
-        return entity;
+        return new StringEntity(jsonString, ContentType.APPLICATION_JSON);
     }
 
 }

@@ -21,7 +21,6 @@ public class JsonFlatConvertController {
      * */
     @PostMapping
     public ResponseEntity<Response<Object>> getFlatJSON(@RequestBody Object dataForConversion) {
-
         Response<Object> response = new Response<>();
         JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
         try {
