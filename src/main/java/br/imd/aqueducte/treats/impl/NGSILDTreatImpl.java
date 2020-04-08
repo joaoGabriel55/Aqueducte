@@ -12,8 +12,9 @@ import java.util.Map.Entry;
 import static br.imd.aqueducte.utils.NGSILDUtils.removeSpacesForeignProperty;
 
 public class NGSILDTreatImpl implements NGSILDTreat {
+    private static final String LOCATION_FIELD = "location";
 
-    private NGSILDUtils ngsildUtils;
+    private final NGSILDUtils ngsildUtils;
 
     public NGSILDTreatImpl() {
         this.ngsildUtils = new NGSILDUtils();
@@ -42,13 +43,12 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                 for (Entry<String, Object> property : ldObj.entrySet()) {
                     HashMap<String, Object> objectValue = new HashMap<>();
                     if (geoLocationConfig != null && geoLocationConfig.size() > 0) {
-                        String locationField = "location";
                         typeAndValueMap.putAll(this.ngsildUtils.propertyGeoJsonFormat(
                                 geoLocationConfig,
                                 property,
                                 listTwoFields,
                                 typeAndValueMap,
-                                locationField
+                                LOCATION_FIELD
                         ));
                     }
                     if (property.getValue() != null) {
@@ -79,7 +79,6 @@ public class NGSILDTreatImpl implements NGSILDTreat {
     ) {
         List<LinkedHashMap<String, Object>> listNGSILD = new ArrayList<>();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
-        Map<Object, Integer> indexes = new HashMap<>();
         for (Map<String, Object> element : contentForConvert) {
             NGSILDUtils ngsildUtils = new NGSILDUtils();
             UUID uuid = UUID.randomUUID();
@@ -91,35 +90,52 @@ public class NGSILDTreatImpl implements NGSILDTreat {
                     String foreignProperty = removeSpacesForeignProperty(matches.getForeignProperty());
                     String contextName = matches.getContextName();
                     Boolean isLocation = matches.isLocation();
-
+                    // getTempProperty()
                     if (!this.ngsildUtils.propertyIsLocation(property, isLocation)) {
                         if (key.equalsIgnoreCase(foreignProperty) && matches.isTemporaryField()) {
-                            properties.put(
-                                    this.ngsildUtils.treatIdOrType(foreignProperty),
-                                    getTempProperty(property.getValue())
-                            );
+                            String foreignPropertyTreated = this.ngsildUtils.treatIdOrType(foreignProperty);
+                            if (!properties.containsKey(foreignPropertyTreated))
+                                properties.put(foreignPropertyTreated, typeValue(property.getValue()));
                         } else if (key.equalsIgnoreCase(foreignProperty) && !isLocation) {
-                            HashMap<String, Object> typeValue = new HashMap<>();
-                            typeValue.put("type", "Property");
-                            typeValue.put("value", property.getValue());
-                            properties.put(contextName, typeValue);
+                            if (!properties.containsKey(contextName))
+                                properties.put(contextName, typeValue(property.getValue()));
                         }
                     } else if (this.ngsildUtils.propertyIsLocation(property, isLocation)) {
-                        properties.putAll(this.ngsildUtils.propertyGeoJsonFormat(
-                                matches.getGeoLocationConfig(),
-                                property,
-                                listTwoFields,
-                                properties,
-                                contextName
-                        ));
+                        if (matches.isTemporaryField()) {
+                            if (!properties.containsKey(LOCATION_FIELD)) {
+                                properties.putAll(this.ngsildUtils.propertyGeoJsonFormat(
+                                        matches.getGeoLocationConfig(),
+                                        property,
+                                        listTwoFields,
+                                        properties,
+                                        LOCATION_FIELD
+                                ));
+                            }
+                        } else {
+                            if (!properties.containsKey(contextName)) {
+                                properties.putAll(this.ngsildUtils.propertyGeoJsonFormat(
+                                        matches.getGeoLocationConfig(),
+                                        property,
+                                        listTwoFields,
+                                        properties,
+                                        contextName
+                                ));
+                            }
+                        }
                     }
                 }
             }
-            if (!this.ngsildUtils.checkIfEntityAlreadyExistsByPrimaryField(properties, listNGSILD, indexes))
-                listNGSILD.add(properties);
+            listNGSILD.add(properties);
             properties = new LinkedHashMap<>();
         }
         return listNGSILD;
+    }
+
+    private Map<String, Object> typeValue(Object value) {
+        HashMap<String, Object> typeValue = new HashMap<>();
+        typeValue.put("type", "Property");
+        typeValue.put("value", value);
+        return typeValue;
     }
 
     private Map<String, Object> getTempProperty(Object propertyValue) {
