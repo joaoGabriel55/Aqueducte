@@ -2,10 +2,7 @@ package br.imd.aqueducte.treats.impl;
 
 import br.imd.aqueducte.treats.JsonFlatTreat;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
@@ -18,11 +15,11 @@ public class JsonFlatTreatImpl implements JsonFlatTreat {
     @Override
     public Object getFlatJSON(Object dataForConversion) {
         if (dataForConversion instanceof Map) {
-            Map<String, Object> result = new HashMap<>();
+            Map<String, Object> result = new LinkedHashMap<>();
             Map<String, Object> dataMap = (Map<String, Object>) dataForConversion;
             for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
-                Map<String, Object> jsonFlatAux = new HashMap<>();
-                Map<String, Object> objectMap = new HashMap<>();
+                Map<String, Object> jsonFlatAux = new LinkedHashMap<>();
+                Map<String, Object> objectMap = new LinkedHashMap<>();
                 objectMap.put(entry.getKey(), entry.getValue());
                 result.putAll(convertToJsonFlat(jsonFlatAux, objectMap));
             }
@@ -31,7 +28,7 @@ public class JsonFlatTreatImpl implements JsonFlatTreat {
             List<Object> result = (List<Object>) ((List) dataForConversion)
                     .stream()
                     .map(elem -> {
-                        Map<String, Object> jsonFlatAux = new HashMap<>();
+                        Map<String, Object> jsonFlatAux = new LinkedHashMap<>();
                         return convertToJsonFlat(jsonFlatAux, elem);
                     }).collect(Collectors.toList());
             return result;

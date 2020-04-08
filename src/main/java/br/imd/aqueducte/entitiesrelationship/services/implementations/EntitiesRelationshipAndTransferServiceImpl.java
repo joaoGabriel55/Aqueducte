@@ -1,11 +1,11 @@
 package br.imd.aqueducte.entitiesrelationship.services.implementations;
 
 import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipAndTransferService;
-import br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService;
-import br.imd.aqueducte.services.sgeolqueriesservices.RelationshipOperationsService;
 import br.imd.aqueducte.models.entitiesrelationship.dtos.PropertyNGSILD;
 import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
 import br.imd.aqueducte.services.ImportNGSILDDataService;
+import br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService;
+import br.imd.aqueducte.services.sgeolqueriesservices.RelationshipOperationsService;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -58,11 +58,13 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                 }
                 for (Object entity : entities) {
                     Map<String, Object> entityMap = (Map<String, Object>) entity;
-                    if (entityMap.containsKey(property1)) {
-                        Object linkProperty1Value = getValue((Map<String, Object>) entityMap.get(property1));
-                        if (linkProperty1Value != null || typeProperties.equals(PropertyNGSILD.GEOPROPERTY)) {
-                            List<String> response = new ArrayList<>();
-                            if (typeProperties.equals(PropertyNGSILD.PROPERTY)) {
+                    Object linkProperty1Value = entityMap.containsKey(property1) ?
+                            getValue((Map<String, Object>) entityMap.get(property1)) :
+                            null;
+                    if (linkProperty1Value != null || typeProperties.equals(PropertyNGSILD.GEOPROPERTY)) {
+                        List<String> response = new ArrayList<>();
+                        if (typeProperties.equals(PropertyNGSILD.PROPERTY)) {
+                            if (entityMap.containsKey(property1)) {
                                 response = entityOperationsService.findByDocument(
                                         layer2,
                                         property2,
@@ -79,29 +81,29 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                                         setup,
                                         property1, property2
                                 );
-                            } else if (typeProperties.equals(PropertyNGSILD.GEOPROPERTY)) {
-                                int offset2 = 0;
-                                List<String> geoResponse = new ArrayList<>();
-                                while (offset2 == 0 || geoResponse.size() != 0) {
-                                    geoResponse = entityOperationsService.findContainedIn(
-                                            layer2, layer1,
-                                            entityMap.get("id").toString(),
-                                            REQUEST_ENTITIES_LIMIT, offset2,
-                                            "", ""
-                                    );
-                                    if (offset2 == 0 && (geoResponse == null || geoResponse.size() == 0)) {
-                                        return STATUS_RELATIONSHIP_NOTHING_TODO;
-                                    }
-                                    statusOperation = relationshipAndDeleteTempProperties(
-                                            statusOperation,
-                                            geoResponse,
-                                            layer1, layer2,
-                                            entityMap.get("id").toString(),
-                                            setup,
-                                            property1, property2
-                                    );
-                                    offset2++;
+                            }
+                        } else if (typeProperties.equals(PropertyNGSILD.GEOPROPERTY)) {
+                            int offset2 = 0;
+                            List<String> geoResponse = new ArrayList<>();
+                            while (offset2 == 0 || geoResponse.size() != 0) {
+                                geoResponse = entityOperationsService.findContainedIn(
+                                        layer2, layer1,
+                                        entityMap.get("id").toString(),
+                                        REQUEST_ENTITIES_LIMIT, offset2,
+                                        "", ""
+                                );
+                                if (offset2 == 0 && (geoResponse == null || geoResponse.size() == 0)) {
+                                    return STATUS_RELATIONSHIP_NOTHING_TODO;
                                 }
+                                statusOperation = relationshipAndDeleteTempProperties(
+                                        statusOperation,
+                                        geoResponse,
+                                        layer1, layer2,
+                                        entityMap.get("id").toString(),
+                                        setup,
+                                        property1, property2
+                                );
+                                offset2++;
                             }
                         }
                     }
@@ -127,10 +129,12 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
 
             Map<String, Object> entity = getEntityById(layer1, setup.getPropertiesLinked().get(0).getEntityId());
             if (entity != null) {
-                if (entity.containsKey(property1)) {
-                    Object linkProperty1Value = getValue((Map<String, Object>) entity.get(property1));
-                    if (linkProperty1Value != null || typeProperties.equals(PropertyNGSILD.GEOPROPERTY)) {
-                        if (typeProperties.equals(PropertyNGSILD.PROPERTY)) {
+                Object linkProperty1Value = entity.containsKey(property1) ?
+                        getValue((Map<String, Object>) entity.get(property1)) :
+                        null;
+                if (linkProperty1Value != null || typeProperties.equals(PropertyNGSILD.GEOPROPERTY)) {
+                    if (typeProperties.equals(PropertyNGSILD.PROPERTY)) {
+                        if (entity.containsKey(property1)) {
                             List<String> response = entityOperationsService.findByDocument(
                                     layer2,
                                     property2,
@@ -147,29 +151,29 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                                     setup,
                                     property1, property2
                             );
-                        } else if (typeProperties.equals(PropertyNGSILD.GEOPROPERTY)) {
-                            int offset2 = 0;
-                            List<String> geoResponse = new ArrayList<>();
-                            while (offset2 == 0 || geoResponse.size() != 0) {
-                                geoResponse = entityOperationsService.findContainedIn(
-                                        layer2, layer1,
-                                        entity.get("id").toString(),
-                                        REQUEST_ENTITIES_LIMIT, offset2,
-                                        "", ""
-                                );
-                                if (offset2 == 0 && (geoResponse == null || geoResponse.size() == 0)) {
-                                    return STATUS_RELATIONSHIP_NOTHING_TODO;
-                                }
-                                statusOperation = relationshipAndDeleteTempProperties(
-                                        statusOperation,
-                                        geoResponse,
-                                        layer1, layer2,
-                                        entity.get("id").toString(),
-                                        setup,
-                                        property1, property2
-                                );
-                                offset2++;
+                        }
+                    } else if (typeProperties.equals(PropertyNGSILD.GEOPROPERTY)) {
+                        int offset2 = 0;
+                        List<String> geoResponse = new ArrayList<>();
+                        while (offset2 == 0 || geoResponse.size() != 0) {
+                            geoResponse = entityOperationsService.findContainedIn(
+                                    layer2, layer1,
+                                    entity.get("id").toString(),
+                                    REQUEST_ENTITIES_LIMIT, offset2,
+                                    "", ""
+                            );
+                            if (offset2 == 0 && (geoResponse == null || geoResponse.size() == 0)) {
+                                return STATUS_RELATIONSHIP_NOTHING_TODO;
                             }
+                            statusOperation = relationshipAndDeleteTempProperties(
+                                    statusOperation,
+                                    geoResponse,
+                                    layer1, layer2,
+                                    entity.get("id").toString(),
+                                    setup,
+                                    property1, property2
+                            );
+                            offset2++;
                         }
                     }
                 }
