@@ -60,7 +60,7 @@ public class EntitiesRelationshipAndTransferController {
                         TaskStatus.ERROR,
                         "Erro: Relacionamento entre as entidades das Layers " +
                                 setup.getLayerSetup().get(0).getName() + " e " +
-                                setup.getLayerSetup().get(0).getName(),
+                                setup.getLayerSetup().get(1).getName(),
                         "status-relationship-process"
                 );
                 logError(response.getErrors().get(0), null);
@@ -74,7 +74,7 @@ public class EntitiesRelationshipAndTransferController {
                         TaskStatus.ERROR,
                         "Erro: Relacionamento entre as entidades das Layers " +
                                 setup.getLayerSetup().get(0).getName() + " e " +
-                                setup.getLayerSetup().get(0).getName(),
+                                setup.getLayerSetup().get(1).getName(),
                         "status-relationship-process"
                 );
                 logError(response.getErrors().get(0), null);
@@ -97,7 +97,7 @@ public class EntitiesRelationshipAndTransferController {
                     TaskStatus.ERROR,
                     "Erro: Relacionamento entre as entidades das Layers " +
                             setup.getLayerSetup().get(0).getName() + " e " +
-                            setup.getLayerSetup().get(0).getName(),
+                            setup.getLayerSetup().get(1).getName(),
                     "status-relationship-process"
             );
             response.getErrors().add(e.getMessage());
@@ -109,7 +109,7 @@ public class EntitiesRelationshipAndTransferController {
                 TaskStatus.DONE,
                 "Sucesso: Relacionamento entre as entidades das Layers " +
                         setup.getLayerSetup().get(0).getName() + " e " +
-                        setup.getLayerSetup().get(0).getName(),
+                        setup.getLayerSetup().get(1).getName(),
                 "status-relationship-process"
         );
         logInfo("POST makeEntitiesRelationship", null);
