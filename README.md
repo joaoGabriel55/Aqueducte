@@ -13,10 +13,6 @@ API for consume data on format NGSI-LD
 
     ``sudo systemctl stop mongod``
 
-- Change the IP address on file src/main/resources/application.properties of mongodb docker instance
-
-    ``spring.data.mongodb.host={DOCKER_IP}``
-
 - If want use Aqueducte without SGEOL Auth, just change the AUTH param at file: src/main/java/br/imd/aqueducte/config/PropertiesParams.java
 
     ``public static boolean AUTH = false;``
