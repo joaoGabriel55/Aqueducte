@@ -93,7 +93,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                                         "", ""
                                 );
                                 if (offset2 == 0 && (geoResponse == null || geoResponse.size() == 0)) {
-                                    return STATUS_RELATIONSHIP_NOTHING_TODO;
+                                    break;
                                 }
                                 statusOperation = relationshipAndDeleteTempProperties(
                                         statusOperation,
@@ -163,7 +163,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                                     "", ""
                             );
                             if (offset2 == 0 && (geoResponse == null || geoResponse.size() == 0)) {
-                                return STATUS_RELATIONSHIP_NOTHING_TODO;
+                                break;
                             }
                             statusOperation = relationshipAndDeleteTempProperties(
                                     statusOperation,
