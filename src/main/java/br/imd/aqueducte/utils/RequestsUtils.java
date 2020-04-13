@@ -36,6 +36,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class RequestsUtils {
+    public static final int STATUS_OK = 200;
+    public static final String APP_TOKEN = "application-token";
+    public static final String USER_TOKEN = "user-token";
 
     public static HttpClient getHttpClientInstance() {
         HttpClient httpClientInstance = null;

@@ -20,8 +20,8 @@ import java.util.*;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.config.PropertiesParams.*;
-import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
-import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
+import static br.imd.aqueducte.utils.RequestsUtils.*;
+import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @SuppressWarnings("ALL")
 public abstract class LoadDataNGSILDByImportSetup {

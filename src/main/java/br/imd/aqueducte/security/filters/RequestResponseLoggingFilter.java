@@ -15,7 +15,7 @@ import java.io.IOException;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.config.PropertiesParams.AUTH;
-import static br.imd.aqueducte.config.PropertiesParams.USER_TOKEN;
+import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @Order(1)
 public class RequestResponseLoggingFilter implements Filter {
