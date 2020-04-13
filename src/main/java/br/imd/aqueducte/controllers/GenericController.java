@@ -4,12 +4,19 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static br.imd.aqueducte.config.PropertiesParams.AUTH;
+
 public class GenericController {
 
     protected String idUser;
 
     public boolean checkUserIdIsEmpty(HttpServletRequest request) {
-        this.idUser = (String) request.getAttribute("user-id");
+
+        if (AUTH)
+            this.idUser = (String) request.getAttribute("user-id");
+        else
+            this.idUser = "none";
+
         return this.idUser == null || this.idUser.trim().equals("");
     }
 

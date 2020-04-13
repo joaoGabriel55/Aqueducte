@@ -1,14 +1,33 @@
 package br.imd.aqueducte.config;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 public class PropertiesParams {
-    public static boolean AUTH = true;
-    public static final boolean TEST_ENV = false;
-    public static int STATUS_OK = 200;
-    public final static String ROLE_AQUEDUCTE = "aqueducte";
-    public final static String APP_TOKEN = "application-token";
-    public final static String USER_TOKEN = "user-token";
-    // public static String URL_SGEOL = "http://192.168.7.47/sgeol-dm/v2/"; // MPRN
-    public static String URL_SGEOL = "http://sgeolayers.imd.ufrn.br/sgeol-test-sec/v2/"; // Test test-sec
-    // public static String URL_SGEOL = "http://localhost:8080/sgeol-dm/v2/"; // Localhost
-    public static String URL_AQUECONNECT = "http://10.7.128.16:7000/aqueconnect/";
+    public static boolean AUTH;
+    public static boolean TEST_ENV;
+    public static String ROLE_AQUEDUCTE;
+    public static String URL_SGEOL;
+    public static String URL_AQUECONNECT;
+
+    static {
+        try {
+            initialize();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void initialize() throws IOException {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream source = classLoader.getResourceAsStream("properties.cfg");
+        Properties conf = new Properties();
+        conf.load(source);
+        AUTH = Boolean.parseBoolean(conf.getProperty("AUTH"));
+        TEST_ENV = Boolean.parseBoolean(conf.getProperty("AUTH"));
+        ROLE_AQUEDUCTE = String.valueOf(Boolean.parseBoolean(conf.getProperty("ROLE_AQUEDUCTE")));
+        URL_SGEOL = String.valueOf(Boolean.parseBoolean(conf.getProperty("URL_SGEOL")));
+        URL_AQUECONNECT = String.valueOf(Boolean.parseBoolean(conf.getProperty("URL_SGEOL")));
+    }
 }

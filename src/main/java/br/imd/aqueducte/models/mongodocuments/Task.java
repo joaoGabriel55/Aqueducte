@@ -13,9 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.NotBlank;
 import java.util.Date;
 
-import static br.imd.aqueducte.models.config.MongoDBCollectionsConfig.TASK;
-
-@Document(value = TASK)
+@Document
 @Getter
 @Setter
 @NoArgsConstructor

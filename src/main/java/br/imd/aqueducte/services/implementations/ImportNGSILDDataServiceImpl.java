@@ -16,10 +16,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static br.imd.aqueducte.config.PropertiesParams.*;
+import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
-import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
-import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
+import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
 @Service

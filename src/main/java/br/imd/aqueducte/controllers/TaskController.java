@@ -56,9 +56,7 @@ public class TaskController extends GenericController {
     }
 
     @PostMapping
-    public ResponseEntity<Response<Task>> saveImportationSetupWithContext(HttpServletRequest request,
-                                                                          @RequestBody Task task
-    ) {
+    public ResponseEntity<Response<Task>> saveTask(HttpServletRequest request, @RequestBody Task task) {
         Response<Task> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
@@ -81,7 +79,7 @@ public class TaskController extends GenericController {
                 task.setDateModified(new Date());
                 Task taskCreated = taskStatusService.createOrUpdate(task);
                 response.setData(taskCreated);
-                logInfo("POST saveImportationSetupWithContext", null);
+                logInfo("POST saveTask", null);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");

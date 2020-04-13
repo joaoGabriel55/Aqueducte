@@ -17,9 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static br.imd.aqueducte.models.config.MongoDBCollectionsConfig.ENTITIES_RELATIONSHIP_SETUP;
-
-@Document(value = ENTITIES_RELATIONSHIP_SETUP)
+@Document
 @Getter
 @Setter
 @NoArgsConstructor

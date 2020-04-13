@@ -13,15 +13,15 @@ API for consume data on format NGSI-LD
 
     ``sudo systemctl stop mongod``
 
-- If want use Aqueducte without SGEOL Auth, just change the AUTH param at file: src/main/java/br/imd/aqueducte/config/PropertiesParams.java
+- If want use Aqueducte without Auth, just change AUTH param from file: src/main/resources/properties.cfg
 
-    ``public static boolean AUTH = false;``
+    ``AUTH = false;``
 
-- For build a new jar file, after some change on Aqüeducte, run this command on root folder:
+- For build a new jar file, after some change on Aqüeducte, run this command in root folder:
 
     ``sudo mvn clean -Dmaven.test.skip=true install``
 
-- And, finally, for run Docker container run the command, on root folder too:
+- And, finally, for run Docker container run the command, in root folder too:
 
     ``sudo docker-compose up -d``
 

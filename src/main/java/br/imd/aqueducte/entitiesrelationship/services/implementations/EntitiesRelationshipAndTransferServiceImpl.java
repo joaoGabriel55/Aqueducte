@@ -52,7 +52,8 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
             String property2 = setup.getPropertiesLinked().get(1).getName();
 
             while (offset == 0 || entities.size() != 0) {
-                entities = getEntities(layer1, offset);
+                int entitiesSize = entities.size();
+                entities = getEntities(layer1, offset * entitiesSize);
                 if (offset == 0 && (entities == null || entities.size() == 0)) {
                     return STATUS_RELATIONSHIP_NOTHING_TODO;
                 }
@@ -86,13 +87,15 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                             int offset2 = 0;
                             List<String> geoResponse = new ArrayList<>();
                             while (offset2 == 0 || geoResponse.size() != 0) {
+                                int geoResponseSize = geoResponse.size();
                                 geoResponse = entityOperationsService.findContainedIn(
                                         layer2, layer1,
                                         entityMap.get("id").toString(),
-                                        REQUEST_ENTITIES_LIMIT, offset2,
+                                        REQUEST_ENTITIES_LIMIT,
+                                        offset2 * geoResponseSize,
                                         "", ""
                                 );
-                                if (offset2 == 0 && (geoResponse == null || geoResponse.size() == 0)) {
+                                if (geoResponse == null || geoResponse.size() == 0) {
                                     break;
                                 }
                                 statusOperation = relationshipAndDeleteTempProperties(
@@ -156,13 +159,15 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                         int offset2 = 0;
                         List<String> geoResponse = new ArrayList<>();
                         while (offset2 == 0 || geoResponse.size() != 0) {
+                            int geoResponseSize = geoResponse.size();
                             geoResponse = entityOperationsService.findContainedIn(
                                     layer2, layer1,
                                     entity.get("id").toString(),
-                                    REQUEST_ENTITIES_LIMIT, offset2,
+                                    REQUEST_ENTITIES_LIMIT,
+                                    offset2 * geoResponseSize,
                                     "", ""
                             );
-                            if (offset2 == 0 && (geoResponse == null || geoResponse.size() == 0)) {
+                            if (geoResponse == null || geoResponse.size() == 0) {
                                 break;
                             }
                             statusOperation = relationshipAndDeleteTempProperties(

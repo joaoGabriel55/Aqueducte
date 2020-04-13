@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static br.imd.aqueducte.config.PropertiesParams.APP_TOKEN;
-import static br.imd.aqueducte.config.PropertiesParams.USER_TOKEN;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.RequestsUtils.APP_TOKEN;
+import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @SuppressWarnings("ALL")
 @RestController
