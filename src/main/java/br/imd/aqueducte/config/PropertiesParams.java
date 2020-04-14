@@ -26,8 +26,8 @@ public class PropertiesParams {
         conf.load(source);
         AUTH = Boolean.parseBoolean(conf.getProperty("AUTH"));
         TEST_ENV = Boolean.parseBoolean(conf.getProperty("AUTH"));
-        ROLE_AQUEDUCTE = String.valueOf(Boolean.parseBoolean(conf.getProperty("ROLE_AQUEDUCTE")));
-        URL_SGEOL = String.valueOf(Boolean.parseBoolean(conf.getProperty("URL_SGEOL")));
-        URL_AQUECONNECT = String.valueOf(Boolean.parseBoolean(conf.getProperty("URL_SGEOL")));
+        ROLE_AQUEDUCTE = String.valueOf(conf.getProperty("ROLE_AQUEDUCTE"));
+        URL_SGEOL = String.valueOf(conf.getProperty("URL_SGEOL"));
+        URL_AQUECONNECT = String.valueOf(conf.getProperty("URL_AQUECONNECT"));
     }
 }
