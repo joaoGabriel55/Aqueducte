@@ -160,7 +160,7 @@ public class ImportDataToSGEOLController {
         NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
 
         List<GeoLocationConfig> geoLocationConfig = importConfig.getGeoLocationConfig();
-        if (geoLocationConfig.size() > 2) {
+        if (geoLocationConfig != null && geoLocationConfig.size() > 2) {
             String errGeoLocMessage = "Somente é permitido um campo para geolocalização. Tamanho atual: {}";
             response.getErrors().add(errGeoLocMessage);
             logError(errGeoLocMessage, geoLocationConfig.size());

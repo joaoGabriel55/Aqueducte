@@ -13,8 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.config.PropertiesParams.AUTH;
+import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @Order(1)
@@ -39,7 +39,6 @@ public class RequestResponseLoggingFilter implements Filter {
         } catch (Exception e) {
             buildResponseError(response, "Internal error.");
             logError(e.getMessage(), e.getStackTrace());
-            return;
         }
     }
 
