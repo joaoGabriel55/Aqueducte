@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @SuppressWarnings("ALL")
 @RestController
@@ -196,13 +197,14 @@ public class ImportationSetupWithContextController extends GenericController {
 
     @PostMapping(value = "/load-ngsild-data")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetupWithContext(
+            @RequestHeader(USER_TOKEN) String userToken,
             @RequestParam boolean samples,
             @RequestBody ImportationSetupWithContext importationSetupWithContext
     ) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
         try {
             List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDByImportationSetupService.loadData(
-                    importationSetupWithContext, ""
+                    importationSetupWithContext, userToken
             );
             response.setData(samples ? getSamples(ngsildData) : ngsildData);
             logInfo("POST loadNGSILDDataFromImportSetupWithContext", null);
@@ -216,15 +218,14 @@ public class ImportationSetupWithContextController extends GenericController {
 
     @PostMapping(value = "/load-ngsild-data/count")
     public ResponseEntity<Response<Integer>> loadCountNGSILDDataFromImportSetupWithoutContext(
+            @RequestHeader(USER_TOKEN) String userToken,
             @RequestBody ImportationSetupWithContext importationSetupWithContext
     ) {
         Response<Integer> response = new Response<>();
         try {
-            response.setData(
-                    this.loadDataNGSILDByImportationSetupService
-                            .loadData(importationSetupWithContext, "")
-                            .size()
-            );
+            response.setData(this.loadDataNGSILDByImportationSetupService
+                    .loadData(importationSetupWithContext, userToken)
+                    .size());
             logInfo("POST loadCountNGSILDDataFromImportSetupWithoutContext", null);
             return ResponseEntity.ok(response);
         } catch (Exception e) {

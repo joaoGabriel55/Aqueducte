@@ -21,7 +21,7 @@ public class NGSILDUtils {
 
     public static String removeSpacesForeignProperty(String value) {
         if (value != null)
-            return value.toLowerCase().replaceAll("\\s+", "").trim();
+            return value.toLowerCase().replaceAll(" ", "_").trim();
         return null;
     }
 

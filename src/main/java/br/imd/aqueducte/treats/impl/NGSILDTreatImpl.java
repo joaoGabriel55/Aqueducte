@@ -85,7 +85,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             ngsildUtils.initDefaultProperties(properties, contextLinks, layerPath, uuid.toString());
             List<Object> listTwoFields = new ArrayList<>();
             for (Entry<String, Object> property : element.entrySet()) {
-                String key = property.getKey();
+                String key = removeSpacesForeignProperty(property.getKey());
                 for (MatchingConfig matches : matchingConfig) {
                     String foreignProperty = removeSpacesForeignProperty(matches.getForeignProperty());
                     String contextName = matches.getContextName();
