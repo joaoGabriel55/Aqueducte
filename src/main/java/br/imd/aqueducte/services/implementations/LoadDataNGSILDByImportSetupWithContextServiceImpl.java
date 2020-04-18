@@ -3,8 +3,8 @@ package br.imd.aqueducte.services.implementations;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
-import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
 import br.imd.aqueducte.treats.NGSILDTreat;
+import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,8 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
     @Override
     public List<LinkedHashMap<String, Object>> loadData(
             ImportationSetupWithContext importationSetupWithContext,
-            String userToken) {
+            String userToken
+    ) {
         if (importationSetupWithContext.getImportType().equals(WEB_SERVICE)) {
             return loadDataWebService(importationSetupWithContext);
         } else if (importationSetupWithContext.getImportType().equals(FILE)) {
