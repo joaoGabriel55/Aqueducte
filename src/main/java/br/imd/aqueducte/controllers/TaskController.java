@@ -112,7 +112,7 @@ public class TaskController extends GenericController {
                 return ResponseEntity.badRequest().body(response);
             }
             response.setData(tasks);
-        } else if ((type == null && type.equals("")) && (status != null || !status.equals(""))) {
+        } else if ((type == null || type.equals("")) && (status != null || !status.equals(""))) {
             Page<Task> tasks = taskStatusService.findByUserIdAndStatus(userId, status, page, count);
             if (tasks == null) {
                 response.getErrors().add("The \"status\" informed not exists");
