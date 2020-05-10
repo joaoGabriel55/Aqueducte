@@ -60,6 +60,12 @@ public class ImportDataToSGEOLController {
         updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, appToken, userToken);
         if (response.getErrors().size() > 0) {
             logError(response.getErrors().get(0), null);
+            taskStatusService.sendTaskStatusProgress(
+                    taskId,
+                    TaskStatus.ERROR,
+                    response.getErrors().get(0),
+                    "status-task-import-process"
+            );
             return ResponseEntity.badRequest().body(response);
         }
         return importData(appToken, userToken, layer, response, taskId, ngsildData);
@@ -80,6 +86,12 @@ public class ImportDataToSGEOLController {
         updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, appToken, userToken);
         if (response.getErrors().size() > 0) {
             logError(response.getErrors().get(0), null);
+            taskStatusService.sendTaskStatusProgress(
+                    taskId,
+                    TaskStatus.ERROR,
+                    response.getErrors().get(0),
+                    "status-task-import-process"
+            );
             return ResponseEntity.badRequest().body(response);
         }
         return importData(appToken, userToken, layer, response, taskId, ngsildData);
@@ -123,6 +135,19 @@ public class ImportDataToSGEOLController {
                 List<String> jsonArrayResponse = importNGSILDDataService.importData(
                         layer, appToken, userToken, jsonArrayNGSILD
                 );
+
+                if (jsonArrayResponse != null && jsonArrayResponse.size() == 0) {
+                    response.getErrors().add("Nenhuma Entity importada");
+                    logError(response.getErrors().get(0), null);
+                    taskStatusService.sendTaskStatusProgress(
+                            taskId,
+                            TaskStatus.ERROR,
+                            response.getErrors().get(0),
+                            "status-task-import-process"
+                    );
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+                }
+
                 response.setData(jsonArrayResponse);
                 logInfo("POST /importToSgeol", null);
                 if (taskId != null && !taskId.equals("")) {

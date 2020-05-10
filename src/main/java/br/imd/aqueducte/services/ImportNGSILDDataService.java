@@ -18,5 +18,5 @@ public interface ImportNGSILDDataService {
             String primaryField
     );
 
-    List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws IOException;
+    List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws Exception;
 }
