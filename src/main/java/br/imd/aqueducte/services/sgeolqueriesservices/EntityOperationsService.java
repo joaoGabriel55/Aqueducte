@@ -1,5 +1,6 @@
 package br.imd.aqueducte.services.sgeolqueriesservices;
 
+import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -19,8 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
-import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
-import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
+import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
 public class EntityOperationsService {
@@ -98,6 +98,11 @@ public class EntityOperationsService {
 
     private List<String> executeServiceFindByDocument(String layer, JSONObject query, String appToken, String userToken) {
         HttpPost request = new HttpPost(URL_SGEOL + layer + FIND_ENTITY_BY_DOCUMENT);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         StringEntity entity = new StringEntity(query.toString(), ContentType.APPLICATION_JSON);
         request.setEntity(entity);
         try {
@@ -120,10 +125,15 @@ public class EntityOperationsService {
         return new ArrayList<>();
     }
 
-    public boolean updateEntity(String id, LinkedHashMap<String, Object> entity, String layer) {
+    public boolean updateEntity(String id, String appToken, String userToken, LinkedHashMap<String, Object> entity, String layer) {
         entity.put("id", id);
         JSONObject entityJson = new JSONObject(entity);
         HttpPut request = new HttpPut(URL_SGEOL + layer);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         StringEntity stringEntity = new StringEntity(entityJson.toString(), ContentType.APPLICATION_JSON);
         request.setEntity(stringEntity);
         try {

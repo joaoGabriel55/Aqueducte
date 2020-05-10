@@ -11,7 +11,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONArray;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
                     layer, primaryField, value.get("value"), false, appToken, userToken
             );
             if (entityId != null && entityId.size() != 0) {
-                if (entityOperationsService.updateEntity(entityId.get(0), entity, layer)) {
+                if (entityOperationsService.updateEntity(entityId.get(0), appToken, userToken, entity, layer)) {
                     return true;
                 }
                 return false;
@@ -61,23 +60,23 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
     }
 
     @Override
-    public List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws IOException {
+    public List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws Exception {
         String url = URL_SGEOL + layer + "/batch";
         if (layer.contains("preprocessing"))
             url = URL_SGEOL + "preprocessing/" + layer;
 
         HttpResponse responseSGEOL = getHttpClientInstance().execute(requestConfigParams(url, appToken, userToken, jsonArray));
 
-        if (responseSGEOL.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> mapFromJson = mapper.readValue(
-                    readBodyReq(responseSGEOL.getEntity().getContent()), Map.class
-            );
-            List<String> entitiesId = (List<String>) mapFromJson.get("entities");
-            logInfo("POST /entity imported {}", entitiesId);
-            return entitiesId;
-        }
-        return null;
+        if (responseSGEOL.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED)
+            throw new Exception("Error on middleware request");
+
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> mapFromJson = mapper.readValue(
+                readBodyReq(responseSGEOL.getEntity().getContent()), Map.class
+        );
+        List<String> entitiesId = (List<String>) mapFromJson.get("entities");
+        logInfo("POST /entity imported {}", entitiesId);
+        return entitiesId;
     }
 
 }
