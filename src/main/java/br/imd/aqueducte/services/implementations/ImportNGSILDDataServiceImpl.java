@@ -39,7 +39,10 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
 
     @Override
     public int updateDataAlreadyImported(String layer, String appToken, String userToken, List<LinkedHashMap<String, Object>> ngsildData, String primaryField) {
+        final int[] index = {0};
         ngsildData.removeIf(entity -> {
+            logInfo("[" + index[0] + "] Entity ID: {}", entity.get("id"));
+            index[0]++;
             if (!entity.containsKey(primaryField))
                 return false;
             Map<String, Object> value = (Map<String, Object>) entity.get(primaryField);
