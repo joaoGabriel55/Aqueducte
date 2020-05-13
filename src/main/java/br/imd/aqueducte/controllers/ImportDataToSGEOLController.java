@@ -24,6 +24,7 @@ import java.util.List;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.FormatterUtils.treatPrimaryField;
 import static br.imd.aqueducte.utils.RequestsUtils.APP_TOKEN;
 import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
@@ -109,7 +110,7 @@ public class ImportDataToSGEOLController {
         NGSILDUtils utils = new NGSILDUtils();
         if (primaryField != null && !primaryField.equals("")) {
             int entitiesUpdated = importNGSILDDataService.updateDataAlreadyImported(
-                    layer, appToken, userToken, ngsildData, utils.treatIdOrType(primaryField)
+                    layer, appToken, userToken, ngsildData, treatPrimaryField(primaryField)
             );
             if (entitiesUpdated == 0) {
                 response.getErrors().add("Todos os dados foram atualizados. Nada para importar");

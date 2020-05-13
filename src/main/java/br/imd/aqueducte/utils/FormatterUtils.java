@@ -1,19 +1,14 @@
 package br.imd.aqueducte.utils;
 
-import java.util.Map;
+import java.text.Normalizer;
 
 public class FormatterUtils {
 
-    public static boolean checkIsGeoJson(Map<String, Object> jsonData) {
-        boolean hasAnyGeoType = jsonData.get("type") != null &&
-                (jsonData.get("type").equals("Polygon") ||
-                        jsonData.get("type").equals("Point") ||
-                        jsonData.get("type").equals("LineString") ||
-                        jsonData.get("type").equals("MultiPoint") ||
-                        jsonData.get("type").equals("MultiLineString") ||
-                        jsonData.get("type").equals("MultiPolygon"));
-
-        return jsonData.containsKey("type") && jsonData.containsKey("coordinates") && hasAnyGeoType;
+    public static String treatPrimaryField(String str) {
+        NGSILDUtils utils = new NGSILDUtils();
+        String strTreated = utils.treatIdOrType(str.toLowerCase().replace(" ", "_"));
+        return Normalizer.normalize(strTreated, Normalizer.Form.NFD)
+                .replaceAll("[^\\p{ASCII}]", "");
     }
 
 }

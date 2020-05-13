@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
-import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
+import static br.imd.aqueducte.utils.GeoJsonValidator.checkIsGeoJson;
 
 @SuppressWarnings("ALL")
 public class NGSILDUtils {

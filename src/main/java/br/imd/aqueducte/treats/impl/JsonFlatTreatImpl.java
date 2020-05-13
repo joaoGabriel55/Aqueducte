@@ -2,10 +2,13 @@ package br.imd.aqueducte.treats.impl;
 
 import br.imd.aqueducte.treats.JsonFlatTreat;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-import static br.imd.aqueducte.utils.FormatterUtils.checkIsGeoJson;
+import static br.imd.aqueducte.utils.GeoJsonValidator.checkIsGeoJson;
 
 @SuppressWarnings("ALL")
 public class JsonFlatTreatImpl implements JsonFlatTreat {
