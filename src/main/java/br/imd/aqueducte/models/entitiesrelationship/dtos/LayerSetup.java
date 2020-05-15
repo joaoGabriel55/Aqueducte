@@ -15,4 +15,5 @@ public class LayerSetup {
     private String path;
     private boolean isPreprocessingLayer;
     private List<Map<String, String>> contextSources;
+    private String importSetupId;
 }

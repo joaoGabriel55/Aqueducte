@@ -66,7 +66,7 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
 
                 List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
                         importConfig,
-                        importationSetup.getLayerSelected(),
+                        importationSetup.getLayerPathSelected(),
                         null
                 );
                 return listConvertedIntoNGSILD;
@@ -98,7 +98,7 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
 
                     List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
                             importConfig,
-                            importationSetup.getLayerSelected(),
+                            importationSetup.getLayerPathSelected(),
                             null
                     );
                     return listConvertedIntoNGSILD;

@@ -20,7 +20,7 @@ public class EntitiesRelationshipSetupValidate {
             errors.add("Tipos de propriedades diferentes");
         if (!validateLayerSetup(setup.getLayerSetup()))
             errors.add("Layer path e o nome são requeridos");
-        if (!validateContextSources(setup.getLayerSetup()))
+        if (setup.isUseContext() && !validateContextSources(setup.getLayerSetup()))
             errors.add("Fontes de Contexto são necessárias");
         if (!validatePropertiesLinked(setup.getPropertiesLinked()))
             errors.add("Propriedades devem conter o nome ou o ID da Entity");

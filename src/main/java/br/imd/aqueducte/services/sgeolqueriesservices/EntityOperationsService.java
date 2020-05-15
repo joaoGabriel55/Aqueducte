@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
+import static br.imd.aqueducte.utils.FormatterUtils.treatPrimaryField;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
@@ -40,8 +41,13 @@ public class EntityOperationsService {
         return instance;
     }
 
-    public List<Map<String, Object>> getEntitiesPageable(String layer, int limit, int offset) throws Exception {
+    public List<Map<String, Object>> getEntitiesPageable(String appToken, String userToken, String layer, int limit, int offset) throws Exception {
         HttpGet request = new HttpGet(URL_SGEOL + layer + "?limit=" + limit + "&offset=" + offset);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -61,9 +67,14 @@ public class EntityOperationsService {
 
     }
 
-    public Map<String, Object> findEntityById(String layer, String id) {
+    public Map<String, Object> findEntityById(String appToken, String userToken, String layer, String id) {
         String uri = URL_SGEOL + layer + FIND_ENTITY_BY_ID + "?entity-id=" + id;
         HttpGet request = new HttpGet(uri);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -88,9 +99,9 @@ public class EntityOperationsService {
                                        String appToken,
                                        String userToken
     ) {
-        String query = "{\"$and\": [{\"properties." + propertyName + ".value\": {\"$eq\": " + value + "}}]}";
+        String query = "{\"$and\": [{\"properties." + treatPrimaryField(propertyName) + ".value\": {\"$eq\": " + value + "}}]}";
         if (isTempProperty)
-            query = "{\"$and\": [{\"properties." + propertyName + ".value.value\": {\"$eq\": " + value + "}}]}";
+            query = "{\"$and\": [{\"properties." + treatPrimaryField(propertyName) + ".value.value\": {\"$eq\": " + value + "}}]}";
 
         JSONObject queryJson = new JSONObject(query);
         return executeServiceFindByDocument(layer, queryJson, appToken, userToken);
@@ -165,6 +176,11 @@ public class EntityOperationsService {
                 "&limit=" + limit +
                 "&offset=" + offset;
         HttpGet request = new HttpGet(uri);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
@@ -185,11 +201,15 @@ public class EntityOperationsService {
         return new ArrayList<>();
     }
 
-    public boolean tranferPreprocessingLayerEntitesToFinalLayer(String preprocessingLayer, String finalLayer) throws IOException {
+    public boolean tranferPreprocessingLayerEntitesToFinalLayer(String appToken, String userToken, String preprocessingLayer, String finalLayer) throws IOException {
         HttpPost request = new HttpPost(
                 URL_SGEOL + TRANSFER_LAYER_ENTITIES + preprocessingLayer + "/" + finalLayer
         );
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
@@ -204,9 +224,14 @@ public class EntityOperationsService {
     }
 
 
-    public boolean deleteEntityTempProperty(String layer, String entityId, String propertyName) throws Exception {
+    public boolean deleteEntityTempProperty(String appToken, String userToken, String layer, String entityId, String propertyName) throws Exception {
         String uri = URL_SGEOL + layer + "/property?entity-id=" + entityId + "&property-name=" + propertyName;
         HttpDelete request = new HttpDelete(uri);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
@@ -220,9 +245,14 @@ public class EntityOperationsService {
         }
     }
 
-    public boolean deleteDataFromPreprocessingLayer(String preprocessinglayer) throws Exception {
+    public boolean deleteDataFromPreprocessingLayer(String appToken, String userToken, String preprocessinglayer) throws Exception {
         String uri = URL_SGEOL + PREPROCESSING_LAYER_ENTITIES + preprocessinglayer;
         HttpDelete request = new HttpDelete(uri);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK)
