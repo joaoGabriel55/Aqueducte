@@ -20,7 +20,7 @@ public class EntityOperationsServiceTest {
         // && !result
         while ((offset == 0 || entities.size() != 0)) {
             int entitiesSize = entities.size();
-            entities = service.getEntitiesPageable("bairro", 1024, offset * entitiesSize);
+            entities = service.getEntitiesPageable("", "", "bairro", 1024, offset * entitiesSize);
             for (Object entity : entities) {
                 Map<String, Object> entityMap = (Map<String, Object>) entity;
                 int offset2 = 0;

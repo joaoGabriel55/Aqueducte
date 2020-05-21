@@ -1,5 +1,6 @@
 package br.imd.aqueducte.services.sgeolqueriesservices;
 
+import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -13,10 +14,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.*;
 
-import static br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService.FIND_ENTITY_BY_DOCUMENT;
 import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
-import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
-import static br.imd.aqueducte.utils.RequestsUtils.readBodyReq;
+import static br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService.FIND_ENTITY_BY_DOCUMENT;
+import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
 public class RelationshipOperationsService {
@@ -33,23 +33,26 @@ public class RelationshipOperationsService {
         return instance;
     }
 
-    public boolean relationshipEntities(String layer1,
-                                        String layer2,
-                                        String idFromLayerEntity1,
-                                        String idFromLayerEntity2,
-                                        Map<String, String> relationships
+    public boolean relationshipEntities(
+            String appToken,
+            String userToken,
+            String layer1,
+            String layer2,
+            String idFromLayerEntity1,
+            String idFromLayerEntity2,
+            Map<String, String> relationships
     ) throws Exception {
         try {
             boolean statusOperationRelationship1 = false;
             boolean statusOperationRelationship2 = false;
-            if (relationships.containsKey(layer1)) {
+            if (relationships.containsKey(layer1) && !relationships.get(layer1).equals("")) {
                 statusOperationRelationship1 = executeRelationship(
-                        layer1, layer2, idFromLayerEntity1, idFromLayerEntity2, relationships
+                        appToken, userToken, layer1, layer2, idFromLayerEntity1, idFromLayerEntity2, relationships
                 );
             }
-            if (relationships.containsKey(layer2)) {
+            if (relationships.containsKey(layer2) && !relationships.get(layer2).equals("")) {
                 statusOperationRelationship2 = executeRelationship(
-                        layer2, layer1, idFromLayerEntity2, idFromLayerEntity1, relationships
+                        appToken, userToken, layer2, layer1, idFromLayerEntity2, idFromLayerEntity1, relationships
                 );
             }
 
@@ -63,15 +66,18 @@ public class RelationshipOperationsService {
         return false;
     }
 
-    private boolean executeRelationship(String layer1,
-                                        String layer2,
-                                        String idFromLayerEntity1,
-                                        String idFromLayerEntity2,
-                                        Map<String, String> relationships) throws Exception {
+    private boolean executeRelationship(
+            String appToken,
+            String userToken,
+            String layer1,
+            String layer2,
+            String idFromLayerEntity1,
+            String idFromLayerEntity2,
+            Map<String, String> relationships) throws Exception {
         boolean statusOperationRelationship = false;
         List<String> objectId = new ArrayList<>();
 
-        Map<String, Object> relationship = getEntityRelationshipsObjectIds(layer1, idFromLayerEntity1, relationships.get(layer1));
+        Map<String, Object> relationship = getEntityRelationshipsObjectIds(appToken, userToken, layer1, idFromLayerEntity1, relationships.get(layer1));
 
         if (relationship != null) {
             boolean hasObjectId = false;
@@ -82,7 +88,7 @@ public class RelationshipOperationsService {
                 isString = false;
 
             hasObjectId = hasRelationshipObjectId(
-                    layer1, idFromLayerEntity1, relationships.get(layer1), idFromLayerEntity2, isString
+                    appToken, userToken, layer1, idFromLayerEntity1, relationships.get(layer1), idFromLayerEntity2, isString
             );
 
             if (!hasObjectId)
@@ -93,6 +99,7 @@ public class RelationshipOperationsService {
 
         try {
             statusOperationRelationship = addOrUpdateRelationshipIntoEntity(
+                    appToken, userToken,
                     layer1,
                     idFromLayerEntity1,
                     relationships.get(layer1),
@@ -108,11 +115,16 @@ public class RelationshipOperationsService {
         return statusOperationRelationship;
     }
 
-    private boolean addOrUpdateRelationshipIntoEntity(String layer, String entityId, String relationshipName, Object objectIds) throws Exception {
+    private boolean addOrUpdateRelationshipIntoEntity(String appToken, String userToken, String layer, String entityId, String relationshipName, Object objectIds) throws Exception {
         if (objectIds != null) {
             JSONObject payload = new JSONObject(buildRelationshipObject(objectIds));
             String uri = URL_SGEOL + layer + RELATIONSHIP + "?entity-id=" + entityId + "&relationship-name=" + relationshipName;
             HttpPost postRequest = new HttpPost(uri);
+            LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+            headers.put(APP_TOKEN, appToken);
+            headers.put(USER_TOKEN, userToken);
+            RequestsUtils requestsUtils = new RequestsUtils();
+            requestsUtils.setHeadersParams(headers, postRequest);
             StringEntity entity = new StringEntity(payload.toString(), ContentType.APPLICATION_JSON);
             postRequest.setEntity(entity);
             // TODO: Avoid update relationship which already done.
@@ -121,6 +133,11 @@ public class RelationshipOperationsService {
 
                 if (response.getStatusLine().getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                     HttpPut putRequest = new HttpPut(uri);
+                    headers = new LinkedHashMap<>();
+                    headers.put(APP_TOKEN, appToken);
+                    headers.put(USER_TOKEN, userToken);
+                    requestsUtils = new RequestsUtils();
+                    requestsUtils.setHeadersParams(headers, putRequest);
                     putRequest.setEntity(entity);
                     response = getHttpClientInstance().execute(putRequest);
                 }
@@ -143,11 +160,14 @@ public class RelationshipOperationsService {
         return relationship;
     }
 
-    private boolean hasRelationshipObjectId(String layer,
-                                            String entityId,
-                                            String relationshipName,
-                                            String objectId,
-                                            boolean objectIsString
+    private boolean hasRelationshipObjectId(
+            String appToken,
+            String userToken,
+            String layer,
+            String entityId,
+            String relationshipName,
+            String objectId,
+            boolean objectIsString
     ) {
         String uri = URL_SGEOL + layer + FIND_ENTITY_BY_DOCUMENT;
         String query = "{\"$and\":[{\"_id\": \"" + entityId + "\"},{\"relationships." + relationshipName + ".object\":{\"$elemMatch\": {\"$eq\": \"" + objectId + "\"}}}]}";
@@ -155,6 +175,11 @@ public class RelationshipOperationsService {
             query = "{\"$and\":[{\"_id\": \"" + entityId + "\"},{\"relationships." + relationshipName + ".object\":{\"$eq\": \"" + objectId + "\"}}]}";
 
         HttpPost request = new HttpPost(uri);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         StringEntity entity = new StringEntity(query.toString(), ContentType.APPLICATION_JSON);
         request.setEntity(entity);
         try {
@@ -174,9 +199,14 @@ public class RelationshipOperationsService {
         return false;
     }
 
-    public Map<String, Object> getEntityRelationshipsObjectIds(String layer, String entityId, String relationshipName) {
+    public Map<String, Object> getEntityRelationshipsObjectIds(String appToken, String userToken, String layer, String entityId, String relationshipName) {
         String uri = URL_SGEOL + layer + RELATIONSHIP + "?entity-id=" + entityId + "&relationship-name=" + relationshipName;
         HttpGet request = new HttpGet(uri);
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put(APP_TOKEN, appToken);
+        headers.put(USER_TOKEN, userToken);
+        RequestsUtils requestsUtils = new RequestsUtils();
+        requestsUtils.setHeadersParams(headers, request);
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {

@@ -61,7 +61,7 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
                         getContextLinks(importationSetupWithContext.getContextSources().values()),
                         importationSetupWithContext.getMatchingConfigList(),
                         dataForConvert,
-                        importationSetupWithContext.getLayerSelected()
+                        importationSetupWithContext.getLayerPathSelected()
                 );
                 return listConvertedIntoNGSILD;
             } catch (Exception e) {
@@ -85,7 +85,7 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
                         getContextLinks(importationSetup.getContextSources().values()),
                         importationSetup.getMatchingConfigList(),
                         fileConvertedIntoJSON,
-                        importationSetup.getLayerSelected()
+                        importationSetup.getLayerPathSelected()
                 );
                 return listConvertedIntoNGSILD;
             } else {

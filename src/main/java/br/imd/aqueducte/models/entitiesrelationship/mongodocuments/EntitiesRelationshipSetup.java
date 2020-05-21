@@ -28,6 +28,8 @@ public class EntitiesRelationshipSetup {
 
     private String idUser;
 
+    private boolean useContext;
+
     @NotBlank
     private List<LayerSetup> layerSetup;
 

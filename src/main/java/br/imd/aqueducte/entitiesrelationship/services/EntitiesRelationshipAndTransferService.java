@@ -8,14 +8,14 @@ import java.util.concurrent.CompletableFuture;
 @Component
 public interface EntitiesRelationshipAndTransferService {
 
-    int relationshipManyToMany(EntitiesRelationshipSetup setup);
+    int relationshipManyToMany(EntitiesRelationshipSetup setup, String appToken, String userToken);
 
-    int relationshipOneToMany(EntitiesRelationshipSetup setup);
+    int relationshipOneToMany(EntitiesRelationshipSetup setup, String appToken, String userToken);
 
-    int relationshipOneToOne(EntitiesRelationshipSetup setup);
+    int relationshipOneToOne(EntitiesRelationshipSetup setup, String appToken, String userToken);
 
-    CompletableFuture<Integer> transferLayerEntitiesAsync(String layer) throws Exception;
+    CompletableFuture<Integer> transferLayerEntitiesAsync(String layer, String appToken, String userToken) throws Exception;
 
-    int transferLayerEntities(String layer) throws Exception;
+    int transferLayerEntities(String layer, String appToken, String userToken) throws Exception;
 
 }

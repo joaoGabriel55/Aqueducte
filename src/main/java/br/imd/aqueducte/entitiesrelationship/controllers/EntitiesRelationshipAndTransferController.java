@@ -21,6 +21,8 @@ import static br.imd.aqueducte.entitiesrelationship.services.implementations.Ent
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType.*;
+import static br.imd.aqueducte.utils.RequestsUtils.APP_TOKEN;
+import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @RestController
 @RequestMapping("/sync/entitiesRelationship")
@@ -38,6 +40,8 @@ public class EntitiesRelationshipAndTransferController {
 
     @PostMapping(value = {"/make", "/make/{taskId}"})
     public ResponseEntity<Response<Map<String, String>>> makeEntitiesRelationship(
+            @RequestHeader(APP_TOKEN) String appToken,
+            @RequestHeader(USER_TOKEN) String userToken,
             @PathVariable String taskId,
             @RequestBody EntitiesRelationshipSetup setup
     ) {
@@ -48,11 +52,11 @@ public class EntitiesRelationshipAndTransferController {
             List<String> validatorMessage = validator.validateEntitiesRelationshipSetup(setup);
             if (validatorMessage.size() == 0 && setup.getStatus().equals(EntitiesRelationshipSetupStatus.DONE)) {
                 if (setup.getRelationshipType().equals(MANY_TO_MANY))
-                    status = this.entitiesRelationshipAndTransferService.relationshipManyToMany(setup);
+                    status = this.entitiesRelationshipAndTransferService.relationshipManyToMany(setup, appToken, userToken);
                 else if (setup.getRelationshipType().equals(ONE_TO_MANY))
-                    status = this.entitiesRelationshipAndTransferService.relationshipOneToMany(setup);
+                    status = this.entitiesRelationshipAndTransferService.relationshipOneToMany(setup, appToken, userToken);
                 else if (setup.getRelationshipType().equals(ONE_TO_ONE))
-                    status = this.entitiesRelationshipAndTransferService.relationshipOneToOne(setup);
+                    status = this.entitiesRelationshipAndTransferService.relationshipOneToOne(setup, appToken, userToken);
             } else {
                 response.getErrors().addAll(validatorMessage);
                 taskStatusService.sendTaskStatusProgress(
@@ -118,12 +122,20 @@ public class EntitiesRelationshipAndTransferController {
 
     @PostMapping(value = {"/transfer/{layer1}/{layer2}", "/transfer/{layer1}/{layer2}/{taskId}"})
     public ResponseEntity<Response<Map<String, String>>> transferDataWithRelationshipToOriginLayer(
-            @PathVariable String layer1, @PathVariable String layer2, @PathVariable String taskId
+            @RequestHeader(APP_TOKEN) String appToken,
+            @RequestHeader(USER_TOKEN) String userToken,
+            @PathVariable String layer1,
+            @PathVariable String layer2,
+            @PathVariable String taskId
     ) {
         Response<Map<String, String>> response = new Response<>();
         try {
-            CompletableFuture<Integer> data1 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(layer1);
-            CompletableFuture<Integer> data2 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(layer2);
+            CompletableFuture<Integer> data1 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(
+                    layer1, appToken, userToken
+            );
+            CompletableFuture<Integer> data2 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(
+                    layer2, appToken, userToken
+            );
             CompletableFuture.allOf(data1, data2).join();
 
             Map<String, String> layersTransferResponse = new LinkedHashMap<>();
