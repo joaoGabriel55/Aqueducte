@@ -14,6 +14,7 @@ import java.util.List;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 
 @SuppressWarnings("ALL")
 @RestController
@@ -23,6 +24,7 @@ public class NGSILDConverterController {
 
     @PostMapping(value = "/{layerPath}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertToNGSILDWithoutContext(
+            @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @PathVariable String layerPath,
             @RequestBody ImportNSILDDataWithoutContextConfig importConfig) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
@@ -39,7 +41,7 @@ public class NGSILDConverterController {
             NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
             List<LinkedHashMap<String, Object>> listNGSILD;
             long startTime = System.nanoTime();
-            listNGSILD = ngsildTreat.convertToEntityNGSILD(importConfig, layerPath, null);
+            listNGSILD = ngsildTreat.convertToEntityNGSILD(sgeolInstance, importConfig, layerPath, null);
             long endTime = System.nanoTime();
             long timeElapsed = endTime - startTime;
             logInfo("Time to conversion NGSI-LD: {}", timeElapsed);
@@ -54,6 +56,7 @@ public class NGSILDConverterController {
 
     @PostMapping(value = "/withMatchingConfig/{layerPath}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertMatchingConfigIntoNGSILD(
+            @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @PathVariable String layerPath,
             @RequestBody ImportNSILDDataWithContextConfig importContextConfig) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
@@ -62,6 +65,7 @@ public class NGSILDConverterController {
         try {
             long startTime = System.nanoTime();
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+                    sgeolInstance,
                     importContextConfig.getContextLinks(),
                     importContextConfig.getMatchingConfigContent(),
                     importContextConfig.getDataContentForNGSILDConversion(),

@@ -9,7 +9,9 @@ import java.util.List;
 
 public interface ImportationSetupWithoutContextRepository extends MongoRepository<ImportationSetupWithoutContext, String> {
 
-    Page<ImportationSetupWithoutContext> findByImportTypeOrderByDateCreatedDesc(String importType, Pageable pages);
+    Page<ImportationSetupWithoutContext> findByIdUserAndImportTypeOrderByDateCreatedDesc(
+            String idUser, String importType, Pageable pages
+    );
 
     List<ImportationSetupWithoutContext> findByIdUserAndFilePath(String userId, String filePath);
 }

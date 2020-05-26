@@ -39,6 +39,7 @@ public class RequestsUtils {
     public static final int STATUS_OK = 200;
     public static final String APP_TOKEN = "application-token";
     public static final String USER_TOKEN = "user-token";
+    public static final String SGEOL_INSTANCE = "sgeol-instance";
 
     public static HttpClient getHttpClientInstance() {
         HttpClient httpClientInstance = null;

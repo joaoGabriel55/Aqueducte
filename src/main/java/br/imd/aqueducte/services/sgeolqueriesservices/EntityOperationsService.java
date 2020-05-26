@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
 import static br.imd.aqueducte.utils.FormatterUtils.treatPrimaryField;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
@@ -41,8 +40,8 @@ public class EntityOperationsService {
         return instance;
     }
 
-    public List<Map<String, Object>> getEntitiesPageable(String appToken, String userToken, String layer, int limit, int offset) throws Exception {
-        HttpGet request = new HttpGet(URL_SGEOL + layer + "?limit=" + limit + "&offset=" + offset);
+    public List<Map<String, Object>> getEntitiesPageable(String sgeolInstance, String appToken, String userToken, String layer, int limit, int offset) throws Exception {
+        HttpGet request = new HttpGet(sgeolInstance + "/v2/" + layer + "?limit=" + limit + "&offset=" + offset);
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         headers.put(APP_TOKEN, appToken);
         headers.put(USER_TOKEN, userToken);
@@ -67,8 +66,8 @@ public class EntityOperationsService {
 
     }
 
-    public Map<String, Object> findEntityById(String appToken, String userToken, String layer, String id) {
-        String uri = URL_SGEOL + layer + FIND_ENTITY_BY_ID + "?entity-id=" + id;
+    public Map<String, Object> findEntityById(String sgeolInstance, String appToken, String userToken, String layer, String id) {
+        String uri = sgeolInstance + "/v2/" + layer + FIND_ENTITY_BY_ID + "?entity-id=" + id;
         HttpGet request = new HttpGet(uri);
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         headers.put(APP_TOKEN, appToken);
@@ -92,7 +91,8 @@ public class EntityOperationsService {
         return null;
     }
 
-    public List<String> findByDocument(String layer,
+    public List<String> findByDocument(String sgeolInstance,
+                                       String layer,
                                        String propertyName,
                                        Object value,
                                        boolean isTempProperty,
@@ -104,11 +104,11 @@ public class EntityOperationsService {
             query = "{\"$and\": [{\"properties." + treatPrimaryField(propertyName) + ".value.value\": {\"$eq\": " + value + "}}]}";
 
         JSONObject queryJson = new JSONObject(query);
-        return executeServiceFindByDocument(layer, queryJson, appToken, userToken);
+        return executeServiceFindByDocument(sgeolInstance, layer, queryJson, appToken, userToken);
     }
 
-    private List<String> executeServiceFindByDocument(String layer, JSONObject query, String appToken, String userToken) {
-        HttpPost request = new HttpPost(URL_SGEOL + layer + FIND_ENTITY_BY_DOCUMENT);
+    private List<String> executeServiceFindByDocument(String sgeolInstance, String layer, JSONObject query, String appToken, String userToken) {
+        HttpPost request = new HttpPost(sgeolInstance + "/v2/" + layer + FIND_ENTITY_BY_DOCUMENT);
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         headers.put(APP_TOKEN, appToken);
         headers.put(USER_TOKEN, userToken);
@@ -136,10 +136,10 @@ public class EntityOperationsService {
         return new ArrayList<>();
     }
 
-    public boolean updateEntity(String id, String appToken, String userToken, LinkedHashMap<String, Object> entity, String layer) {
+    public boolean updateEntity(String sgeolInstance, String id, String appToken, String userToken, LinkedHashMap<String, Object> entity, String layer) {
         entity.put("id", id);
         JSONObject entityJson = new JSONObject(entity);
-        HttpPut request = new HttpPut(URL_SGEOL + layer);
+        HttpPut request = new HttpPut(sgeolInstance + "/v2/" + layer);
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         headers.put(APP_TOKEN, appToken);
         headers.put(USER_TOKEN, userToken);
@@ -163,14 +163,15 @@ public class EntityOperationsService {
      * This method call the SGEOL contained-in service. That service, look entities contained in a specific layer,
      * using GeoProperties
      */
-    public List<String> findContainedIn(String layer,
+    public List<String> findContainedIn(String sgeolInstance,
+                                        String layer,
                                         String containerLayer,
                                         String containerEntityId,
                                         int limit,
                                         int offset,
                                         String appToken,
                                         String userToken) {
-        String uri = URL_SGEOL + layer + CONTAINED_IN +
+        String uri = sgeolInstance + "/v2/" + layer + CONTAINED_IN +
                 "?container-layer=" + containerLayer +
                 "&container-entity=" + containerEntityId +
                 "&limit=" + limit +
@@ -201,9 +202,9 @@ public class EntityOperationsService {
         return new ArrayList<>();
     }
 
-    public boolean tranferPreprocessingLayerEntitesToFinalLayer(String appToken, String userToken, String preprocessingLayer, String finalLayer) throws IOException {
+    public boolean tranferPreprocessingLayerEntitesToFinalLayer(String sgeolInstance, String appToken, String userToken, String preprocessingLayer, String finalLayer) throws IOException {
         HttpPost request = new HttpPost(
-                URL_SGEOL + TRANSFER_LAYER_ENTITIES + preprocessingLayer + "/" + finalLayer
+                sgeolInstance + "/v2/" + TRANSFER_LAYER_ENTITIES + preprocessingLayer + "/" + finalLayer
         );
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         headers.put(APP_TOKEN, appToken);
@@ -224,8 +225,8 @@ public class EntityOperationsService {
     }
 
 
-    public boolean deleteEntityTempProperty(String appToken, String userToken, String layer, String entityId, String propertyName) throws Exception {
-        String uri = URL_SGEOL + layer + "/property?entity-id=" + entityId + "&property-name=" + propertyName;
+    public boolean deleteEntityTempProperty(String sgeolInstance, String appToken, String userToken, String layer, String entityId, String propertyName) throws Exception {
+        String uri = sgeolInstance + "/v2/" + layer + "/property?entity-id=" + entityId + "&property-name=" + propertyName;
         HttpDelete request = new HttpDelete(uri);
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         headers.put(APP_TOKEN, appToken);
@@ -245,8 +246,8 @@ public class EntityOperationsService {
         }
     }
 
-    public boolean deleteDataFromPreprocessingLayer(String appToken, String userToken, String preprocessinglayer) throws Exception {
-        String uri = URL_SGEOL + PREPROCESSING_LAYER_ENTITIES + preprocessinglayer;
+    public boolean deleteDataFromPreprocessingLayer(String sgeolInstance, String appToken, String userToken, String preprocessinglayer) throws Exception {
+        String uri = sgeolInstance + "/v2/" + PREPROCESSING_LAYER_ENTITIES + preprocessinglayer;
         HttpDelete request = new HttpDelete(uri);
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
         headers.put(APP_TOKEN, appToken);

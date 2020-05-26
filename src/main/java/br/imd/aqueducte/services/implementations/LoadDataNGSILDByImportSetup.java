@@ -17,11 +17,10 @@ import org.apache.http.entity.StringEntity;
 import java.io.IOException;
 import java.util.*;
 
+import static br.imd.aqueducte.config.PropertiesParams.URL_AQUECONNECT;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
-import static br.imd.aqueducte.config.PropertiesParams.*;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
-import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @SuppressWarnings("ALL")
 public abstract class LoadDataNGSILDByImportSetup {
@@ -149,6 +148,7 @@ public abstract class LoadDataNGSILDByImportSetup {
     }
 
     protected List<Map<String, Object>> convertToJSON(
+            String sgeolInstance,
             String userToken,
             ImportationSetup importationSetup,
             Map<String, Integer> fieldsSelected
@@ -162,6 +162,7 @@ public abstract class LoadDataNGSILDByImportSetup {
 
         HttpPost request = new HttpPost(url.toString());
         request.setHeader(USER_TOKEN, userToken);
+        request.setHeader(SGEOL_INSTANCE, sgeolInstance);
         request.setEntity(objectToJson(fieldsSelected));
         try {
             HttpResponse response = getHttpClientInstance().execute(request);

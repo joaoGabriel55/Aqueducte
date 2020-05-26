@@ -8,8 +8,8 @@ import java.util.List;
 
 @Component
 public interface ImportationSetupWithoutContextService extends GenericService<ImportationSetupWithoutContext> {
-    Page<ImportationSetupWithoutContext> findByImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
-            String importType, int page, int count
+    Page<ImportationSetupWithoutContext> findByIdUserImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+            String idUser, String importType, int page, int count
     );
 
     List<ImportationSetupWithoutContext> findByUserIdAndFilePath(String userId, String filePath);

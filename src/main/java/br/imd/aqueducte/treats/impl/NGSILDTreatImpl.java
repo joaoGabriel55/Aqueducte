@@ -21,9 +21,11 @@ public class NGSILDTreatImpl implements NGSILDTreat {
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> convertToEntityNGSILD(ImportNSILDDataWithoutContextConfig importConfig,
-                                                                     String layerPath,
-                                                                     Map<Object, Object> contextLink) {
+    public List<LinkedHashMap<String, Object>> convertToEntityNGSILD(
+            String sgeolInstance,
+            ImportNSILDDataWithoutContextConfig importConfig,
+            String layerPath,
+            Map<Object, Object> contextLink) {
 
         // Property data provided from external API
         List<Map<String, Object>> dataListFromExternalAPI = importConfig.getDataContentForNGSILDConversion();
@@ -36,7 +38,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             LinkedHashMap<String, Object> ldObj;
             ldObj = (LinkedHashMap<String, Object>) objectMap;
             UUID uuid = UUID.randomUUID();
-            this.ngsildUtils.initDefaultProperties(linkedHashMapNGSILD, null, layerPath, uuid.toString());
+            this.ngsildUtils.initDefaultProperties(sgeolInstance, linkedHashMapNGSILD, null, layerPath, uuid.toString());
             LinkedHashMap<String, Object> typeAndValueMap = new LinkedHashMap<>();
             if (ldObj != null) {
                 List<Object> listTwoFields = new ArrayList<>();
@@ -72,6 +74,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
 
     @Override
     public List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
+            String sgeolInstance,
             List<String> contextLinks,
             List<MatchingConfig> matchingConfig,
             List<Map<String, Object>> contentForConvert,
@@ -82,7 +85,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         for (Map<String, Object> element : contentForConvert) {
             NGSILDUtils ngsildUtils = new NGSILDUtils();
             UUID uuid = UUID.randomUUID();
-            ngsildUtils.initDefaultProperties(properties, contextLinks, layerPath, uuid.toString());
+            ngsildUtils.initDefaultProperties(sgeolInstance, properties, contextLinks, layerPath, uuid.toString());
             List<Object> listTwoFields = new ArrayList<>();
             for (Entry<String, Object> property : element.entrySet()) {
                 String key = removeSpacesForeignProperty(property.getKey());
