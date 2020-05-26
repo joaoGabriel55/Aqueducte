@@ -27,18 +27,21 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
     @Override
     public List<LinkedHashMap<String, Object>> loadData(
             ImportationSetupWithContext importationSetupWithContext,
+            String sgeolInstance,
             String userToken
     ) {
         if (importationSetupWithContext.getImportType().equals(WEB_SERVICE)) {
-            return loadDataWebService(importationSetupWithContext);
+            return loadDataWebService(importationSetupWithContext, sgeolInstance);
         } else if (importationSetupWithContext.getImportType().equals(FILE)) {
-            return loadDataFile(importationSetupWithContext, userToken);
+            return loadDataFile(importationSetupWithContext, sgeolInstance, userToken);
         }
         return null;
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> loadDataWebService(ImportationSetupWithContext importationSetupWithContext) {
+    public List<LinkedHashMap<String, Object>> loadDataWebService(
+            ImportationSetupWithContext importationSetupWithContext, String sgeolInstance
+    ) {
         JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
 
         // Load data from Webservice
@@ -58,6 +61,7 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
             NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
             try {
                 List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+                        sgeolInstance,
                         getContextLinks(importationSetupWithContext.getContextSources().values()),
                         importationSetupWithContext.getMatchingConfigList(),
                         dataForConvert,
@@ -73,15 +77,21 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> loadDataFile(ImportationSetupWithContext importationSetup, String userToken) {
+    public List<LinkedHashMap<String, Object>> loadDataFile(
+            ImportationSetupWithContext importationSetup,
+            String sgeolInstance,
+            String userToken) {
         try {
             Map<String, Integer> fieldsFiltered = getFieldsForImportSetupContextWithFile(
                     getFileFields(userToken, importationSetup), importationSetup.getMatchingConfigList()
             );
             if (fieldsFiltered != null && fieldsFiltered.size() > 0) {
-                List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(userToken, importationSetup, fieldsFiltered);
+                List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(
+                        sgeolInstance, userToken, importationSetup, fieldsFiltered
+                );
                 NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
                 List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+                        sgeolInstance,
                         getContextLinks(importationSetup.getContextSources().values()),
                         importationSetup.getMatchingConfigList(),
                         fileConvertedIntoJSON,

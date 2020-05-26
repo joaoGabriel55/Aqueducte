@@ -15,6 +15,7 @@ import java.io.IOException;
 
 import static br.imd.aqueducte.config.PropertiesParams.AUTH;
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
+import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @Order(1)
@@ -30,7 +31,7 @@ public class RequestResponseLoggingFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
         try {
             if (AUTH) {
-                if (!permissionChecker.checkSmartSyncPermissionAccess(req.getHeader(USER_TOKEN), (HttpServletRequest) request)) {
+                if (!permissionChecker.checkSmartSyncPermissionAccess(req.getHeader(SGEOL_INSTANCE), req.getHeader(USER_TOKEN), (HttpServletRequest) request)) {
                     buildResponseError(res, "You don't have permission to access Aqüeducte API");
                     return;
                 }

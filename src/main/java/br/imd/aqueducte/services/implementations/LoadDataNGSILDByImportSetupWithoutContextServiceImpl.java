@@ -4,8 +4,8 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
-import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
 import br.imd.aqueducte.treats.NGSILDTreat;
+import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
 import org.springframework.stereotype.Service;
 
@@ -24,18 +24,21 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
     @Override
     public List<LinkedHashMap<String, Object>> loadData(
             ImportationSetupWithoutContext ImportationSetupWithoutContext,
+            String sgeolInstance,
             String userToken
     ) {
         if (ImportationSetupWithoutContext.getImportType().equals(WEB_SERVICE)) {
-            return loadDataWebService(ImportationSetupWithoutContext);
+            return loadDataWebService(ImportationSetupWithoutContext, sgeolInstance);
         } else if (ImportationSetupWithoutContext.getImportType().equals(FILE)) {
-            return loadDataFile(ImportationSetupWithoutContext, userToken);
+            return loadDataFile(ImportationSetupWithoutContext, sgeolInstance, userToken);
         }
         return null;
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> loadDataWebService(ImportationSetupWithoutContext importationSetup) {
+    public List<LinkedHashMap<String, Object>> loadDataWebService(
+            ImportationSetupWithoutContext importationSetup, String sgeolInstance
+    ) {
         JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
 
         // Load data from Webservice
@@ -65,6 +68,7 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
                 importConfig.setDataContentForNGSILDConversion(dataForConvert);
 
                 List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
+                        sgeolInstance,
                         importConfig,
                         importationSetup.getLayerPathSelected(),
                         null
@@ -80,7 +84,7 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
 
     @Override
     public List<LinkedHashMap<String, Object>> loadDataFile(
-            ImportationSetupWithoutContext importationSetup, String userToken) {
+            ImportationSetupWithoutContext importationSetup, String sgeolInstance, String userToken) {
         try {
             Map<String, Integer> fieldsFiltered = getFieldsForImportSetupStandardWithFile(
                     getFileFields(userToken, importationSetup),
@@ -88,7 +92,9 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
                     importationSetup.getFieldsGeolocationSelectedConfigs()
             );
             if (fieldsFiltered != null && fieldsFiltered.size() > 0) {
-                List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(userToken, importationSetup, fieldsFiltered);
+                List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(
+                        sgeolInstance, userToken, importationSetup, fieldsFiltered
+                );
                 // Convert o NGSI-LD
                 NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
                 try {
@@ -97,6 +103,7 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
                     importConfig.setDataContentForNGSILDConversion(fileConvertedIntoJSON);
 
                     List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
+                            sgeolInstance,
                             importConfig,
                             importationSetup.getLayerPathSelected(),
                             null

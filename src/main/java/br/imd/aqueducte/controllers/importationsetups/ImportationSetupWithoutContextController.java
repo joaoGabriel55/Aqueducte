@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
+import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @SuppressWarnings("ALL")
@@ -33,8 +34,9 @@ public class ImportationSetupWithoutContextController extends GenericController 
     @Autowired
     private LoadDataNGSILDByImportationSetupService<ImportationSetupWithoutContext> loadDataNGSILDByImportationSetupService;
 
-    @GetMapping(value = "/{importType}/{page}/{count}")
+    @GetMapping(value = "/{idUser}/{importType}/{page}/{count}")
     public ResponseEntity<Response<Page<ImportationSetupWithoutContext>>> findImportTypeImportationSetupWithoutContext(
+            @PathVariable("idUser") String idUser,
             @PathVariable("importType") String importType,
             @PathVariable("page") int page,
             @PathVariable("count") int count
@@ -42,8 +44,8 @@ public class ImportationSetupWithoutContextController extends GenericController 
         Response<Page<ImportationSetupWithoutContext>> response = new Response<>();
         try {
             Page<ImportationSetupWithoutContext> list = impSetupWithoutCxtService
-                    .findByImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
-                            importType.toUpperCase(), page, count
+                    .findByIdUserImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+                            idUser, importType.toUpperCase(), page, count
                     );
             if (!list.hasContent()) {
                 response.getErrors().add("Has not content");
@@ -198,13 +200,14 @@ public class ImportationSetupWithoutContextController extends GenericController 
     @PostMapping(value = "/load-ngsild-data")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetupWithoutContext(
             @RequestHeader(USER_TOKEN) String userToken,
+            @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @RequestParam boolean samples,
             @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext
     ) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
         try {
             List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDByImportationSetupService.loadData(
-                    importationSetupWithoutContext, userToken
+                    importationSetupWithoutContext, sgeolInstance, userToken
             );
             response.setData(samples ? getSamples(ngsildData) : ngsildData);
             logInfo("POST loadNGSILDDataFromImportSetupWithoutContext", null);
@@ -218,13 +221,14 @@ public class ImportationSetupWithoutContextController extends GenericController 
     @PostMapping(value = "/load-ngsild-data/count")
     public ResponseEntity<Response<Integer>> loadCountNGSILDDataFromImportSetupWithoutContext(
             @RequestHeader(USER_TOKEN) String userToken,
+            @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext
     ) {
         Response<Integer> response = new Response<>();
         try {
             response.setData(
                     this.loadDataNGSILDByImportationSetupService
-                            .loadData(importationSetupWithoutContext, userToken)
+                            .loadData(importationSetupWithoutContext, sgeolInstance, userToken)
                             .size()
             );
             return ResponseEntity.ok(response);

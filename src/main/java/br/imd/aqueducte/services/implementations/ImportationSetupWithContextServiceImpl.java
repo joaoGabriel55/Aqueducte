@@ -33,13 +33,16 @@ public class ImportationSetupWithContextServiceImpl implements ImportationSetupW
     }
 
     @Override
-    public Page<ImportationSetupWithContext> findByImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+    public Page<ImportationSetupWithContext> findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+            String idUser,
             String importType,
             int page,
             int count
     ) {
         PageRequest pageable = new PageRequest(page, count);
-        return this.importationSetupWithContextRepository.findByImportTypeOrderByDateCreatedDesc(importType, pageable);
+        return this.importationSetupWithContextRepository.findByIdUserAndImportTypeOrderByDateCreatedDesc(
+                idUser, importType, pageable
+        );
     }
 
     @Override
