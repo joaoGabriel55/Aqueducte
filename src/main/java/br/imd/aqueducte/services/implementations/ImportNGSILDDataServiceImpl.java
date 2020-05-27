@@ -15,7 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static br.imd.aqueducte.config.PropertiesParams.URL_SGEOL;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
@@ -38,7 +37,14 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
     }
 
     @Override
-    public int updateDataAlreadyImported(String layer, String appToken, String userToken, List<LinkedHashMap<String, Object>> ngsildData, String primaryField) {
+    public int updateDataAlreadyImported(
+            String layer,
+            String sgeolInstance,
+            String appToken,
+            String userToken,
+            List<LinkedHashMap<String, Object>> ngsildData,
+            String primaryField
+    ) {
         final int[] index = {0};
         ngsildData.removeIf(entity -> {
             logInfo("[" + index[0] + "] Entity ID: {}", entity.get("id"));
@@ -49,10 +55,10 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
             if (value == null)
                 return false;
             List<String> entityId = entityOperationsService.findByDocument(
-                    layer, primaryField, value.get("value"), false, appToken, userToken
+                    sgeolInstance, layer, primaryField, value.get("value"), false, appToken, userToken
             );
             if (entityId != null && entityId.size() != 0) {
-                if (entityOperationsService.updateEntity(entityId.get(0), appToken, userToken, entity, layer)) {
+                if (entityOperationsService.updateEntity(sgeolInstance, entityId.get(0), appToken, userToken, entity, layer)) {
                     return true;
                 }
                 return false;
@@ -63,10 +69,10 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
     }
 
     @Override
-    public List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws Exception {
-        String url = URL_SGEOL + layer + "/batch";
+    public List<String> importData(String layer, String sgeolInstance, String appToken, String userToken, JSONArray jsonArray) throws Exception {
+        String url = sgeolInstance + "/v2/" + layer + "/batch";
         if (layer.contains("preprocessing"))
-            url = URL_SGEOL + "preprocessing/" + layer;
+            url = sgeolInstance + "/v2/preprocessing/" + layer;
 
         HttpResponse responseSGEOL = getHttpClientInstance().execute(requestConfigParams(url, appToken, userToken, jsonArray));
 

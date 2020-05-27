@@ -21,8 +21,7 @@ import static br.imd.aqueducte.entitiesrelationship.services.implementations.Ent
 import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType.*;
-import static br.imd.aqueducte.utils.RequestsUtils.APP_TOKEN;
-import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
+import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @RestController
 @RequestMapping("/sync/entitiesRelationship")
@@ -40,6 +39,7 @@ public class EntitiesRelationshipAndTransferController {
 
     @PostMapping(value = {"/make", "/make/{taskId}"})
     public ResponseEntity<Response<Map<String, String>>> makeEntitiesRelationship(
+            @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @RequestHeader(APP_TOKEN) String appToken,
             @RequestHeader(USER_TOKEN) String userToken,
             @PathVariable String taskId,
@@ -52,11 +52,11 @@ public class EntitiesRelationshipAndTransferController {
             List<String> validatorMessage = validator.validateEntitiesRelationshipSetup(setup);
             if (validatorMessage.size() == 0 && setup.getStatus().equals(EntitiesRelationshipSetupStatus.DONE)) {
                 if (setup.getRelationshipType().equals(MANY_TO_MANY))
-                    status = this.entitiesRelationshipAndTransferService.relationshipManyToMany(setup, appToken, userToken);
+                    status = this.entitiesRelationshipAndTransferService.relationshipManyToMany(setup, sgeolInstance, appToken, userToken);
                 else if (setup.getRelationshipType().equals(ONE_TO_MANY))
-                    status = this.entitiesRelationshipAndTransferService.relationshipOneToMany(setup, appToken, userToken);
+                    status = this.entitiesRelationshipAndTransferService.relationshipOneToMany(setup, sgeolInstance, appToken, userToken);
                 else if (setup.getRelationshipType().equals(ONE_TO_ONE))
-                    status = this.entitiesRelationshipAndTransferService.relationshipOneToOne(setup, appToken, userToken);
+                    status = this.entitiesRelationshipAndTransferService.relationshipOneToOne(setup, sgeolInstance, appToken, userToken);
             } else {
                 response.getErrors().addAll(validatorMessage);
                 taskStatusService.sendTaskStatusProgress(
@@ -122,6 +122,7 @@ public class EntitiesRelationshipAndTransferController {
 
     @PostMapping(value = {"/transfer/{layer1}/{layer2}", "/transfer/{layer1}/{layer2}/{taskId}"})
     public ResponseEntity<Response<Map<String, String>>> transferDataWithRelationshipToOriginLayer(
+            @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @RequestHeader(APP_TOKEN) String appToken,
             @RequestHeader(USER_TOKEN) String userToken,
             @PathVariable String layer1,
@@ -131,10 +132,10 @@ public class EntitiesRelationshipAndTransferController {
         Response<Map<String, String>> response = new Response<>();
         try {
             CompletableFuture<Integer> data1 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(
-                    layer1, appToken, userToken
+                    layer1, sgeolInstance, appToken, userToken
             );
             CompletableFuture<Integer> data2 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(
-                    layer2, appToken, userToken
+                    layer2, sgeolInstance, appToken, userToken
             );
             CompletableFuture.allOf(data1, data2).join();
 

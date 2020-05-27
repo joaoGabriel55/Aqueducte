@@ -3,7 +3,6 @@ package br.imd.aqueducte.services;
 import org.json.JSONArray;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -12,11 +11,12 @@ public interface ImportNGSILDDataService {
 
     int updateDataAlreadyImported(
             String layer,
+            String sgeolInstance,
             String appToken,
             String userToken,
             List<LinkedHashMap<String, Object>> ngsildData,
             String primaryField
     );
 
-    List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws Exception;
+    List<String> importData(String layer, String sgeolInstance, String appToken, String userToken, JSONArray jsonArray) throws Exception;
 }

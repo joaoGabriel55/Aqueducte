@@ -33,7 +33,6 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
 
     private static final int REQUEST_ENTITIES_LIMIT = 1024;
 
-
     private EntityOperationsService entityOperationsService = EntityOperationsService.getInstance();
     private RelationshipOperationsService relationshipOperationsService = RelationshipOperationsService.getInstance();
 
@@ -41,7 +40,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
     private ImportNGSILDDataService importNGSILDDataService;
 
     @Override
-    public int relationshipManyToMany(EntitiesRelationshipSetup setup, String appToken, String userToken) {
+    public int relationshipManyToMany(EntitiesRelationshipSetup setup, String sgeolInstance, String appToken, String userToken) {
         List<Map<String, Object>> entities = new ArrayList<>();
         int offset = 0;
         int statusOperation = STATUS_RELATIONSHIP_NOTHING_TODO;
@@ -55,7 +54,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
             int index = 0;
             while (offset == 0 || entities.size() != 0) {
                 int entitiesSize = entities.size();
-                entities = getEntities(appToken, userToken, layer1, offset * entitiesSize);
+                entities = getEntities(sgeolInstance, appToken, userToken, layer1, offset * entitiesSize);
                 if (offset == 0 && (entities == null || entities.size() == 0)) {
                     return STATUS_RELATIONSHIP_NOTHING_TODO;
                 }
@@ -70,6 +69,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                         if (typeProperties.equals(PropertyNGSILD.PROPERTY)) {
                             if (entityMap.containsKey(property1)) {
                                 response = entityOperationsService.findByDocument(
+                                        sgeolInstance,
                                         layer2,
                                         property2,
                                         linkProperty1Value,
@@ -79,6 +79,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                                 );
 
                                 statusOperation = relationshipAndDeleteTempProperties(
+                                        sgeolInstance,
                                         appToken, userToken,
                                         statusOperation,
                                         response,
@@ -94,6 +95,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                             while (offset2 == 0 || geoResponse.size() != 0) {
                                 int geoResponseSize = geoResponse.size();
                                 geoResponse = entityOperationsService.findContainedIn(
+                                        sgeolInstance,
                                         layer2, layer1,
                                         entityMap.get("id").toString(),
                                         REQUEST_ENTITIES_LIMIT,
@@ -105,6 +107,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                                     break;
                                 }
                                 statusOperation = relationshipAndDeleteTempProperties(
+                                        sgeolInstance,
                                         appToken, userToken,
                                         statusOperation,
                                         geoResponse,
@@ -129,7 +132,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
     }
 
     @Override
-    public int relationshipOneToMany(EntitiesRelationshipSetup setup, String appToken, String userToken) {
+    public int relationshipOneToMany(EntitiesRelationshipSetup setup, String sgeolInstance, String appToken, String userToken) {
         int statusOperation = STATUS_RELATIONSHIP_NOTHING_TODO;
         String typeProperties = setup.getPropertiesLinked().get(0).getType();
         try {
@@ -138,7 +141,9 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
             String property1 = treatPrimaryField(setup.getPropertiesLinked().get(0).getName());
             String property2 = treatPrimaryField(setup.getPropertiesLinked().get(1).getName());
 
-            Map<String, Object> entity = getEntityById(appToken, userToken, layer1, setup.getPropertiesLinked().get(0).getEntityId());
+            Map<String, Object> entity = getEntityById(
+                    sgeolInstance, appToken, userToken, layer1, setup.getPropertiesLinked().get(0).getEntityId()
+            );
             if (entity != null) {
                 Object linkProperty1Value = entity.containsKey(property1) ?
                         getValue((Map<String, Object>) entity.get(property1)) :
@@ -147,6 +152,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                     if (typeProperties.equals(PropertyNGSILD.PROPERTY)) {
                         if (entity.containsKey(property1)) {
                             List<String> response = entityOperationsService.findByDocument(
+                                    sgeolInstance,
                                     layer2,
                                     property2,
                                     linkProperty1Value,
@@ -156,6 +162,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                             );
 
                             statusOperation = relationshipAndDeleteTempProperties(
+                                    sgeolInstance,
                                     appToken, userToken,
                                     statusOperation,
                                     response,
@@ -171,6 +178,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                         while (offset2 == 0 || geoResponse.size() != 0) {
                             int geoResponseSize = geoResponse.size();
                             geoResponse = entityOperationsService.findContainedIn(
+                                    sgeolInstance,
                                     layer2, layer1,
                                     entity.get("id").toString(),
                                     REQUEST_ENTITIES_LIMIT,
@@ -182,6 +190,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                                 break;
                             }
                             statusOperation = relationshipAndDeleteTempProperties(
+                                    sgeolInstance,
                                     appToken, userToken,
                                     statusOperation,
                                     geoResponse,
@@ -203,7 +212,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
     }
 
     @Override
-    public int relationshipOneToOne(EntitiesRelationshipSetup setup, String appToken, String userToken) {
+    public int relationshipOneToOne(EntitiesRelationshipSetup setup, String sgeolInstance, String appToken, String userToken) {
         int statusOperation = STATUS_RELATIONSHIP_NOTHING_TODO;
         String typeProperties = setup.getPropertiesLinked().get(0).getType();
         try {
@@ -211,11 +220,16 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
             String layer2 = setup.getLayerSetup().get(1).getPath();
             String property1 = treatPrimaryField(setup.getPropertiesLinked().get(0).getName());
             String property2 = treatPrimaryField(setup.getPropertiesLinked().get(1).getName());
-            Map<String, Object> entity1 = getEntityById(appToken, userToken, layer1, setup.getPropertiesLinked().get(0).getEntityId());
-            Map<String, Object> entity2 = getEntityById(appToken, userToken, layer2, setup.getPropertiesLinked().get(1).getEntityId());
+            Map<String, Object> entity1 = getEntityById(
+                    sgeolInstance, appToken, userToken, layer1, setup.getPropertiesLinked().get(0).getEntityId()
+            );
+            Map<String, Object> entity2 = getEntityById(
+                    sgeolInstance, appToken, userToken, layer2, setup.getPropertiesLinked().get(1).getEntityId()
+            );
             if (entity1 != null && entity2 != null) {
                 if (entity1.containsKey(property1) && entity2.containsKey(property2)) {
                     boolean status = relationshipOperationsService.relationshipEntities(
+                            sgeolInstance,
                             appToken, userToken,
                             layer1,
                             layer2,
@@ -225,7 +239,9 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                     );
                     if (status) statusOperation = STATUS_RELATIONSHIP_OK;
                     if (statusOperation == STATUS_RELATIONSHIP_OK) {
-                        deleteTempProperties(appToken, userToken,
+                        deleteTempProperties(
+                                sgeolInstance,
+                                appToken, userToken,
                                 setup.getPropertiesLinked(),
                                 layer1,
                                 layer2,
@@ -246,6 +262,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
 
 
     private int relationshipAndDeleteTempProperties(
+            String sgeolInstance,
             String appToken,
             String userToken,
             int statusOperation,
@@ -259,6 +276,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
     ) throws Exception {
         for (String idFromLayerEntity2 : response) {
             boolean status = relationshipOperationsService.relationshipEntities(
+                    sgeolInstance,
                     appToken, userToken,
                     layer1,
                     layer2,
@@ -271,6 +289,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
 
             if (statusOperation == STATUS_RELATIONSHIP_OK) {
                 deleteTempProperties(
+                        sgeolInstance,
                         appToken,
                         userToken,
                         setup.getPropertiesLinked(),
@@ -288,6 +307,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
 
 
     private void deleteTempProperties(
+            String sgeolInstance,
             String appToken,
             String userToken,
             List<PropertyNGSILD> properties,
@@ -299,10 +319,13 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
             String property2
     ) throws Exception {
         if (properties.get(0).isTemporaryProperty()) {
-            entityOperationsService.deleteEntityTempProperty(appToken, userToken, layer1, entityIdLayer1, property1);
+            entityOperationsService.deleteEntityTempProperty(
+                    sgeolInstance, appToken, userToken, layer1, entityIdLayer1, property1
+            );
         }
         if (properties.get(1).isTemporaryProperty()) {
-            entityOperationsService.deleteEntityTempProperty(appToken, userToken, layer2, entityIdLayer2, property2);
+            entityOperationsService.deleteEntityTempProperty(
+                    sgeolInstance, appToken, userToken, layer2, entityIdLayer2, property2);
         }
     }
 
@@ -318,20 +341,22 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
         }
     }
 
-    private List<Map<String, Object>> getEntities(String appToken, String userToken, String layer, int offset) throws Exception {
-        return entityOperationsService.getEntitiesPageable(appToken, userToken, layer, REQUEST_ENTITIES_LIMIT, offset);
+    private List<Map<String, Object>> getEntities(String sgeolInstance, String appToken, String userToken, String layer, int offset) throws Exception {
+        return entityOperationsService.getEntitiesPageable(
+                sgeolInstance, appToken, userToken, layer, REQUEST_ENTITIES_LIMIT, offset
+        );
     }
 
     @Override
     @Async
-    public CompletableFuture<Integer> transferLayerEntitiesAsync(String layer, String appToken, String userToken) throws Exception {
+    public CompletableFuture<Integer> transferLayerEntitiesAsync(String layer, String sgeolInstance, String appToken, String userToken) throws Exception {
         logInfo("getLayerEntitiesAsync", null);
-        final int status = transferLayerEntities(layer, appToken, userToken);
+        final int status = transferLayerEntities(layer, sgeolInstance, appToken, userToken);
         return CompletableFuture.completedFuture(status);
     }
 
     @Override
-    public int transferLayerEntities(String layer, String appToken, String userToken) throws Exception {
+    public int transferLayerEntities(String layer, String sgeolInstance, String appToken, String userToken) throws Exception {
         if (layer.contains("_preprocessing")) {
             boolean statusLayerEntitiesTransfered = false;
             boolean statusLayerDeleted = false;
@@ -341,18 +366,21 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                 String layerDestiny = layer.replace("_preprocessing", "");
                 List<Map<String, Object>> entities = new ArrayList<>();
                 while (offset == 0 || entities.size() != 0) {
-                    entities = getEntities(appToken, userToken, layer, offset);
+                    entities = getEntities(sgeolInstance, appToken, userToken, layer, offset);
                     if (offset == 0 && (entities == null || entities.size() == 0)) {
                         return STATUS_TRANSFER_NOTHING_TODO;
                     }
                     JSONArray entitiesJsonArray = new JSONArray(entities);
                     statusLayerEntitiesTransfered = entityOperationsService.tranferPreprocessingLayerEntitesToFinalLayer(
+                            sgeolInstance,
                             appToken, userToken,
                             layer, layerDestiny
                     );
                     offset++;
                 }
-                statusLayerDeleted = entityOperationsService.deleteDataFromPreprocessingLayer(appToken, userToken, layer);
+                statusLayerDeleted = entityOperationsService.deleteDataFromPreprocessingLayer(
+                        sgeolInstance, appToken, userToken, layer
+                );
                 if (statusLayerDeleted && statusLayerEntitiesTransfered)
                     return STATUS_TRANSFER_OK;
                 else
@@ -365,7 +393,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
         return STATUS_TRANSFER_NOTHING_TODO;
     }
 
-    private Map<String, Object> getEntityById(String appToken, String userToken, String layer, String id) {
-        return entityOperationsService.findEntityById(appToken, userToken, layer, id);
+    private Map<String, Object> getEntityById(String sgeolInstance, String appToken, String userToken, String layer, String id) {
+        return entityOperationsService.findEntityById(sgeolInstance, appToken, userToken, layer, id);
     }
 }

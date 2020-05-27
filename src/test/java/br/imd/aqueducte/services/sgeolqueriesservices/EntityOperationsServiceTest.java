@@ -20,7 +20,7 @@ public class EntityOperationsServiceTest {
         // && !result
         while ((offset == 0 || entities.size() != 0)) {
             int entitiesSize = entities.size();
-            entities = service.getEntitiesPageable("", "", "bairro", 1024, offset * entitiesSize);
+            entities = service.getEntitiesPageable("", "", "", "bairro", 1024, offset * entitiesSize);
             for (Object entity : entities) {
                 Map<String, Object> entityMap = (Map<String, Object>) entity;
                 int offset2 = 0;
@@ -28,6 +28,7 @@ public class EntityOperationsServiceTest {
                 while (offset2 == 0 || geoResponse.size() != 0) {
                     int geoResponseSize = geoResponse.size();
                     geoResponse = service.findContainedIn(
+                            "",
                             "escola", "bairro",
                             entityMap.get("id").toString(),
                             1024, offset2 * geoResponseSize,
