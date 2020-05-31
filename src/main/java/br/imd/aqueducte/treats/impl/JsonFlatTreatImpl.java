@@ -1,14 +1,16 @@
 package br.imd.aqueducte.treats.impl;
 
 import br.imd.aqueducte.treats.JsonFlatTreat;
+import org.codehaus.jettison.json.JSONException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static br.imd.aqueducte.utils.GeoJsonValidator.checkIsGeoJson;
+import static br.imd.aqueducte.utils.GeoJsonValidator.getGeoJson;
 
 @SuppressWarnings("ALL")
 public class JsonFlatTreatImpl implements JsonFlatTreat {
@@ -65,7 +67,14 @@ public class JsonFlatTreatImpl implements JsonFlatTreat {
         }
         for (Map.Entry<String, Object> entry : jsonDataTyped.entrySet()) {
             if ((entry.getValue() instanceof Map) && !(entry.getValue() instanceof List)) {
-                boolean isGeoJson = checkIsGeoJson((Map<String, Object>) entry.getValue());
+                boolean isGeoJson = false;
+                try {
+                    isGeoJson = getGeoJson(entry.getValue()) == null ? false : true;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 if (!isGeoJson) {
                     if (keyPath != "")
                         keyPath += "_" + entry.getKey();

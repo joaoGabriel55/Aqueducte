@@ -87,7 +87,7 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
             ImportationSetupWithoutContext importationSetup, String sgeolInstance, String userToken) {
         try {
             Map<String, Integer> fieldsFiltered = getFieldsForImportSetupStandardWithFile(
-                    getFileFields(userToken, importationSetup),
+                    getFileFields(sgeolInstance, userToken, importationSetup),
                     importationSetup.getFieldsSelected(),
                     importationSetup.getFieldsGeolocationSelectedConfigs()
             );
