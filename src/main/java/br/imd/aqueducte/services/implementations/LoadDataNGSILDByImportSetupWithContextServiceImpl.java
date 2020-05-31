@@ -83,7 +83,7 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
             String userToken) {
         try {
             Map<String, Integer> fieldsFiltered = getFieldsForImportSetupContextWithFile(
-                    getFileFields(userToken, importationSetup), importationSetup.getMatchingConfigList()
+                    getFileFields(sgeolInstance, userToken, importationSetup), importationSetup.getMatchingConfigList()
             );
             if (fieldsFiltered != null && fieldsFiltered.size() > 0) {
                 List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(

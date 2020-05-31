@@ -1,11 +1,13 @@
 package br.imd.aqueducte.utils;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
+import org.codehaus.jettison.json.JSONException;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static br.imd.aqueducte.utils.GeoJsonValidator.checkIsGeoJson;
+import static br.imd.aqueducte.utils.GeoJsonValidator.getGeoJson;
 
 @SuppressWarnings("ALL")
 public class NGSILDUtils {
@@ -161,11 +163,18 @@ public class NGSILDUtils {
         HashMap<String, Object> valueGeoLocation = new HashMap<>();
         for (GeoLocationConfig configElem : geoLocationConfig) {
             if (configElem.getKey().equalsIgnoreCase(property.getKey()) && property.getValue() != null) {
-                if ((property.getValue() instanceof Map) &&
-                        checkIsGeoJson((Map<String, Object>) property.getValue())) {
+                Map<String, Object> geojson = null;
+                try {
+                    geojson = getGeoJson(property.getValue());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (geojson != null) {
                     Map<String, Object> geoJsonMap = new HashMap<>();
                     geoJsonMap.put("type", "GeoProperty");
-                    geoJsonMap.put("value", property.getValue());
+                    geoJsonMap.put("value", geojson);
                     properties.put(contextName, geoJsonMap);
                     property.setValue(null);
                 } else {

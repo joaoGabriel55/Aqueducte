@@ -120,7 +120,7 @@ public abstract class LoadDataNGSILDByImportSetup {
         return dataFiltered;
     }
 
-    protected Map<String, Integer> getFileFields(String userToken, ImportationSetup importationSetup) {
+    protected Map<String, Integer> getFileFields(String sgeolInstance, String userToken, ImportationSetup importationSetup) {
         StringBuilder url = new StringBuilder();
         url.append(URL_AQUECONNECT);
         url.append("file-import-setup-resource/file-fields/");
@@ -129,6 +129,7 @@ public abstract class LoadDataNGSILDByImportSetup {
         url.append("&delimiter=" + importationSetup.getDelimiterFileContent());
 
         HttpGet request = new HttpGet(url.toString());
+        request.setHeader(SGEOL_INSTANCE, sgeolInstance);
         request.setHeader(USER_TOKEN, userToken);
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
