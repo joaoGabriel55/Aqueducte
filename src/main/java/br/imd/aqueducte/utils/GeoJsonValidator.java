@@ -1,10 +1,10 @@
 package br.imd.aqueducte.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vividsolutions.jts.geom.Geometry;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.geotools.geojson.geom.GeometryJSON;
+import org.locationtech.jts.geom.Geometry;
 
 import java.io.IOException;
 import java.io.StringReader;
