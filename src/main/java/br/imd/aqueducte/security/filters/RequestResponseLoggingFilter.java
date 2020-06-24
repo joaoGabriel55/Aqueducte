@@ -3,6 +3,7 @@ package br.imd.aqueducte.security.filters;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.security.PermissionChecker;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.core.annotation.Order;
 
 import javax.servlet.Filter;
@@ -14,11 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 import static br.imd.aqueducte.config.PropertiesParams.AUTH;
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
 import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @Order(1)
+@Log4j2
 public class RequestResponseLoggingFilter implements Filter {
 
     @Override
@@ -39,7 +40,7 @@ public class RequestResponseLoggingFilter implements Filter {
             chain.doFilter(request, response);
         } catch (Exception e) {
             buildResponseError(response, "Internal error.");
-            logError(e.getMessage(), e.getStackTrace());
+            log.error(e.getMessage(), e.getStackTrace());
         }
     }
 

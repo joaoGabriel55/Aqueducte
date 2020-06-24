@@ -9,6 +9,6 @@ import java.util.List;
 @Component
 public interface EntitiesRelationshipSetupService extends GenericService<EntitiesRelationshipSetup> {
 
-    List<EntitiesRelationshipSetup> findByStatus(String status);
+    List<EntitiesRelationshipSetup> findByStatus(String status) throws Exception;
 
 }

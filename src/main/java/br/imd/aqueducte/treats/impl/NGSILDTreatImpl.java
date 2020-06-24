@@ -5,12 +5,14 @@ import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.utils.NGSILDUtils;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.*;
 import java.util.Map.Entry;
 
 import static br.imd.aqueducte.utils.NGSILDUtils.removeSpacesForeignProperty;
 
+@Log4j2
 public class NGSILDTreatImpl implements NGSILDTreat {
     private static final String LOCATION_FIELD = "location";
 
@@ -25,10 +27,19 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             String sgeolInstance,
             ImportNSILDDataWithoutContextConfig importConfig,
             String layerPath,
-            Map<Object, Object> contextLink) {
+            Map<Object, Object> contextLink) throws Exception {
 
         // Property data provided from external API
         List<Map<String, Object>> dataListFromExternalAPI = importConfig.getDataContentForNGSILDConversion();
+        if (dataListFromExternalAPI == null) {
+            log.error("dataListFromExternalAPI is null");
+            throw new Exception();
+        }
+        if (dataListFromExternalAPI.size() == 0) {
+            log.error("dataListFromExternalAPI is empty");
+            throw new Exception();
+        }
+
         List<LinkedHashMap<String, Object>> listContentConverted = new ArrayList<>();
 
         // Geolocation config
@@ -69,6 +80,10 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             linkedHashMapNGSILD.putAll(typeAndValueMap);
             listContentConverted.add(linkedHashMapNGSILD);
         }
+        if (listContentConverted.size() == 0) {
+            log.error("listContentConverted is empty");
+        }
+        log.info("listContentConverted successfuly");
         return listContentConverted;
     }
 
@@ -79,7 +94,15 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             List<MatchingConfig> matchingConfig,
             List<Map<String, Object>> contentForConvert,
             String layerPath
-    ) {
+    ) throws Exception {
+        if (contentForConvert == null) {
+            log.error("contentForConvert is null");
+            throw new Exception();
+        }
+        if (contentForConvert.size() == 0) {
+            log.error("contentForConvert is empty");
+            throw new Exception();
+        }
         List<LinkedHashMap<String, Object>> listNGSILD = new ArrayList<>();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
         for (Map<String, Object> element : contentForConvert) {
@@ -131,6 +154,10 @@ public class NGSILDTreatImpl implements NGSILDTreat {
             listNGSILD.add(properties);
             properties = new LinkedHashMap<>();
         }
+        if (listNGSILD.size() == 0) {
+            log.error("listNGSILD is empty");
+        }
+        log.info("listNGSILD successfuly");
         return listNGSILD;
     }
 
@@ -139,15 +166,5 @@ public class NGSILDTreatImpl implements NGSILDTreat {
         typeValue.put("type", "Property");
         typeValue.put("value", value);
         return typeValue;
-    }
-
-    private Map<String, Object> getTempProperty(Object propertyValue) {
-        HashMap<String, Object> tempPropertyValue = new HashMap<>();
-        tempPropertyValue.put("type", "TempProperty");
-        tempPropertyValue.put("value", propertyValue);
-        HashMap<String, Object> value = new HashMap<>();
-        value.put("type", "Property");
-        value.put("value", tempPropertyValue);
-        return value;
     }
 }

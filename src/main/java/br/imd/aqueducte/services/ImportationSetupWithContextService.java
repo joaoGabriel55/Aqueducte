@@ -10,8 +10,8 @@ import java.util.List;
 public interface ImportationSetupWithContextService extends GenericService<ImportationSetupWithContext> {
     Page<ImportationSetupWithContext> findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
             String idUser, String importType, int page, int count
-    );
+    ) throws Exception;
 
-    List<ImportationSetupWithContext> findByUserIdAndFilePath(String userId, String filePath);
+    List<ImportationSetupWithContext> findByUserIdAndFilePath(String userId, String filePath) throws Exception;
 
 }

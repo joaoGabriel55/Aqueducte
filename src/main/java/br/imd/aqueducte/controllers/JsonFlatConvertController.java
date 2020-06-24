@@ -2,16 +2,15 @@ package br.imd.aqueducte.controllers;
 
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
-
 @RestController
+@Log4j2
 @RequestMapping("/sync/jsonFlat")
 @CrossOrigin(origins = "*")
 public class JsonFlatConvertController {
@@ -26,12 +25,12 @@ public class JsonFlatConvertController {
         try {
             Object jsonFlatData = jsonFlatTreatImpl.getFlatJSON(dataForConversion);
             response.setData(jsonFlatData);
-            logInfo("POST /jsonFlat", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getStackTrace());
+            log.error(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
+        log.info("POST /jsonFlat");
         return ResponseEntity.ok(response);
     }
 
@@ -43,12 +42,12 @@ public class JsonFlatConvertController {
         try {
             List<String> jsonFlatCollection = jsonFlatTreatImpl.getKeysCollectionFromJSON(dataForConversion);
             response.setData(jsonFlatCollection);
-            logInfo("POST /arrayKeys", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getStackTrace());
+            log.error(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
+        log.info("POST /arrayKeys");
         return ResponseEntity.ok(response);
     }
 

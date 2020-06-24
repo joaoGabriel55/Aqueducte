@@ -7,6 +7,7 @@ import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelat
 import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.services.TaskStatusService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +19,11 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static br.imd.aqueducte.entitiesrelationship.services.implementations.EntitiesRelationshipAndTransferServiceImpl.*;
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType.*;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @RestController
+@Log4j2
 @RequestMapping("/sync/entitiesRelationship")
 @CrossOrigin(origins = "*")
 public class EntitiesRelationshipAndTransferController {
@@ -67,7 +67,7 @@ public class EntitiesRelationshipAndTransferController {
                                 setup.getLayerSetup().get(1).getName(),
                         "status-relationship-process"
                 );
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -81,7 +81,7 @@ public class EntitiesRelationshipAndTransferController {
                                 setup.getLayerSetup().get(1).getName(),
                         "status-relationship-process"
                 );
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
 
@@ -105,7 +105,7 @@ public class EntitiesRelationshipAndTransferController {
                     "status-relationship-process"
             );
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
         taskStatusService.sendTaskStatusProgress(
@@ -116,7 +116,7 @@ public class EntitiesRelationshipAndTransferController {
                         setup.getLayerSetup().get(1).getName(),
                 "status-relationship-process"
         );
-        logInfo("POST makeEntitiesRelationship", null);
+        log.info("POST makeEntitiesRelationship");
         return ResponseEntity.ok().body(response);
     }
 
@@ -147,48 +147,32 @@ public class EntitiesRelationshipAndTransferController {
             layersTransferResponse.put(layer1, statusMessageTransferData(statusTransferData1));
             layersTransferResponse.put(layer2, statusMessageTransferData(statusTransferData2));
 
+            String msg = "Transferência de entidades das Layers " +
+                    layer1 + "(" + layersTransferResponse.get(layer1) + ") " +
+                    layer2 + "(" + layersTransferResponse.get(layer2) + ")";
             if (statusTransferData1 == STATUS_TRANSFER_NOTHING_TODO &&
                     statusTransferData2 == STATUS_TRANSFER_NOTHING_TODO) {
                 response.setData(layersTransferResponse);
-                taskStatusService.sendTaskStatusProgress(
-                        taskId,
-                        TaskStatus.ERROR,
-                        "Transferência de entidades das Layers " +
-                                layer1 + "(" + layersTransferResponse.get(layer1) + ") " +
-                                layer2 + "(" + layersTransferResponse.get(layer2) + ")",
-                        "status-transfer-process"
-                );
+                taskStatusService.sendTaskStatusProgress(taskId, TaskStatus.ERROR, msg, "status-transfer-process");
+                log.error(msg);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
 
             if (statusTransferData1 == STATUS_TRANSFER_ERROR &&
                     statusTransferData2 == STATUS_TRANSFER_ERROR) {
                 response.setData(layersTransferResponse);
-                taskStatusService.sendTaskStatusProgress(
-                        taskId,
-                        TaskStatus.ERROR,
-                        "Transferência de entidades das Layers " +
-                                layer1 + "(" + layersTransferResponse.get(layer1) + ") " +
-                                layer2 + "(" + layersTransferResponse.get(layer2) + ")",
-                        "status-transfer-process"
-                );
+                taskStatusService.sendTaskStatusProgress(taskId, TaskStatus.ERROR, msg, "status-transfer-process");
+                log.error(msg);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
 
             response.setData(layersTransferResponse);
-            taskStatusService.sendTaskStatusProgress(
-                    taskId,
-                    TaskStatus.DONE,
-                    "Transferência de entidades das Layers " +
-                            layer1 + "(" + layersTransferResponse.get(layer1) + ") " +
-                            layer2 + "(" + layersTransferResponse.get(layer2) + ")",
-                    "status-transfer-process"
-            );
-            logInfo("POST transferDataWithRelationshipToOriginLayer", null);
+            taskStatusService.sendTaskStatusProgress(taskId, TaskStatus.DONE, msg, "status-transfer-process");
+            log.info("POST transferDataWithRelationshipToOriginLayer - {}", msg);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (final Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

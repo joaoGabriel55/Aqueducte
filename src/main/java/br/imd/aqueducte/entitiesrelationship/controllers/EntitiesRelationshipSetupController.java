@@ -7,6 +7,7 @@ import br.imd.aqueducte.models.entitiesrelationship.enums.EntitiesRelationshipSe
 import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
 import br.imd.aqueducte.models.response.Response;
 import com.mongodb.DuplicateKeyException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
-
 @RestController
+@Log4j2
 @RequestMapping("/sync/entitiesRelationshipSetup")
 @CrossOrigin(origins = "*")
 public class EntitiesRelationshipSetupController extends GenericController {
@@ -37,12 +36,12 @@ public class EntitiesRelationshipSetupController extends GenericController {
         try {
             List<EntitiesRelationshipSetup> entitiesRelationshipSetups = service.findAll();
             response.setData(entitiesRelationshipSetups);
-            logInfo("GET getAll EntitiesRelationshipSetup", null);
+            log.info("GET getAll EntitiesRelationshipSetup");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
             response.getErrors().add(e.getLocalizedMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -54,16 +53,16 @@ public class EntitiesRelationshipSetupController extends GenericController {
             Optional<EntitiesRelationshipSetup> setupFound = service.findById(id);
             if (setupFound.isEmpty()) {
                 response.getErrors().add("EntitiesRelationshipSetup " + id + " not found");
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.badRequest().body(response);
             }
             response.setData(setupFound.get());
-            logInfo("GET getById EntitiesRelationshipSetup", null);
+            log.info("GET getById EntitiesRelationshipSetup {}", id);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
             response.getErrors().add(e.getLocalizedMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -74,18 +73,18 @@ public class EntitiesRelationshipSetupController extends GenericController {
         Response<List<EntitiesRelationshipSetup>> response = new Response<>();
         if (!validator.validateStatusParam(status)) {
             response.getErrors().add("Status not exists");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
         try {
             List<EntitiesRelationshipSetup> entitiesRelationshipSetups = service.findByStatus(status);
             response.setData(entitiesRelationshipSetups);
-            logInfo("GET getByStatus EntitiesRelationshipSetup", null);
+            log.info("GET getByStatus EntitiesRelationshipSetup - {}", status);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
             response.getErrors().add(e.getLocalizedMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -97,13 +96,13 @@ public class EntitiesRelationshipSetupController extends GenericController {
         Response<EntitiesRelationshipSetup> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
         List<String> validatorMessage = validator.validateEntitiesRelationshipSetup(entitiesRelationshipSetup);
         if (validatorMessage.size() != 0 && !entitiesRelationshipSetup.getStatus().equals(EntitiesRelationshipSetupStatus.PENDING)) {
             response.getErrors().addAll(validatorMessage);
-            logError(response.getErrors().toString(), null);
+            log.error(response.getErrors().toString());
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -113,12 +112,12 @@ public class EntitiesRelationshipSetupController extends GenericController {
             entitiesRelationshipSetup.setDateModified(new Date());
             EntitiesRelationshipSetup entitiesRelationshipSetups = service.createOrUpdate(entitiesRelationshipSetup);
             response.setData(entitiesRelationshipSetups);
-            logInfo("POST save EntitiesRelationshipSetup", null);
+            log.info("POST save EntitiesRelationshipSetup");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
             e.printStackTrace();
             response.getErrors().add(e.getLocalizedMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -132,17 +131,17 @@ public class EntitiesRelationshipSetupController extends GenericController {
         Response<EntitiesRelationshipSetup> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         } else if (!entitiesRelationshipSetup.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
         List<String> validatorMessage = validator.validateEntitiesRelationshipSetup(entitiesRelationshipSetup);
         if (validatorMessage.size() != 0 && !entitiesRelationshipSetup.getStatus().equals(EntitiesRelationshipSetupStatus.PENDING)) {
             response.getErrors().addAll(validatorMessage);
-            logError(response.getErrors().toString(), null);
+            log.error(response.getErrors().toString());
             return ResponseEntity.badRequest().body(response);
         }
         try {
@@ -155,14 +154,14 @@ public class EntitiesRelationshipSetupController extends GenericController {
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("PATCH update EntitiesRelationshipSetup", null);
+        log.info("PATCH update EntitiesRelationshipSetup - {}", id);
         return ResponseEntity.ok(response);
     }
 
@@ -172,12 +171,12 @@ public class EntitiesRelationshipSetupController extends GenericController {
         try {
             String entitiesRelationshipSetupDeletedId = service.delete(id);
             response.setData(entitiesRelationshipSetupDeletedId);
-            logInfo("DELETE delete EntitiesRelationshipSetup", null);
+            log.info("DELETE delete EntitiesRelationshipSetup - {}", id);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             e.printStackTrace();
             response.getErrors().add(e.getLocalizedMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }

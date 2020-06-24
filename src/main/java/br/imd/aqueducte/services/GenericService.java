@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 public interface GenericService<T> {
 
-	T createOrUpdate(T obj);
+	T createOrUpdate(T obj) throws Exception;
 
-	List<T> findAll();
+	List<T> findAll() throws Exception;
 
-	Optional<T> findById(String id);
+	Optional<T> findById(String id) throws Exception;
 	
-	String delete(String id);
+	String delete(String id) throws Exception;
 
 }

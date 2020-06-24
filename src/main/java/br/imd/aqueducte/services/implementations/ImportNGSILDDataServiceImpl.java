@@ -4,6 +4,7 @@ import br.imd.aqueducte.services.ImportNGSILDDataService;
 import br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.log4j.Log4j2;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
@@ -15,11 +16,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
 @Service
+@Log4j2
 public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
 
     private EntityOperationsService entityOperationsService = EntityOperationsService.getInstance();
@@ -47,7 +48,7 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
     ) {
         final int[] index = {0};
         ngsildData.removeIf(entity -> {
-            logInfo("[" + index[0] + "] Entity ID: {}", entity.get("id"));
+            log.info("[" + index[0] + "] Entity ID: {}", entity.get("id"));
             index[0]++;
             if (!entity.containsKey(primaryField))
                 return false;
@@ -76,15 +77,18 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
 
         HttpResponse responseSGEOL = getHttpClientInstance().execute(requestConfigParams(url, appToken, userToken, jsonArray));
 
-        if (responseSGEOL.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED)
-            throw new Exception("Error on middleware request");
+        if (responseSGEOL.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
+            String msg = "Error on middleware request";
+            log.error(msg);
+            throw new Exception(msg);
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> mapFromJson = mapper.readValue(
                 readBodyReq(responseSGEOL.getEntity().getContent()), Map.class
         );
         List<String> entitiesId = (List<String>) mapFromJson.get("entities");
-        logInfo("POST /entity imported {}", entitiesId);
+        log.info("POST /entity imported {}", entitiesId);
         return entitiesId;
     }
 

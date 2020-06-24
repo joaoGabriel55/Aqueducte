@@ -6,6 +6,7 @@ import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.services.ImportationSetupWithoutContextService;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
 import com.mongodb.DuplicateKeyException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +18,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @SuppressWarnings("ALL")
 @RestController
+@Log4j2
 @RequestMapping("/sync/withoutContextSetup")
 @CrossOrigin(origins = "*")
 public class ImportationSetupWithoutContextController extends GenericController {
@@ -49,16 +49,16 @@ public class ImportationSetupWithoutContextController extends GenericController 
                     );
             if (!list.hasContent()) {
                 response.getErrors().add("Has not content");
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.badRequest().body(response);
             }
             response.setData(list);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("GET findImportTypeImportationSetupWithoutContext", null);
+        log.info("GET findImportTypeImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
@@ -73,10 +73,10 @@ public class ImportationSetupWithoutContextController extends GenericController 
             response.setData(importationSetupWithoutContext.get());
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("GET getByIdImportationSetupWithoutContext", null);
+        log.info("GET getByIdImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
@@ -89,7 +89,7 @@ public class ImportationSetupWithoutContextController extends GenericController 
 
         if (filePath == "" || filePath == null) {
             response.getErrors().add("File path must be informed");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -98,10 +98,10 @@ public class ImportationSetupWithoutContextController extends GenericController 
             response.setData(importationSetupWithoutContextList);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("GET findImportationSetupWithoutContextByFilePathAndUserId", null);
+        log.info("GET findImportationSetupWithoutContextByFilePathAndUserId");
         return ResponseEntity.ok(response);
     }
 
@@ -113,7 +113,7 @@ public class ImportationSetupWithoutContextController extends GenericController 
         Response<ImportationSetupWithoutContext> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
         importationSetupWithoutContext.setIdUser(idUser);
@@ -125,19 +125,19 @@ public class ImportationSetupWithoutContextController extends GenericController 
                 response.setData(importationSetupWithoutContext);
             } else {
                 response.getErrors().add("Object inconsistent");
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.badRequest().body(response);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("POST saveImportationSetupWithoutContext", null);
+        log.info("POST saveImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
@@ -151,11 +151,11 @@ public class ImportationSetupWithoutContextController extends GenericController 
 
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         } else if (!importationSetupWithoutContext.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -169,14 +169,14 @@ public class ImportationSetupWithoutContextController extends GenericController 
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("PUT updateImportationSetupWithoutContext", null);
+        log.info("PUT updateImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
@@ -190,10 +190,10 @@ public class ImportationSetupWithoutContextController extends GenericController 
                 response.setData(idDeleted);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("DELETE deleteImportationSetupWithoutContext", null);
+        log.info("DELETE deleteImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
@@ -210,10 +210,11 @@ public class ImportationSetupWithoutContextController extends GenericController 
                     importationSetupWithoutContext, sgeolInstance, userToken
             );
             response.setData(samples ? getSamples(ngsildData) : ngsildData);
-            logInfo("POST loadNGSILDDataFromImportSetupWithoutContext", null);
+            log.info("POST loadNGSILDDataFromImportSetupWithoutContext");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -231,10 +232,11 @@ public class ImportationSetupWithoutContextController extends GenericController 
                             .loadData(importationSetupWithoutContext, sgeolInstance, userToken)
                             .size()
             );
+            log.info("POST loadCountNGSILDDataFromImportSetupWithoutContext");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }

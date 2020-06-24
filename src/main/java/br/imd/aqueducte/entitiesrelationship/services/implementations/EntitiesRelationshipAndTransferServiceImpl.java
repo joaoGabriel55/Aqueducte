@@ -6,6 +6,7 @@ import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelat
 import br.imd.aqueducte.services.ImportNGSILDDataService;
 import br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService;
 import br.imd.aqueducte.services.sgeolqueriesservices.RelationshipOperationsService;
+import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -16,11 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.FormatterUtils.treatPrimaryField;
 
 @SuppressWarnings("ALL")
 @Service
+@Log4j2
 public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelationshipAndTransferService {
 
     public static final int STATUS_RELATIONSHIP_OK = 1;
@@ -60,7 +61,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                 }
                 for (Object entity : entities) {
                     Map<String, Object> entityMap = (Map<String, Object>) entity;
-                    logInfo("[" + index + "] Entity ID: {}", entityMap.get("id"));
+                    log.info("[" + index + "] Entity ID: {}", entityMap.get("id"));
                     Object linkProperty1Value = entityMap.containsKey(property1) ?
                             getValue((Map<String, Object>) entityMap.get(property1)) :
                             null;
@@ -350,7 +351,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
     @Override
     @Async
     public CompletableFuture<Integer> transferLayerEntitiesAsync(String layer, String sgeolInstance, String appToken, String userToken) throws Exception {
-        logInfo("getLayerEntitiesAsync", null);
+        log.info("getLayerEntitiesAsync - {}", layer);
         final int status = transferLayerEntities(layer, sgeolInstance, appToken, userToken);
         return CompletableFuture.completedFuture(status);
     }
