@@ -100,36 +100,42 @@ public class TaskController extends GenericController {
                                                                         @RequestParam String status
     ) {
         Response<Page<Task>> response = new Response<>();
-        if ((type == null || type.equals("")) && (status == null || status.equals(""))) {
-            Page<Task> tasks = taskStatusService.findByUserId(userId, page, count);
-            response.setData(tasks);
-        } else if ((type != null && !type.equals("")) && (status == null || status.equals(""))) {
-            Page<Task> tasks = taskStatusService.findByUserIdAndType(userId, type, page, count);
-            if (tasks == null) {
-                response.getErrors().add("The \"type\" informed not exists");
-                log.error(response.getErrors().get(0));
-                return ResponseEntity.badRequest().body(response);
+        try {
+            if ((type == null || type.equals("")) && (status == null || status.equals(""))) {
+                Page<Task> tasks = taskStatusService.findByUserId(userId, page, count);
+                response.setData(tasks);
+            } else if ((type != null && !type.equals("")) && (status == null || status.equals(""))) {
+                Page<Task> tasks = taskStatusService.findByUserIdAndType(userId, type, page, count);
+                if (tasks == null) {
+                    response.getErrors().add("The \"type\" informed not exists");
+                    log.error(response.getErrors().get(0));
+                    return ResponseEntity.badRequest().body(response);
+                }
+                response.setData(tasks);
+            } else if ((type == null || type.equals("")) && (status != null || !status.equals(""))) {
+                Page<Task> tasks = taskStatusService.findByUserIdAndStatus(userId, status, page, count);
+                if (tasks == null) {
+                    response.getErrors().add("The \"status\" informed not exists");
+                    log.error(response.getErrors().get(0));
+                    return ResponseEntity.badRequest().body(response);
+                }
+                response.setData(tasks);
+            } else if ((type != null || !type.equals("")) && (status != null || !status.equals(""))) {
+                Page<Task> tasks = taskStatusService.findByUserIdAndTypeAndStatus(userId, type, status, page, count);
+                if (tasks == null && !tasks.hasContent()) {
+                    response.getErrors().add("The \"type\" \"status\" informed not exists");
+                    log.error(response.getErrors().get(0));
+                    return ResponseEntity.badRequest().body(response);
+                }
+                response.setData(tasks);
             }
-            response.setData(tasks);
-        } else if ((type == null || type.equals("")) && (status != null || !status.equals(""))) {
-            Page<Task> tasks = taskStatusService.findByUserIdAndStatus(userId, status, page, count);
-            if (tasks == null) {
-                response.getErrors().add("The \"status\" informed not exists");
-                log.error(response.getErrors().get(0));
-                return ResponseEntity.badRequest().body(response);
-            }
-            response.setData(tasks);
-        } else if ((type != null || !type.equals("")) && (status != null || !status.equals(""))) {
-            Page<Task> tasks = taskStatusService.findByUserIdAndTypeAndStatus(userId, type, status, page, count);
-            if (tasks == null && !tasks.hasContent()) {
-                response.getErrors().add("The \"type\" \"status\" informed not exists");
-                log.error(response.getErrors().get(0));
-                return ResponseEntity.badRequest().body(response);
-            }
-            response.setData(tasks);
+            log.info("GET findByUserIdWithFilters successfuly");
+            return ResponseEntity.ok().body(response);
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            log.error(e.getMessage(), e.getStackTrace());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        log.info("GET findByUserIdWithFilters successfuly");
-        return ResponseEntity.ok().body(response);
     }
 
 }

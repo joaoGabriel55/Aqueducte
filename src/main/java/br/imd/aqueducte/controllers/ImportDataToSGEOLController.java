@@ -55,21 +55,27 @@ public class ImportDataToSGEOLController {
             @RequestBody ImportationSetupWithoutContext importationSetup
     ) {
         Response<List<String>> response = new Response<>();
-        List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupStandardService.loadData(
-                importationSetup, sgeolInstance, null
-        );
-        updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, sgeolInstance, appToken, userToken);
-        if (response.getErrors().size() > 0) {
-            log.error(response.getErrors().get(0));
-            taskStatusService.sendTaskStatusProgress(
-                    taskId,
-                    TaskStatus.ERROR,
-                    response.getErrors().get(0),
-                    "status-task-import-process"
+        try {
+            List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupStandardService.loadData(
+                    importationSetup, sgeolInstance, null
             );
-            return ResponseEntity.badRequest().body(response);
+            updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, sgeolInstance, appToken, userToken);
+            if (response.getErrors().size() > 0) {
+                taskStatusService.sendTaskStatusProgress(
+                        taskId,
+                        TaskStatus.ERROR,
+                        response.getErrors().get(0),
+                        "status-task-import-process"
+                );
+                log.error(response.getErrors().get(0));
+                return ResponseEntity.badRequest().body(response);
+            }
+            return importData(sgeolInstance, appToken, userToken, layer, response, taskId, ngsildData);
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            log.error(e.getMessage(), e.getStackTrace());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return importData(sgeolInstance, appToken, userToken, layer, response, taskId, ngsildData);
     }
 
     @PostMapping(value = {"/{layer}/context", "/{layer}/{taskId}/context"})
@@ -82,21 +88,27 @@ public class ImportDataToSGEOLController {
             @RequestBody ImportationSetupWithContext importationSetup
     ) {
         Response<List<String>> response = new Response<>();
-        List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupContextService.loadData(
-                importationSetup, sgeolInstance, null
-        );
-        updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, sgeolInstance, appToken, userToken);
-        if (response.getErrors().size() > 0) {
-            log.error(response.getErrors().get(0));
-            taskStatusService.sendTaskStatusProgress(
-                    taskId,
-                    TaskStatus.ERROR,
-                    response.getErrors().get(0),
-                    "status-task-import-process"
+        try {
+            List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupContextService.loadData(
+                    importationSetup, sgeolInstance, null
             );
-            return ResponseEntity.badRequest().body(response);
+            updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, sgeolInstance, appToken, userToken);
+            if (response.getErrors().size() > 0) {
+                log.error(response.getErrors().get(0));
+                taskStatusService.sendTaskStatusProgress(
+                        taskId,
+                        TaskStatus.ERROR,
+                        response.getErrors().get(0),
+                        "status-task-import-process"
+                );
+                return ResponseEntity.badRequest().body(response);
+            }
+            return importData(sgeolInstance, appToken, userToken, layer, response, taskId, ngsildData);
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            log.error(e.getMessage(), e.getStackTrace());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return importData(sgeolInstance, appToken, userToken, layer, response, taskId, ngsildData);
     }
 
     private void updateData(
@@ -128,7 +140,7 @@ public class ImportDataToSGEOLController {
             Response<List<String>> response,
             String taskId,
             List<LinkedHashMap<String, Object>> ngsildData
-    ) {
+    ) throws Exception {
         if (ngsildData == null || ngsildData.size() == 0) {
             response.getErrors().add("Nothing to import.");
             log.error(response.getErrors().get(0));

@@ -44,7 +44,7 @@ public class EntitiesRelationshipAndTransferController {
             @RequestHeader(USER_TOKEN) String userToken,
             @PathVariable String taskId,
             @RequestBody EntitiesRelationshipSetup setup
-    ) {
+    ) throws Exception {
         Response<Map<String, String>> response = new Response<>();
         Map<String, String> statusRelationship = new LinkedHashMap<>();
         try {
@@ -95,6 +95,16 @@ public class EntitiesRelationshipAndTransferController {
                 response.setData(statusRelationship);
             }
 
+            taskStatusService.sendTaskStatusProgress(
+                    taskId,
+                    TaskStatus.DONE,
+                    "Sucesso: Relacionamento entre as entidades das Layers " +
+                            setup.getLayerSetup().get(0).getName() + " e " +
+                            setup.getLayerSetup().get(1).getName(),
+                    "status-relationship-process"
+            );
+            log.info("POST makeEntitiesRelationship");
+            return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             taskStatusService.sendTaskStatusProgress(
                     taskId,
@@ -108,16 +118,6 @@ public class EntitiesRelationshipAndTransferController {
             log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        taskStatusService.sendTaskStatusProgress(
-                taskId,
-                TaskStatus.DONE,
-                "Sucesso: Relacionamento entre as entidades das Layers " +
-                        setup.getLayerSetup().get(0).getName() + " e " +
-                        setup.getLayerSetup().get(1).getName(),
-                "status-relationship-process"
-        );
-        log.info("POST makeEntitiesRelationship");
-        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping(value = {"/transfer/{layer1}/{layer2}", "/transfer/{layer1}/{layer2}/{taskId}"})

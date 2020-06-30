@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class ImportationSetupServiceTest extends AqueducteApplicationTests {
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
         super.setUp();
         importSetupIdsToRemove = new ArrayList<>();
 
@@ -60,7 +59,7 @@ public class ImportationSetupServiceTest extends AqueducteApplicationTests {
     }
 
     @Test
-    public void findImportSetupByFilePath() {
+    public void findImportSetupByFilePath() throws Exception {
         List<ImportationSetupWithoutContext> listFiltered1 = service.findByUserIdAndFilePath("user1", "//Test1.csv");
         List<ImportationSetupWithoutContext> listFiltered2 = service.findByUserIdAndFilePath("user2", "//Test2.csv");
         assertEquals(1, listFiltered1.size());
@@ -68,7 +67,7 @@ public class ImportationSetupServiceTest extends AqueducteApplicationTests {
     }
 
     @After
-    public void close() {
+    public void close() throws Exception {
         super.close();
         for (String id : importSetupIdsToRemove) {
             service.delete(id);

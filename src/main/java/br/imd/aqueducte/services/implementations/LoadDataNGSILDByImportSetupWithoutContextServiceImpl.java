@@ -55,7 +55,7 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
             dataFound = findDataRecursive(responseWSResultFlat, importationSetup.getDataSelected());
         }
         // Get data chosen
-        if (dataFound instanceof List) {
+        if (!(dataFound instanceof List)) {
             log.error("dataFound is not List type");
             throw new Exception();
         }
@@ -134,7 +134,7 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
             List<String> fieldsSelected,
             List<GeoLocationConfig> fieldsGeolocationSelectedConfigs
     ) throws Exception {
-        if (fileFields != null) {
+        if (fileFields == null) {
             log.error("fileFields is empty");
             throw new Exception();
         }
