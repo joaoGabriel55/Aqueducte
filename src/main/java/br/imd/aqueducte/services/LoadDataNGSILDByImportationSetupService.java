@@ -8,9 +8,9 @@ import java.util.List;
 @Component
 public interface LoadDataNGSILDByImportationSetupService<T> {
 
-    List<LinkedHashMap<String, Object>> loadData(T importationSetup, String sgeolInstance, String userToken);
+    List<LinkedHashMap<String, Object>> loadData(T importationSetup, String sgeolInstance, String userToken) throws Exception;
 
-    List<LinkedHashMap<String, Object>> loadDataWebService(T importationSetup, String sgeolInstance);
+    List<LinkedHashMap<String, Object>> loadDataWebService(T importationSetup, String sgeolInstance) throws Exception;
 
-    List<LinkedHashMap<String, Object>> loadDataFile(T importationSetup, String sgeolInstance, String userToken);
+    List<LinkedHashMap<String, Object>> loadDataFile(T importationSetup, String sgeolInstance, String userToken) throws Exception;
 }

@@ -10,7 +10,7 @@ import java.util.List;
 public interface ImportationSetupWithoutContextService extends GenericService<ImportationSetupWithoutContext> {
     Page<ImportationSetupWithoutContext> findByIdUserImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
             String idUser, String importType, int page, int count
-    );
+    ) throws Exception;
 
-    List<ImportationSetupWithoutContext> findByUserIdAndFilePath(String userId, String filePath);
+    List<ImportationSetupWithoutContext> findByUserIdAndFilePath(String userId, String filePath) throws Exception;
 }

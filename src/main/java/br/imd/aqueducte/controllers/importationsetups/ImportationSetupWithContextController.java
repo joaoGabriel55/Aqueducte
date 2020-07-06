@@ -7,6 +7,7 @@ import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.services.ImportationSetupWithContextService;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
 import com.mongodb.DuplicateKeyException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +19,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @SuppressWarnings("ALL")
 @RestController
+@Log4j2
 @RequestMapping("/sync/withContextSetup")
 @CrossOrigin(origins = "*")
 public class ImportationSetupWithContextController extends GenericController {
@@ -54,11 +54,11 @@ public class ImportationSetupWithContextController extends GenericController {
             }
 
             response.setData(importationSetupWithContextList);
-            logInfo("GET findAllImportationSetupWithoutContext", null);
+            log.info("GET findAllImportationSetupWithoutContext");
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             response.getErrors().add("Error on get Importation Setup with Context list");
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -72,12 +72,12 @@ public class ImportationSetupWithContextController extends GenericController {
             Optional<ImportationSetupWithContext> importationSetupWithContext = importationSetupWithContextService
                     .findById(id);
             importationSetupWithContext.ifPresent(response::setData);
-            logInfo("GET Importation Setup With Context", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getMessage());
+            log.error(e.getMessage(), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        log.info("GET Importation Setup With Context");
         return ResponseEntity.ok(response);
     }
 
@@ -90,19 +90,19 @@ public class ImportationSetupWithContextController extends GenericController {
 
         if (filePath == null || filePath.equals("")) {
             response.getErrors().add("File path must be informed");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
 
         try {
             List<ImportationSetupWithContext> importationSetupWithContextList = importationSetupWithContextService.findByUserIdAndFilePath(userId, filePath);
             response.setData(importationSetupWithContextList);
-            logInfo("GET findImportationSetupWithContextByFilePathAndUserId", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getMessage());
+            log.error(e.getMessage(), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        log.info("GET findImportationSetupWithContextByFilePathAndUserId");
         return ResponseEntity.ok(response);
     }
 
@@ -113,7 +113,7 @@ public class ImportationSetupWithContextController extends GenericController {
         Response<ImportationSetupWithContext> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
         importationSetupWithContext.setIdUser(idUser);
@@ -123,21 +123,21 @@ public class ImportationSetupWithContextController extends GenericController {
                 importationSetupWithContext.setDateModified(new Date());
                 importationSetupWithContextService.createOrUpdate(importationSetupWithContext);
                 response.setData(importationSetupWithContext);
-                logInfo("POST saveImportationSetupWithContext", null);
             } else {
                 response.getErrors().add("Object inconsistent");
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.badRequest().body(response);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        log.info("POST saveImportationSetupWithContext");
         return ResponseEntity.ok(response);
     }
 
@@ -151,11 +151,11 @@ public class ImportationSetupWithContextController extends GenericController {
 
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         } else if (!importationSetupWithoutContext.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
 
@@ -166,17 +166,17 @@ public class ImportationSetupWithContextController extends GenericController {
                 importationSetupWithoutContext.setDateModified(new Date());
                 importationSetupWithContextService.createOrUpdate(importationSetupWithoutContext);
                 response.setData(importationSetupWithoutContext);
-                logInfo("PUT updateImportationSetupWithContext", null);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        log.info("PUT updateImportationSetupWithContext");
         return ResponseEntity.ok(response);
     }
 
@@ -189,13 +189,13 @@ public class ImportationSetupWithContextController extends GenericController {
             String idDeleted = importationSetupWithContextService.delete(id);
             if (idDeleted != null) {
                 response.setData(idDeleted);
-                logInfo("DELETE deleteImportationSetupWithContext", null);
             }
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
+        log.info("DELETE deleteImportationSetupWithContext");
         return ResponseEntity.ok(response);
     }
 
@@ -212,11 +212,11 @@ public class ImportationSetupWithContextController extends GenericController {
                     importationSetupWithContext, sgeolInstance, userToken
             );
             response.setData(samples ? getSamples(ngsildData) : ngsildData);
-            logInfo("POST loadNGSILDDataFromImportSetupWithContext", null);
+            log.info("POST loadNGSILDDataFromImportSetupWithContext");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -232,11 +232,11 @@ public class ImportationSetupWithContextController extends GenericController {
             response.setData(this.loadDataNGSILDByImportationSetupService
                     .loadData(importationSetupWithContext, sgeolInstance, userToken)
                     .size());
-            logInfo("POST loadCountNGSILDDataFromImportSetupWithoutContext", null);
+            log.info("POST loadCountNGSILDDataFromImportSetupWithoutContext");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }

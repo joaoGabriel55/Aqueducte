@@ -7,6 +7,7 @@ import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,6 +18,7 @@ import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.WEB_SERVIC
 
 @SuppressWarnings("ALL")
 @Service
+@Log4j2
 public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
         extends LoadDataNGSILDByImportSetup
         implements LoadDataNGSILDByImportationSetupService<ImportationSetupWithoutContext> {
@@ -26,19 +28,20 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
             ImportationSetupWithoutContext ImportationSetupWithoutContext,
             String sgeolInstance,
             String userToken
-    ) {
+    ) throws Exception {
         if (ImportationSetupWithoutContext.getImportType().equals(WEB_SERVICE)) {
             return loadDataWebService(ImportationSetupWithoutContext, sgeolInstance);
         } else if (ImportationSetupWithoutContext.getImportType().equals(FILE)) {
             return loadDataFile(ImportationSetupWithoutContext, sgeolInstance, userToken);
         }
-        return null;
+        log.error("Load data error");
+        throw new Exception();
     }
 
     @Override
     public List<LinkedHashMap<String, Object>> loadDataWebService(
             ImportationSetupWithoutContext importationSetup, String sgeolInstance
-    ) {
+    ) throws Exception {
         JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
 
         // Load data from Webservice
@@ -52,73 +55,77 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
             dataFound = findDataRecursive(responseWSResultFlat, importationSetup.getDataSelected());
         }
         // Get data chosen
-        if (dataFound instanceof List) {
-            // Flat Json collection
-            List<Object> dataCollectionFlat = (List<Object>) jsonFlatTreatImpl.getFlatJSON(dataFound);
-            List<Map<String, Object>> dataForConvert = filterFieldsSelectedIntoArray(
-                    dataCollectionFlat,
-                    importationSetup
-            );
-
-            // Convert o NGSI-LD
-            NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
-            try {
-                ImportNSILDDataWithoutContextConfig importConfig = new ImportNSILDDataWithoutContextConfig();
-                importConfig.setGeoLocationConfig(importationSetup.getFieldsGeolocationSelectedConfigs());
-                importConfig.setDataContentForNGSILDConversion(dataForConvert);
-
-                List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
-                        sgeolInstance,
-                        importConfig,
-                        importationSetup.getLayerPathSelected(),
-                        null
-                );
-                return listConvertedIntoNGSILD;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+        if (!(dataFound instanceof List)) {
+            log.error("dataFound is not List type");
+            throw new Exception();
         }
-        return null;
+        // Flat Json collection
+        List<Object> dataCollectionFlat = (List<Object>) jsonFlatTreatImpl.getFlatJSON(dataFound);
+        List<Map<String, Object>> dataForConvert = filterFieldsSelectedIntoArray(
+                dataCollectionFlat,
+                importationSetup
+        );
+
+        // Convert o NGSI-LD
+        NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
+        try {
+            ImportNSILDDataWithoutContextConfig importConfig = new ImportNSILDDataWithoutContextConfig();
+            importConfig.setGeoLocationConfig(importationSetup.getFieldsGeolocationSelectedConfigs());
+            importConfig.setDataContentForNGSILDConversion(dataForConvert);
+
+            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
+                    sgeolInstance,
+                    importConfig,
+                    importationSetup.getLayerPathSelected(),
+                    null
+            );
+            log.info("loadData WebService successfuly");
+            return listConvertedIntoNGSILD;
+        } catch (Exception e) {
+            log.error("loadData WebService error", e.getStackTrace());
+            throw new Exception();
+        }
     }
 
     @Override
     public List<LinkedHashMap<String, Object>> loadDataFile(
-            ImportationSetupWithoutContext importationSetup, String sgeolInstance, String userToken) {
+            ImportationSetupWithoutContext importationSetup, String sgeolInstance, String userToken) throws Exception {
         try {
             Map<String, Integer> fieldsFiltered = getFieldsForImportSetupStandardWithFile(
                     getFileFields(sgeolInstance, userToken, importationSetup),
                     importationSetup.getFieldsSelected(),
                     importationSetup.getFieldsGeolocationSelectedConfigs()
             );
-            if (fieldsFiltered != null && fieldsFiltered.size() > 0) {
-                List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(
-                        sgeolInstance, userToken, importationSetup, fieldsFiltered
-                );
-                // Convert o NGSI-LD
-                NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
-                try {
-                    ImportNSILDDataWithoutContextConfig importConfig = new ImportNSILDDataWithoutContextConfig();
-                    importConfig.setGeoLocationConfig(importationSetup.getFieldsGeolocationSelectedConfigs());
-                    importConfig.setDataContentForNGSILDConversion(fileConvertedIntoJSON);
-
-                    List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
-                            sgeolInstance,
-                            importConfig,
-                            importationSetup.getLayerPathSelected(),
-                            null
-                    );
-                    return listConvertedIntoNGSILD;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            } else {
-                return null;
+            if (fieldsFiltered == null) {
+                log.error("fieldsFiltered is null");
+                throw new Exception();
             }
+            if (fieldsFiltered.size() == 0) {
+                log.error("fieldsFiltered is empty");
+                throw new Exception();
+            }
+
+            List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(
+                    sgeolInstance, userToken, importationSetup, fieldsFiltered
+            );
+            // Convert o NGSI-LD
+            NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
+
+            ImportNSILDDataWithoutContextConfig importConfig = new ImportNSILDDataWithoutContextConfig();
+            importConfig.setGeoLocationConfig(importationSetup.getFieldsGeolocationSelectedConfigs());
+            importConfig.setDataContentForNGSILDConversion(fileConvertedIntoJSON);
+
+            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
+                    sgeolInstance,
+                    importConfig,
+                    importationSetup.getLayerPathSelected(),
+                    null
+            );
+            log.info("loadData File successfuly");
+            return listConvertedIntoNGSILD;
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            log.error("loadData File error", e.getStackTrace());
+            throw new Exception();
         }
     }
 
@@ -126,32 +133,28 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
             Map<String, Integer> fileFields,
             List<String> fieldsSelected,
             List<GeoLocationConfig> fieldsGeolocationSelectedConfigs
-    ) {
-        if (fileFields != null) {
-            Map<String, Integer> filteredFieldsMap = new HashMap<>();
+    ) throws Exception {
+        if (fileFields == null) {
+            log.error("fileFields is empty");
+            throw new Exception();
+        }
+        Map<String, Integer> filteredFieldsMap = new HashMap<>();
+        for (String key : fileFields.keySet()) {
+            if (fieldsSelected.contains(key)) {
+                filteredFieldsMap.put(key, fileFields.get(key));
+            }
+        }
+        if (fieldsGeolocationSelectedConfigs != null && fieldsGeolocationSelectedConfigs.size() > 0) {
+            List<String> geolocationKeys = fieldsGeolocationSelectedConfigs.stream().map(
+                    (elem) -> elem.getKey()
+            ).collect(Collectors.toList());
             for (String key : fileFields.keySet()) {
-                if (fieldsSelected.contains(key)) {
+                if (geolocationKeys.contains(key)) {
                     filteredFieldsMap.put(key, fileFields.get(key));
                 }
             }
-            if (fieldsGeolocationSelectedConfigs != null && fieldsGeolocationSelectedConfigs.size() > 0) {
-                List<String> geolocationKeys = fieldsGeolocationSelectedConfigs.stream().map(
-                        (elem) -> elem.getKey()
-                ).collect(Collectors.toList());
-                for (String key : fileFields.keySet()) {
-                    if (geolocationKeys.contains(key)) {
-                        filteredFieldsMap.put(key, fileFields.get(key));
-                    }
-                }
-            }
-            return filteredFieldsMap;
-        } else {
-            return null;
         }
+        log.info("getFieldsForImportSetupContextWithFile successfuly");
+        return filteredFieldsMap;
     }
-
-//    @Override
-//    public int makeDataRelationshipAqueconnect(DataSetRelationship dataSetRelationship) {
-//        return 0;
-//    }
 }

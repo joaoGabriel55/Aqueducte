@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface JsonFlatTreat {
 
-    Object getFlatJSON(Object dataForConversion);
+    Object getFlatJSON(Object dataForConversion) throws Exception;
 
     List<String> getKeysCollectionFromJSON(Map<String, Object> dataForConversion);
 }

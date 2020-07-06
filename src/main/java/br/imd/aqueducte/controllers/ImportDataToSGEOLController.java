@@ -13,6 +13,7 @@ import br.imd.aqueducte.services.TaskStatusService;
 import br.imd.aqueducte.treats.NGSILDTreat;
 import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
 import br.imd.aqueducte.utils.NGSILDUtils;
+import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,13 +23,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.FormatterUtils.treatPrimaryField;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
 @RestController
+@Log4j2
 @RequestMapping("/sync/importToSgeol")
 @CrossOrigin(origins = "*")
 public class ImportDataToSGEOLController {
@@ -46,29 +46,36 @@ public class ImportDataToSGEOLController {
     private TaskStatusService taskStatusService;
 
     @PostMapping(value = {"/{layer}", "/{layer}/{taskId}"})
-    public ResponseEntity<Response<List<String>>> importNGSILDData(@RequestHeader(APP_TOKEN) String appToken,
-                                                                   @RequestHeader(USER_TOKEN) String userToken,
-                                                                   @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
-                                                                   @PathVariable String taskId,
-                                                                   @PathVariable String layer,
-                                                                   @RequestBody ImportationSetupWithoutContext importationSetup
+    public ResponseEntity<Response<List<String>>> importNGSILDData(
+            @RequestHeader(APP_TOKEN) String appToken,
+            @RequestHeader(USER_TOKEN) String userToken,
+            @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
+            @PathVariable String taskId,
+            @PathVariable String layer,
+            @RequestBody ImportationSetupWithoutContext importationSetup
     ) {
         Response<List<String>> response = new Response<>();
-        List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupStandardService.loadData(
-                importationSetup, sgeolInstance, null
-        );
-        updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, sgeolInstance, appToken, userToken);
-        if (response.getErrors().size() > 0) {
-            logError(response.getErrors().get(0), null);
-            taskStatusService.sendTaskStatusProgress(
-                    taskId,
-                    TaskStatus.ERROR,
-                    response.getErrors().get(0),
-                    "status-task-import-process"
+        try {
+            List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupStandardService.loadData(
+                    importationSetup, sgeolInstance, null
             );
-            return ResponseEntity.badRequest().body(response);
+            updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, sgeolInstance, appToken, userToken);
+            if (response.getErrors().size() > 0) {
+                taskStatusService.sendTaskStatusProgress(
+                        taskId,
+                        TaskStatus.ERROR,
+                        response.getErrors().get(0),
+                        "status-task-import-process"
+                );
+                log.error(response.getErrors().get(0));
+                return ResponseEntity.badRequest().body(response);
+            }
+            return importData(sgeolInstance, appToken, userToken, layer, response, taskId, ngsildData);
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            log.error(e.getMessage(), e.getStackTrace());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return importData(sgeolInstance, appToken, userToken, layer, response, taskId, ngsildData);
     }
 
     @PostMapping(value = {"/{layer}/context", "/{layer}/{taskId}/context"})
@@ -81,21 +88,27 @@ public class ImportDataToSGEOLController {
             @RequestBody ImportationSetupWithContext importationSetup
     ) {
         Response<List<String>> response = new Response<>();
-        List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupContextService.loadData(
-                importationSetup, sgeolInstance, null
-        );
-        updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, sgeolInstance, appToken, userToken);
-        if (response.getErrors().size() > 0) {
-            logError(response.getErrors().get(0), null);
-            taskStatusService.sendTaskStatusProgress(
-                    taskId,
-                    TaskStatus.ERROR,
-                    response.getErrors().get(0),
-                    "status-task-import-process"
+        try {
+            List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupContextService.loadData(
+                    importationSetup, sgeolInstance, null
             );
-            return ResponseEntity.badRequest().body(response);
+            updateData(importationSetup.getPrimaryField(), ngsildData, layer, response, sgeolInstance, appToken, userToken);
+            if (response.getErrors().size() > 0) {
+                log.error(response.getErrors().get(0));
+                taskStatusService.sendTaskStatusProgress(
+                        taskId,
+                        TaskStatus.ERROR,
+                        response.getErrors().get(0),
+                        "status-task-import-process"
+                );
+                return ResponseEntity.badRequest().body(response);
+            }
+            return importData(sgeolInstance, appToken, userToken, layer, response, taskId, ngsildData);
+        } catch (Exception e) {
+            response.getErrors().add(e.getMessage());
+            log.error(e.getMessage(), e.getStackTrace());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        return importData(sgeolInstance, appToken, userToken, layer, response, taskId, ngsildData);
     }
 
     private void updateData(
@@ -127,10 +140,10 @@ public class ImportDataToSGEOLController {
             Response<List<String>> response,
             String taskId,
             List<LinkedHashMap<String, Object>> ngsildData
-    ) {
+    ) throws Exception {
         if (ngsildData == null || ngsildData.size() == 0) {
             response.getErrors().add("Nothing to import.");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         } else {
             try {
@@ -141,7 +154,7 @@ public class ImportDataToSGEOLController {
 
                 if (jsonArrayResponse != null && jsonArrayResponse.size() == 0) {
                     response.getErrors().add("Nenhuma Entity importada");
-                    logError(response.getErrors().get(0), null);
+                    log.error(response.getErrors().get(0));
                     taskStatusService.sendTaskStatusProgress(
                             taskId,
                             TaskStatus.ERROR,
@@ -152,7 +165,7 @@ public class ImportDataToSGEOLController {
                 }
 
                 response.setData(jsonArrayResponse);
-                logInfo("POST /importToSgeol", null);
+                log.info("POST /importToSgeol - {} entities", jsonArrayResponse.size());
                 if (taskId != null && !taskId.equals("")) {
                     taskStatusService.sendTaskStatusProgress(
                             taskId,
@@ -160,12 +173,12 @@ public class ImportDataToSGEOLController {
                             "Layer: " + layer,
                             "status-task-import-process"
                     );
-                    logInfo("Web Socket sendTaskStatusProgress", null);
+                    log.info("Web Socket sendTaskStatusProgress");
                 }
                 return ResponseEntity.ok(response);
             } catch (Exception e) {
                 response.getErrors().add("Erro interno");
-                logError(response.getErrors().get(0), e.getMessage());
+                log.error(response.getErrors().get(0), e.getMessage());
                 taskStatusService.sendTaskStatusProgress(
                         taskId,
                         TaskStatus.ERROR,
@@ -192,16 +205,17 @@ public class ImportDataToSGEOLController {
         if (geoLocationConfig != null && geoLocationConfig.size() > 2) {
             String errGeoLocMessage = "Somente é permitido um campo para geolocalização. Tamanho atual: {}";
             response.getErrors().add(errGeoLocMessage);
-            logError(errGeoLocMessage, geoLocationConfig.size());
+            log.error(errGeoLocMessage, geoLocationConfig.size());
             return ResponseEntity.badRequest().body(response);
         }
         try {
             List<LinkedHashMap<String, Object>> listNGSILD = ngsildTreat.convertToEntityNGSILD(
                     sgeolInstance, importConfig, layerPath, null
             );
+            long startTime = System.currentTimeMillis();
             updateData(importConfig.getPrimaryField(), listNGSILD, layerPath, response, sgeolInstance, appToken, userToken);
             if (response.getErrors().size() > 0) {
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.badRequest().body(response);
             }
             JSONArray jsonArrayNGSILD = new JSONArray(listNGSILD);
@@ -210,15 +224,18 @@ public class ImportDataToSGEOLController {
                         layerPath, sgeolInstance, appToken, userToken, jsonArrayNGSILD
                 );
                 response.setData(jsonArrayResponse);
-                logInfo("POST convertToNGSILDWithoutContextAndImportData", null);
+                long endTime = System.currentTimeMillis();
+                long timeElapsed = endTime - startTime;
+                log.info("POST time elapsed: {} ms", timeElapsed);
+                log.info("POST convertToNGSILDWithoutContextAndImportData", jsonArrayResponse.size());
             } catch (Exception e) {
                 response.getErrors().add(e.getLocalizedMessage());
-                logError(e.getMessage(), e.getStackTrace());
+                log.error(e.getMessage(), e.getStackTrace());
                 return ResponseEntity.badRequest().body(response);
             }
         } catch (Exception e) {
             response.getErrors().add(e.getLocalizedMessage());
-            logError(e.getMessage(), e.getStackTrace());
+            log.error(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
         return ResponseEntity.ok(response);
@@ -235,7 +252,7 @@ public class ImportDataToSGEOLController {
         Response<List<String>> response = new Response<>();
         NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
         try {
-            long startTime = System.nanoTime();
+            long startTime = System.currentTimeMillis();
             List<LinkedHashMap<String, Object>> listNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
                     sgeolInstance,
                     importConfig.getContextLinks(),
@@ -243,12 +260,9 @@ public class ImportDataToSGEOLController {
                     importConfig.getDataContentForNGSILDConversion(),
                     layerPath
             );
-            long endTime = System.nanoTime();
-            long timeElapsed = endTime - startTime;
-            logInfo("Time to convert MatchingConfig Into NGSI-LD: {}", timeElapsed);
             updateData(importConfig.getPrimaryField(), listNGSILD, layerPath, response, sgeolInstance, appToken, userToken);
             if (response.getErrors().size() > 0) {
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.badRequest().body(response);
             }
             JSONArray jsonArrayNGSILD = new JSONArray(listNGSILD);
@@ -257,16 +271,19 @@ public class ImportDataToSGEOLController {
                         layerPath, sgeolInstance, appToken, userToken, jsonArrayNGSILD
                 );
                 response.setData(jsonArrayResponse);
-                logInfo("POST convertToNGSILDWithContextAndImportData", null);
+                long endTime = System.currentTimeMillis();
+                long timeElapsed = endTime - startTime;
+                log.info("POST time elapsed: {} ms", timeElapsed);
+                log.info("POST convertToNGSILDWithContextAndImportData");
             } catch (Exception e) {
                 response.getErrors().add(e.getLocalizedMessage());
-                logError(e.getMessage(), e.getStackTrace());
+                log.error(e.getMessage(), e.getStackTrace());
                 return ResponseEntity.badRequest().body(response);
             }
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getStackTrace());
+            log.error(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
     }

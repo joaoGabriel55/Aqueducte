@@ -12,7 +12,7 @@ public interface NGSILDTreat {
             String sgeolInstance,
             ImportNSILDDataWithoutContextConfig importConfig,
             String layerPath,
-            Map<Object, Object> contextLink);
+            Map<Object, Object> contextLink) throws Exception;
 
     List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
             String sgeolInstance,
@@ -20,5 +20,5 @@ public interface NGSILDTreat {
             List<MatchingConfig> matchingConfig,
             List<Map<String, Object>> contentForConvert,
             String layerPath
-    );
+    ) throws Exception;
 }
