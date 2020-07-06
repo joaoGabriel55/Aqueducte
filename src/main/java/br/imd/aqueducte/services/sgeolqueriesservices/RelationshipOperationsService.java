@@ -98,7 +98,7 @@ public class RelationshipOperationsService {
                     idFromLayerEntity2, isString
             );
 
-            if (!hasObjectId)
+            if (!hasObjectId || (relationship.containsKey("object") && relationship.get("object") != null))
                 objectId = addObjectIdIntoRelationship(relationship.get("object"), idFromLayerEntity2);
             else
                 objectId = null;
@@ -139,7 +139,7 @@ public class RelationshipOperationsService {
             try {
                 HttpResponse response = getHttpClientInstance().execute(postRequest);
 
-                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
+                if (response.getStatusLine().getStatusCode() == HttpStatus.SC_BAD_REQUEST) {
                     HttpPut putRequest = new HttpPut(uri);
                     headers = new LinkedHashMap<>();
                     headers.put(APP_TOKEN, appToken);
