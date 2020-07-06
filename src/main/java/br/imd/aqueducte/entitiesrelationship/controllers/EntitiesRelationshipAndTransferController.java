@@ -98,7 +98,7 @@ public class EntitiesRelationshipAndTransferController {
             taskStatusService.sendTaskStatusProgress(
                     taskId,
                     TaskStatus.DONE,
-                    "Sucesso: Relacionamento entre as entidades das Layers " +
+                    mountDoneMessage(status) +
                             setup.getLayerSetup().get(0).getName() + " e " +
                             setup.getLayerSetup().get(1).getName(),
                     "status-relationship-process"
@@ -118,6 +118,14 @@ public class EntitiesRelationshipAndTransferController {
             log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    private String mountDoneMessage(int status) {
+        if (status == STATUS_RELATIONSHIP_OK)
+            return "Sucesso: Relacionamento entre as entidades das Layers ";
+        else if (status == STATUS_RELATIONSHIP_NOTHING_TODO)
+            return "Nada a fazer: Relacionamento entre as entidades das Layers ";
+        return "Erro";
     }
 
     @PostMapping(value = {"/transfer/{layer1}/{layer2}", "/transfer/{layer1}/{layer2}/{taskId}"})
