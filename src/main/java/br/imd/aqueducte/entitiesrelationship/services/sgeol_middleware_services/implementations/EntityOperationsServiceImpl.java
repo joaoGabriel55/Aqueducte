@@ -1,5 +1,6 @@
-package br.imd.aqueducte.services.sgeolqueriesservices;
+package br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.implementations;
 
+import br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.EntityOperationsService;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -11,6 +12,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.json.JSONObject;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +25,8 @@ import static br.imd.aqueducte.utils.FormatterUtils.treatPrimaryField;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
-public class EntityOperationsService {
+@Service
+public class EntityOperationsServiceImpl implements EntityOperationsService {
 
     public static final String FIND_ENTITY_BY_DOCUMENT = "/find-by-document";
     private static final String FIND_ENTITY_BY_ID = "/find-by-id";
@@ -31,15 +34,7 @@ public class EntityOperationsService {
     private static final String TRANSFER_LAYER_ENTITIES = "preprocessing/transfer-layer-entities/";
     private static final String CONTAINED_IN = "/contained-in";
 
-    private static EntityOperationsService instance;
-
-    public static EntityOperationsService getInstance() {
-        if (instance == null) {
-            instance = new EntityOperationsService();
-        }
-        return instance;
-    }
-
+    @Override
     public List<Map<String, Object>> getEntitiesPageable(String sgeolInstance, String appToken, String userToken, String layer, int limit, int offset) throws Exception {
         HttpGet request = new HttpGet(sgeolInstance + "/v2/" + layer + "?limit=" + limit + "&offset=" + offset);
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
@@ -66,6 +61,7 @@ public class EntityOperationsService {
 
     }
 
+    @Override
     public Map<String, Object> findEntityById(String sgeolInstance, String appToken, String userToken, String layer, String id) {
         String uri = sgeolInstance + "/v2/" + layer + FIND_ENTITY_BY_ID + "?entity-id=" + id;
         HttpGet request = new HttpGet(uri);
@@ -91,6 +87,7 @@ public class EntityOperationsService {
         return null;
     }
 
+    @Override
     public List<String> findByDocument(String sgeolInstance,
                                        String layer,
                                        String propertyName,
@@ -136,6 +133,7 @@ public class EntityOperationsService {
         return new ArrayList<>();
     }
 
+    @Override
     public boolean updateEntity(String sgeolInstance, String id, String appToken, String userToken, LinkedHashMap<String, Object> entity, String layer) {
         entity.put("id", id);
         JSONObject entityJson = new JSONObject(entity);
@@ -163,6 +161,7 @@ public class EntityOperationsService {
      * This method call the SGEOL contained-in service. That service, look entities contained in a specific layer,
      * using GeoProperties
      */
+    @Override
     public List<String> findContainedIn(String sgeolInstance,
                                         String layer,
                                         String containerLayer,
@@ -202,7 +201,8 @@ public class EntityOperationsService {
         return new ArrayList<>();
     }
 
-    public boolean tranferPreprocessingLayerEntitesToFinalLayer(String sgeolInstance, String appToken, String userToken, String preprocessingLayer, String finalLayer) throws IOException {
+    @Override
+    public boolean transferPreprocessingLayerEntitiesToFinalLayer(String sgeolInstance, String appToken, String userToken, String preprocessingLayer, String finalLayer) throws IOException {
         HttpPost request = new HttpPost(
                 sgeolInstance + "/v2/" + TRANSFER_LAYER_ENTITIES + preprocessingLayer + "/" + finalLayer
         );
@@ -225,6 +225,7 @@ public class EntityOperationsService {
     }
 
 
+    @Override
     public boolean deleteEntityTempProperty(String sgeolInstance, String appToken, String userToken, String layer, String entityId, String propertyName) throws Exception {
         String uri = sgeolInstance + "/v2/" + layer + "/property?entity-id=" + entityId + "&property-name=" + propertyName;
         HttpDelete request = new HttpDelete(uri);
@@ -246,6 +247,7 @@ public class EntityOperationsService {
         }
     }
 
+    @Override
     public boolean deleteDataFromPreprocessingLayer(String sgeolInstance, String appToken, String userToken, String preprocessinglayer) throws Exception {
         String uri = sgeolInstance + "/v2/" + PREPROCESSING_LAYER_ENTITIES + preprocessinglayer;
         HttpDelete request = new HttpDelete(uri);

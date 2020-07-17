@@ -1,11 +1,11 @@
 package br.imd.aqueducte.entitiesrelationship.services.implementations;
 
-import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipAndTransferService;
 import br.imd.aqueducte.entitiesrelationship.models.dtos.PropertyNGSILD;
 import br.imd.aqueducte.entitiesrelationship.models.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipAndTransferService;
+import br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.EntityOperationsService;
+import br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.RelationshipOperationsService;
 import br.imd.aqueducte.services.ImportNGSILDDataService;
-import br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService;
-import br.imd.aqueducte.services.sgeolqueriesservices.RelationshipOperationsService;
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +34,11 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
 
     private static final int REQUEST_ENTITIES_LIMIT = 1024;
 
-    private EntityOperationsService entityOperationsService = EntityOperationsService.getInstance();
-    private RelationshipOperationsService relationshipOperationsService = RelationshipOperationsService.getInstance();
+    @Autowired
+    private EntityOperationsService entityOperationsService;
+
+    @Autowired
+    private RelationshipOperationsService relationshipOperationsService;
 
     @Autowired
     private ImportNGSILDDataService importNGSILDDataService;
@@ -372,7 +375,7 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
                         return STATUS_TRANSFER_NOTHING_TODO;
                     }
                     JSONArray entitiesJsonArray = new JSONArray(entities);
-                    statusLayerEntitiesTransfered = entityOperationsService.tranferPreprocessingLayerEntitesToFinalLayer(
+                    statusLayerEntitiesTransfered = entityOperationsService.transferPreprocessingLayerEntitiesToFinalLayer(
                             sgeolInstance,
                             appToken, userToken,
                             layer, layerDestiny
