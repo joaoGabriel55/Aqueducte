@@ -2,8 +2,8 @@ package br.imd.aqueducte.entitiesrelationship.controllers;
 
 import br.imd.aqueducte.entitiesrelationship.business.EntitiesRelationshipSetupValidate;
 import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipAndTransferService;
-import br.imd.aqueducte.models.entitiesrelationship.enums.EntitiesRelationshipSetupStatus;
-import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.entitiesrelationship.models.enums.EntitiesRelationshipSetupStatus;
+import br.imd.aqueducte.entitiesrelationship.models.mongodocuments.EntitiesRelationshipSetup;
 import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.services.TaskStatusService;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static br.imd.aqueducte.entitiesrelationship.services.implementations.EntitiesRelationshipAndTransferServiceImpl.*;
-import static br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType.*;
+import static br.imd.aqueducte.entitiesrelationship.models.enums.RelationshipType.*;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @RestController

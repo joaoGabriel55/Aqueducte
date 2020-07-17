@@ -4,9 +4,9 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithContextConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.response.Response;
-import br.imd.aqueducte.treats.NGSILDTreat;
-import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
+import br.imd.aqueducte.services.NGSILDConverterService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +21,9 @@ import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 @RequestMapping("/sync/ngsildConverter")
 @CrossOrigin(origins = "*")
 public class NGSILDConverterController {
+
+    @Autowired
+    private NGSILDConverterService ngsildConverterService;
 
     @PostMapping(value = "/{layerPath}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertToNGSILDWithoutContext(
@@ -38,10 +41,9 @@ public class NGSILDConverterController {
         }
 
         try {
-            NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
             List<LinkedHashMap<String, Object>> listNGSILD;
             long startTime = System.currentTimeMillis();
-            listNGSILD = ngsildTreat.convertToEntityNGSILD(sgeolInstance, importConfig, layerPath, null);
+            listNGSILD = ngsildConverterService.standardConverterNGSILD(sgeolInstance, importConfig, layerPath, null);
             long endTime = System.currentTimeMillis();
             long timeElapsed = endTime - startTime;
             log.info("Time to convert Standard mode Into NGSI-LD: {} ms", timeElapsed);
@@ -61,10 +63,9 @@ public class NGSILDConverterController {
             @RequestBody ImportNSILDDataWithContextConfig importContextConfig) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
 
-        NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
         try {
             long startTime = System.currentTimeMillis();
-            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.contextConverterNGSILD(
                     sgeolInstance,
                     importContextConfig.getContextLinks(),
                     importContextConfig.getMatchingConfigContent(),

@@ -1,12 +1,11 @@
 package br.imd.aqueducte.services.implementations;
 
 import br.imd.aqueducte.models.dtos.MatchingConfig;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupContext;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
-import br.imd.aqueducte.treats.NGSILDTreat;
-import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
-import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
+import br.imd.aqueducte.services.NGSILDConverterService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,24 +17,27 @@ import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.WEB_SERVIC
 @SuppressWarnings("ALL")
 @Service
 @Log4j2
-public class LoadDataNGSILDByImportSetupWithContextServiceImpl
+public class LoadDataNGSILDByImportSetupContextServiceImpl
         extends LoadDataNGSILDByImportSetup
-        implements LoadDataNGSILDByImportationSetupService<ImportationSetupWithContext> {
+        implements LoadDataNGSILDByImportationSetupService<ImportationSetupContext> {
 
-    public LoadDataNGSILDByImportSetupWithContextServiceImpl() {
+    @Autowired
+    private NGSILDConverterService ngsildConverterService;
+
+    public LoadDataNGSILDByImportSetupContextServiceImpl() {
         super();
     }
 
     @Override
     public List<LinkedHashMap<String, Object>> loadData(
-            ImportationSetupWithContext importationSetupWithContext,
+            ImportationSetupContext importationSetupContext,
             String sgeolInstance,
             String userToken
     ) throws Exception {
-        if (importationSetupWithContext.getImportType().equals(WEB_SERVICE)) {
-            return loadDataWebService(importationSetupWithContext, sgeolInstance);
-        } else if (importationSetupWithContext.getImportType().equals(FILE)) {
-            return loadDataFile(importationSetupWithContext, sgeolInstance, userToken);
+        if (importationSetupContext.getImportType().equals(WEB_SERVICE)) {
+            return loadDataWebService(importationSetupContext, sgeolInstance);
+        } else if (importationSetupContext.getImportType().equals(FILE)) {
+            return loadDataFile(importationSetupContext, sgeolInstance, userToken);
         }
         log.error("Load data error");
         throw new Exception();
@@ -43,15 +45,15 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
 
     @Override
     public List<LinkedHashMap<String, Object>> loadDataWebService(
-            ImportationSetupWithContext importationSetupWithContext, String sgeolInstance
+            ImportationSetupContext importationSetupContext, String sgeolInstance
     ) throws Exception {
-        JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
+        JsonDataServiceImpl jsonFlatTreatImpl = new JsonDataServiceImpl();
 
         // Load data from Webservice
-        Map<String, Object> responseWSResult = loadDataWebservice(importationSetupWithContext);
+        Map<String, Object> responseWSResult = loadDataWebservice(importationSetupContext);
         Map<String, Object> responseWSResultFlat = (Map<String, Object>) jsonFlatTreatImpl.getFlatJSON(responseWSResult);
         // Get data chosen
-        Object dataFound = findDataRecursive(responseWSResultFlat, importationSetupWithContext.getDataSelected());
+        Object dataFound = findDataRecursive(responseWSResultFlat, importationSetupContext.getDataSelected());
         if (!(dataFound instanceof List)) {
             log.error("dataFound is not List type");
             throw new Exception();
@@ -60,18 +62,16 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
         List<Object> dataCollectionFlat = (List<Object>) jsonFlatTreatImpl.getFlatJSON(dataFound);
         List<Map<String, Object>> dataForConvert = filterFieldsSelectedIntoArray(
                 dataCollectionFlat,
-                importationSetupWithContext
+                importationSetupContext
         );
 
-        // Convert o NGSI-LD
-        NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
         try {
-            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.contextConverterNGSILD(
                     sgeolInstance,
-                    getContextLinks(importationSetupWithContext.getContextSources().values()),
-                    importationSetupWithContext.getMatchingConfigList(),
+                    getContextLinks(importationSetupContext.getContextSources().values()),
+                    importationSetupContext.getMatchingConfigList(),
                     dataForConvert,
-                    importationSetupWithContext.getLayerPathSelected()
+                    importationSetupContext.getLayerPathSelected()
             );
             log.info("loadData WebService successfuly");
             return listConvertedIntoNGSILD;
@@ -83,7 +83,7 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
 
     @Override
     public List<LinkedHashMap<String, Object>> loadDataFile(
-            ImportationSetupWithContext importationSetup,
+            ImportationSetupContext importationSetup,
             String sgeolInstance,
             String userToken) throws Exception {
         try {
@@ -103,8 +103,8 @@ public class LoadDataNGSILDByImportSetupWithContextServiceImpl
             List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(
                     sgeolInstance, userToken, importationSetup, fieldsFiltered
             );
-            NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
-            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+
+            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.contextConverterNGSILD(
                     sgeolInstance,
                     getContextLinks(importationSetup.getContextSources().values()),
                     importationSetup.getMatchingConfigList(),

@@ -1,8 +1,9 @@
-package br.imd.aqueducte.treats.impl;
+package br.imd.aqueducte.services.implementations;
 
-import br.imd.aqueducte.treats.JsonFlatTreat;
+import br.imd.aqueducte.services.JsonDataService;
 import lombok.extern.log4j.Log4j2;
 import org.codehaus.jettison.json.JSONException;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,8 +15,9 @@ import java.util.stream.Collectors;
 import static br.imd.aqueducte.utils.GeoJsonValidator.getGeoJson;
 
 @SuppressWarnings("ALL")
+@Service
 @Log4j2
-public class JsonFlatTreatImpl implements JsonFlatTreat {
+public class JsonDataServiceImpl implements JsonDataService {
 
     private String keyPath = "";
 
@@ -50,7 +52,7 @@ public class JsonFlatTreatImpl implements JsonFlatTreat {
     }
 
     @Override
-    public List<String> getKeysCollectionFromJSON(Map<String, Object> dataForConversion) {
+    public List<String> getCollectionKeysFromJSON(Map<String, Object> dataForConversion) {
         return getKeysArray(dataForConversion);
     }
 

@@ -2,11 +2,11 @@ package br.imd.aqueducte.business;
 
 import br.imd.aqueducte.AqueducteApplicationTests;
 import br.imd.aqueducte.entitiesrelationship.business.EntitiesRelationshipSetupValidate;
-import br.imd.aqueducte.models.entitiesrelationship.dtos.LayerSetup;
-import br.imd.aqueducte.models.entitiesrelationship.dtos.PropertyNGSILD;
-import br.imd.aqueducte.models.entitiesrelationship.enums.EntitiesRelationshipSetupStatus;
-import br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType;
-import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.entitiesrelationship.models.dtos.LayerSetup;
+import br.imd.aqueducte.entitiesrelationship.models.dtos.PropertyNGSILD;
+import br.imd.aqueducte.entitiesrelationship.models.enums.EntitiesRelationshipSetupStatus;
+import br.imd.aqueducte.entitiesrelationship.models.enums.RelationshipType;
+import br.imd.aqueducte.entitiesrelationship.models.mongodocuments.EntitiesRelationshipSetup;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 

@@ -3,8 +3,8 @@ package br.imd.aqueducte.services.implementations;
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetup;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupStandard;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -62,7 +62,7 @@ public abstract class LoadDataNGSILDByImportSetup {
 
     protected List<Map<String, Object>> filterFieldsSelectedIntoArray(
             List<Object> dataCollection,
-            ImportationSetupWithoutContext importationSetup
+            ImportationSetupStandard importationSetup
     ) {
         List<Map<String, Object>> dataCollectionFiltered = new ArrayList<>();
         for (Object data : dataCollection) {
@@ -85,7 +85,7 @@ public abstract class LoadDataNGSILDByImportSetup {
 
     protected List<Map<String, Object>> filterFieldsSelectedIntoArray(
             List<Object> dataCollection,
-            ImportationSetupWithContext importationSetup
+            ImportationSetupContext importationSetup
     ) {
         List<Map<String, Object>> dataCollectionFiltered = new ArrayList<>();
         for (Object data : dataCollection) {

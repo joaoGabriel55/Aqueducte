@@ -4,14 +4,13 @@ import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithContextConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.enums.TaskStatus;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupStandard;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.services.ImportNGSILDDataService;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
+import br.imd.aqueducte.services.NGSILDConverterService;
 import br.imd.aqueducte.services.TaskStatusService;
-import br.imd.aqueducte.treats.NGSILDTreat;
-import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
 import br.imd.aqueducte.utils.NGSILDUtils;
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
@@ -37,10 +36,13 @@ public class ImportDataToSGEOLController {
     private ImportNGSILDDataService importNGSILDDataService;
 
     @Autowired
-    private LoadDataNGSILDByImportationSetupService<ImportationSetupWithoutContext> importationSetupStandardService;
+    private LoadDataNGSILDByImportationSetupService<ImportationSetupStandard> importationSetupStandardService;
 
     @Autowired
-    private LoadDataNGSILDByImportationSetupService<ImportationSetupWithContext> importationSetupContextService;
+    private LoadDataNGSILDByImportationSetupService<ImportationSetupContext> importationSetupContextService;
+
+    @Autowired
+    private NGSILDConverterService ngsildConverterService;
 
     @Autowired
     private TaskStatusService taskStatusService;
@@ -52,7 +54,7 @@ public class ImportDataToSGEOLController {
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @PathVariable String taskId,
             @PathVariable String layer,
-            @RequestBody ImportationSetupWithoutContext importationSetup
+            @RequestBody ImportationSetupStandard importationSetup
     ) {
         Response<List<String>> response = new Response<>();
         try {
@@ -85,7 +87,7 @@ public class ImportDataToSGEOLController {
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @PathVariable String taskId,
             @PathVariable String layer,
-            @RequestBody ImportationSetupWithContext importationSetup
+            @RequestBody ImportationSetupContext importationSetup
     ) {
         Response<List<String>> response = new Response<>();
         try {
@@ -191,7 +193,7 @@ public class ImportDataToSGEOLController {
     }
 
     @PostMapping(value = "/file/{layerPath}")
-    public ResponseEntity<Response<List<String>>> convertToNGSILDWithoutContextAndImportData(
+    public ResponseEntity<Response<List<String>>> standardConvertToNGSILDAndImportData(
             @RequestHeader(APP_TOKEN) String appToken,
             @RequestHeader(USER_TOKEN) String userToken,
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
@@ -199,7 +201,6 @@ public class ImportDataToSGEOLController {
             @RequestBody ImportNSILDDataWithoutContextConfig importConfig
     ) {
         Response<List<String>> response = new Response<>();
-        NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
 
         List<GeoLocationConfig> geoLocationConfig = importConfig.getGeoLocationConfig();
         if (geoLocationConfig != null && geoLocationConfig.size() > 2) {
@@ -209,7 +210,7 @@ public class ImportDataToSGEOLController {
             return ResponseEntity.badRequest().body(response);
         }
         try {
-            List<LinkedHashMap<String, Object>> listNGSILD = ngsildTreat.convertToEntityNGSILD(
+            List<LinkedHashMap<String, Object>> listNGSILD = ngsildConverterService.standardConverterNGSILD(
                     sgeolInstance, importConfig, layerPath, null
             );
             long startTime = System.currentTimeMillis();
@@ -242,7 +243,7 @@ public class ImportDataToSGEOLController {
     }
 
     @PostMapping(value = "/file/context/{layerPath}")
-    public ResponseEntity<Response<List<String>>> convertToNGSILDWithContextAndImportData(
+    public ResponseEntity<Response<List<String>>> contextConvertToNGSILDAndImportData(
             @RequestHeader(APP_TOKEN) String appToken,
             @RequestHeader(USER_TOKEN) String userToken,
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
@@ -250,10 +251,9 @@ public class ImportDataToSGEOLController {
             @RequestBody ImportNSILDDataWithContextConfig importConfig
     ) {
         Response<List<String>> response = new Response<>();
-        NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
         try {
             long startTime = System.currentTimeMillis();
-            List<LinkedHashMap<String, Object>> listNGSILD = ngsildTreat.matchingWithContextAndConvertToEntityNGSILD(
+            List<LinkedHashMap<String, Object>> listNGSILD = ngsildConverterService.contextConverterNGSILD(
                     sgeolInstance,
                     importConfig.getContextLinks(),
                     importConfig.getMatchingConfigContent(),

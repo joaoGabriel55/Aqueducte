@@ -1,4 +1,4 @@
-package br.imd.aqueducte.models.entitiesrelationship.dtos;
+package br.imd.aqueducte.entitiesrelationship.models.dtos;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

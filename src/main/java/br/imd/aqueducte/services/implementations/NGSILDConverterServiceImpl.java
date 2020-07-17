@@ -1,29 +1,31 @@
-package br.imd.aqueducte.treats.impl;
+package br.imd.aqueducte.services.implementations;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
-import br.imd.aqueducte.treats.NGSILDTreat;
+import br.imd.aqueducte.services.NGSILDConverterService;
 import br.imd.aqueducte.utils.NGSILDUtils;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.Map.Entry;
 
 import static br.imd.aqueducte.utils.NGSILDUtils.removeSpacesForeignProperty;
 
+@Service
 @Log4j2
-public class NGSILDTreatImpl implements NGSILDTreat {
+public class NGSILDConverterServiceImpl implements NGSILDConverterService {
     private static final String LOCATION_FIELD = "location";
 
     private final NGSILDUtils ngsildUtils;
 
-    public NGSILDTreatImpl() {
+    public NGSILDConverterServiceImpl() {
         this.ngsildUtils = new NGSILDUtils();
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> convertToEntityNGSILD(
+    public List<LinkedHashMap<String, Object>> standardConverterNGSILD(
             String sgeolInstance,
             ImportNSILDDataWithoutContextConfig importConfig,
             String layerPath,
@@ -88,7 +90,7 @@ public class NGSILDTreatImpl implements NGSILDTreat {
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
+    public List<LinkedHashMap<String, Object>> contextConverterNGSILD(
             String sgeolInstance,
             List<String> contextLinks,
             List<MatchingConfig> matchingConfig,

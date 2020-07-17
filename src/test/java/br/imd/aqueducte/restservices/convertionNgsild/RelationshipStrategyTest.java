@@ -1,7 +1,7 @@
 package br.imd.aqueducte.restservices.convertionNgsild;
 
-import br.imd.aqueducte.treats.NGSILDTreat;
-import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
+import br.imd.aqueducte.services.NGSILDConverterService;
+import br.imd.aqueducte.services.implementations.NGSILDConverterServiceImpl;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
@@ -90,7 +90,7 @@ public class RelationshipStrategyTest {
             String jsonFile
     ) throws IOException {
         String contextLink = "https://github.com/JorgePereiraUFRN/SGEOL-LD/blob/master/ngsi-ld/city/City_Context.jsonld";
-        NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
+        NGSILDConverterService ngsildConverterService = new NGSILDConverterServiceImpl();
 
 //        List<LinkedHashMap<String, Object>> matchingConfig = getContent(jsonFile, "matchingConfigContent");
 //        List<LinkedHashMap<String, Object>> dataContentForNGSILDConversion = getContent(jsonFile, "dataContentForNGSILDConversion");

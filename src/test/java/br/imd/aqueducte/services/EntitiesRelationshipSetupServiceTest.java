@@ -2,9 +2,9 @@ package br.imd.aqueducte.services;
 
 import br.imd.aqueducte.AqueducteApplicationTests;
 import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipSetupService;
-import br.imd.aqueducte.models.entitiesrelationship.enums.EntitiesRelationshipSetupStatus;
-import br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType;
-import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.entitiesrelationship.models.enums.EntitiesRelationshipSetupStatus;
+import br.imd.aqueducte.entitiesrelationship.models.enums.RelationshipType;
+import br.imd.aqueducte.entitiesrelationship.models.mongodocuments.EntitiesRelationshipSetup;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

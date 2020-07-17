@@ -2,12 +2,11 @@ package br.imd.aqueducte.services.implementations;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupStandard;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
-import br.imd.aqueducte.treats.NGSILDTreat;
-import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
-import br.imd.aqueducte.treats.impl.NGSILDTreatImpl;
+import br.imd.aqueducte.services.NGSILDConverterService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,20 +18,23 @@ import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.WEB_SERVIC
 @SuppressWarnings("ALL")
 @Service
 @Log4j2
-public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
+public class LoadDataNGSILDByImportSetupStandardServiceImpl
         extends LoadDataNGSILDByImportSetup
-        implements LoadDataNGSILDByImportationSetupService<ImportationSetupWithoutContext> {
+        implements LoadDataNGSILDByImportationSetupService<ImportationSetupStandard> {
+
+    @Autowired
+    private NGSILDConverterService ngsildConverterService;
 
     @Override
     public List<LinkedHashMap<String, Object>> loadData(
-            ImportationSetupWithoutContext ImportationSetupWithoutContext,
+            ImportationSetupStandard ImportationSetupStandard,
             String sgeolInstance,
             String userToken
     ) throws Exception {
-        if (ImportationSetupWithoutContext.getImportType().equals(WEB_SERVICE)) {
-            return loadDataWebService(ImportationSetupWithoutContext, sgeolInstance);
-        } else if (ImportationSetupWithoutContext.getImportType().equals(FILE)) {
-            return loadDataFile(ImportationSetupWithoutContext, sgeolInstance, userToken);
+        if (ImportationSetupStandard.getImportType().equals(WEB_SERVICE)) {
+            return loadDataWebService(ImportationSetupStandard, sgeolInstance);
+        } else if (ImportationSetupStandard.getImportType().equals(FILE)) {
+            return loadDataFile(ImportationSetupStandard, sgeolInstance, userToken);
         }
         log.error("Load data error");
         throw new Exception();
@@ -40,9 +42,9 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
 
     @Override
     public List<LinkedHashMap<String, Object>> loadDataWebService(
-            ImportationSetupWithoutContext importationSetup, String sgeolInstance
+            ImportationSetupStandard importationSetup, String sgeolInstance
     ) throws Exception {
-        JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
+        JsonDataServiceImpl jsonFlatTreatImpl = new JsonDataServiceImpl();
 
         // Load data from Webservice
         Map<String, Object> responseWSResult = loadDataWebservice(importationSetup);
@@ -66,14 +68,12 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
                 importationSetup
         );
 
-        // Convert o NGSI-LD
-        NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
         try {
             ImportNSILDDataWithoutContextConfig importConfig = new ImportNSILDDataWithoutContextConfig();
             importConfig.setGeoLocationConfig(importationSetup.getFieldsGeolocationSelectedConfigs());
             importConfig.setDataContentForNGSILDConversion(dataForConvert);
 
-            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
+            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.standardConverterNGSILD(
                     sgeolInstance,
                     importConfig,
                     importationSetup.getLayerPathSelected(),
@@ -89,7 +89,7 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
 
     @Override
     public List<LinkedHashMap<String, Object>> loadDataFile(
-            ImportationSetupWithoutContext importationSetup, String sgeolInstance, String userToken) throws Exception {
+            ImportationSetupStandard importationSetup, String sgeolInstance, String userToken) throws Exception {
         try {
             Map<String, Integer> fieldsFiltered = getFieldsForImportSetupStandardWithFile(
                     getFileFields(sgeolInstance, userToken, importationSetup),
@@ -108,14 +108,12 @@ public class LoadDataNGSILDByImportSetupWithoutContextServiceImpl
             List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(
                     sgeolInstance, userToken, importationSetup, fieldsFiltered
             );
-            // Convert o NGSI-LD
-            NGSILDTreat ngsildTreat = new NGSILDTreatImpl();
 
             ImportNSILDDataWithoutContextConfig importConfig = new ImportNSILDDataWithoutContextConfig();
             importConfig.setGeoLocationConfig(importationSetup.getFieldsGeolocationSelectedConfigs());
             importConfig.setDataContentForNGSILDConversion(fileConvertedIntoJSON);
 
-            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildTreat.convertToEntityNGSILD(
+            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.standardConverterNGSILD(
                     sgeolInstance,
                     importConfig,
                     importationSetup.getLayerPathSelected(),

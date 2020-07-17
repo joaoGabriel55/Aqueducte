@@ -1,8 +1,8 @@
 package br.imd.aqueducte.services.implementations;
 
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
-import br.imd.aqueducte.repositories.ImportationSetupWithContextRepository;
-import br.imd.aqueducte.services.ImportationSetupWithContextService;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupContext;
+import br.imd.aqueducte.repositories.ImportationSetupContextRepository;
+import br.imd.aqueducte.services.ImportationSetupContextService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,16 +14,16 @@ import java.util.Optional;
 
 @Service
 @Log4j2
-public class ImportationSetupWithContextServiceImpl implements ImportationSetupWithContextService {
+public class ImportationSetupContextServiceImpl implements ImportationSetupContextService {
 
     @Autowired
-    private ImportationSetupWithContextRepository importationSetupWithContextRepository;
+    private ImportationSetupContextRepository importationSetupContextRepository;
 
     @Override
-    public ImportationSetupWithContext createOrUpdate(ImportationSetupWithContext obj) throws Exception {
+    public ImportationSetupContext createOrUpdate(ImportationSetupContext obj) throws Exception {
         try {
             log.info("createOrUpdate ImportationSetupWithContext");
-            return this.importationSetupWithContextRepository.save(obj);
+            return this.importationSetupContextRepository.save(obj);
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
             throw new Exception();
@@ -31,15 +31,15 @@ public class ImportationSetupWithContextServiceImpl implements ImportationSetupW
     }
 
     @Override
-    public List<ImportationSetupWithContext> findAll() {
+    public List<ImportationSetupContext> findAll() {
         return null;
     }
 
     @Override
-    public Optional<ImportationSetupWithContext> findById(String id) throws Exception {
+    public Optional<ImportationSetupContext> findById(String id) throws Exception {
         try {
             log.info("findById ImportationSetupWithContext - {}", id);
-            return this.importationSetupWithContextRepository.findById(id);
+            return this.importationSetupContextRepository.findById(id);
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
             throw new Exception();
@@ -47,7 +47,7 @@ public class ImportationSetupWithContextServiceImpl implements ImportationSetupW
     }
 
     @Override
-    public Page<ImportationSetupWithContext> findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+    public Page<ImportationSetupContext> findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
             String idUser,
             String importType,
             int page,
@@ -56,7 +56,7 @@ public class ImportationSetupWithContextServiceImpl implements ImportationSetupW
         try {
             PageRequest pageable = new PageRequest(page, count);
             log.info("findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated ImportationSetupWithContext - page: {} count: {}", page, count);
-            return this.importationSetupWithContextRepository.findByIdUserAndImportTypeOrderByDateCreatedDesc(
+            return this.importationSetupContextRepository.findByIdUserAndImportTypeOrderByDateCreatedDesc(
                     idUser, importType, pageable
             );
         } catch (Exception e) {
@@ -66,10 +66,10 @@ public class ImportationSetupWithContextServiceImpl implements ImportationSetupW
     }
 
     @Override
-    public List<ImportationSetupWithContext> findByUserIdAndFilePath(String userId, String filePath) throws Exception {
+    public List<ImportationSetupContext> findByUserIdAndFilePath(String userId, String filePath) throws Exception {
         try {
             log.info("findByUserIdAndFilePath ImportationSetupWithContext");
-            return this.importationSetupWithContextRepository.findByIdUserAndFilePath(userId, filePath);
+            return this.importationSetupContextRepository.findByIdUserAndFilePath(userId, filePath);
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
             throw new Exception();
@@ -79,13 +79,13 @@ public class ImportationSetupWithContextServiceImpl implements ImportationSetupW
     @Override
     public String delete(String id) throws Exception {
         try {
-            Optional<ImportationSetupWithContext> impSetupWithCxt = findById(id);
+            Optional<ImportationSetupContext> impSetupWithCxt = findById(id);
             if (!impSetupWithCxt.isPresent()) {
                 log.error("ImportationSetupWithContext not found - {}", id);
                 throw new Exception();
             }
             String idForDelete = impSetupWithCxt.get().getId();
-            importationSetupWithContextRepository.deleteById(idForDelete);
+            importationSetupContextRepository.deleteById(idForDelete);
             log.info("delete ImportationSetupWithContext - {}", id);
             return idForDelete;
         } catch (Exception e) {

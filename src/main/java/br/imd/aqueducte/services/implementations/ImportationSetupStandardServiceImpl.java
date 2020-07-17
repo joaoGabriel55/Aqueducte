@@ -1,8 +1,8 @@
 package br.imd.aqueducte.services.implementations;
 
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
-import br.imd.aqueducte.repositories.ImportationSetupWithoutContextRepository;
-import br.imd.aqueducte.services.ImportationSetupWithoutContextService;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupStandard;
+import br.imd.aqueducte.repositories.ImportationSetupStandardRepository;
+import br.imd.aqueducte.services.ImportationSetupStandardService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,14 +14,14 @@ import java.util.Optional;
 
 @Service
 @Log4j2
-public class ImportationSetupWithoutContextServiceImpl implements ImportationSetupWithoutContextService {
+public class ImportationSetupStandardServiceImpl implements ImportationSetupStandardService {
 
     @Autowired
-    private ImportationSetupWithoutContextRepository importationSetupWithoutContextRepository;
+    private ImportationSetupStandardRepository importationSetupStandardRepository;
 
     @SuppressWarnings("deprecation")
     @Override
-    public Page<ImportationSetupWithoutContext> findByIdUserImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+    public Page<ImportationSetupStandard> findByIdUserImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
             String idUser,
             String importType,
             int page,
@@ -30,7 +30,7 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
         try {
             PageRequest pageable = new PageRequest(page, count);
             log.info("findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated ImportationSetupWithoutContext - page: {} count: {}", page, count);
-            return this.importationSetupWithoutContextRepository.findByIdUserAndImportTypeOrderByDateCreatedDesc(
+            return this.importationSetupStandardRepository.findByIdUserAndImportTypeOrderByDateCreatedDesc(
                     idUser, importType, pageable
             );
         } catch (Exception e) {
@@ -40,10 +40,10 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
     }
 
     @Override
-    public List<ImportationSetupWithoutContext> findByUserIdAndFilePath(String userId, String filePath) throws Exception {
+    public List<ImportationSetupStandard> findByUserIdAndFilePath(String userId, String filePath) throws Exception {
         try {
             log.info("findByUserIdAndFilePath ImportationSetupWithoutContext");
-            return this.importationSetupWithoutContextRepository.findByIdUserAndFilePath(userId, filePath);
+            return this.importationSetupStandardRepository.findByIdUserAndFilePath(userId, filePath);
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
             throw new Exception();
@@ -51,11 +51,11 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
     }
 
     @Override
-    public ImportationSetupWithoutContext createOrUpdate(
-            ImportationSetupWithoutContext importationSetupWithoutContext) throws Exception {
+    public ImportationSetupStandard createOrUpdate(
+            ImportationSetupStandard importationSetupStandard) throws Exception {
         try {
             log.info("createOrUpdate ImportationSetupWithoutContext");
-            return this.importationSetupWithoutContextRepository.save(importationSetupWithoutContext);
+            return this.importationSetupStandardRepository.save(importationSetupStandard);
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
             throw new Exception();
@@ -63,10 +63,10 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
     }
 
     @Override
-    public List<ImportationSetupWithoutContext> findAll() throws Exception {
+    public List<ImportationSetupStandard> findAll() throws Exception {
         try {
             log.info("findAll ImportationSetupWithoutContext");
-            return this.importationSetupWithoutContextRepository.findAll();
+            return this.importationSetupStandardRepository.findAll();
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
             throw new Exception();
@@ -74,10 +74,10 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
     }
 
     @Override
-    public Optional<ImportationSetupWithoutContext> findById(String id) throws Exception {
+    public Optional<ImportationSetupStandard> findById(String id) throws Exception {
         try {
             log.info("findById ImportationSetupWithoutContext - {}", id);
-            return this.importationSetupWithoutContextRepository.findById(id);
+            return this.importationSetupStandardRepository.findById(id);
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
             throw new Exception();
@@ -87,13 +87,13 @@ public class ImportationSetupWithoutContextServiceImpl implements ImportationSet
     @Override
     public String delete(String id) throws Exception {
         try {
-            Optional<ImportationSetupWithoutContext> impSetupWithoutCxt = findById(id);
+            Optional<ImportationSetupStandard> impSetupWithoutCxt = findById(id);
             if (impSetupWithoutCxt.isEmpty()) {
                 log.error("ImportationSetupWithoutContext not found - {}", id);
                 throw new Exception();
             }
             String idForDelete = impSetupWithoutCxt.get().getId();
-            importationSetupWithoutContextRepository.deleteById(idForDelete);
+            importationSetupStandardRepository.deleteById(idForDelete);
             log.info("delete ImportationSetupWithoutContext - {}", id);
             return idForDelete;
         } catch (Exception e) {

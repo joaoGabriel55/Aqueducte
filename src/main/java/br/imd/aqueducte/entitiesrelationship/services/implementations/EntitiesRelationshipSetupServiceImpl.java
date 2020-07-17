@@ -2,7 +2,7 @@ package br.imd.aqueducte.entitiesrelationship.services.implementations;
 
 import br.imd.aqueducte.entitiesrelationship.repositories.EntitiesRelationshipSetupRepository;
 import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipSetupService;
-import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.entitiesrelationship.models.mongodocuments.EntitiesRelationshipSetup;
 import br.imd.aqueducte.services.implementations.GenericServiceImpl;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;

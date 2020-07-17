@@ -14,7 +14,7 @@ import java.util.Map;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ImportationSetupWithContext extends ImportationSetup {
+public class ImportationSetupContext extends ImportationSetup {
 
     @NotBlank(message = "Context source(s) is required")
     private Map<String, String> contextSources;
