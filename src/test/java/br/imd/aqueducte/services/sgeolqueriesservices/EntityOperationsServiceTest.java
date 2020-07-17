@@ -1,6 +1,8 @@
 package br.imd.aqueducte.services.sgeolqueriesservices;
 
+import br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.EntityOperationsService;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +12,8 @@ import static org.junit.Assert.assertTrue;
 
 public class EntityOperationsServiceTest {
 
-    EntityOperationsService service = EntityOperationsService.getInstance();
+    @Autowired
+    private EntityOperationsService service;
 
     @Test
     public void findContainedInTest() throws Exception {

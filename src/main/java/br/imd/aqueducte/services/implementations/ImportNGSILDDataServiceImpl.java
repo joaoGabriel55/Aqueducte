@@ -1,7 +1,7 @@
 package br.imd.aqueducte.services.implementations;
 
+import br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.EntityOperationsService;
 import br.imd.aqueducte.services.ImportNGSILDDataService;
-import br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
@@ -10,6 +10,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
@@ -23,7 +24,8 @@ import static br.imd.aqueducte.utils.RequestsUtils.*;
 @Log4j2
 public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
 
-    private EntityOperationsService entityOperationsService = EntityOperationsService.getInstance();
+    @Autowired
+    private EntityOperationsService entityOperationsService;
 
     public HttpRequestBase requestConfigParams(String url, String appToken, String userToken, JSONArray jsonArray) {
         RequestsUtils requestsUtils = new RequestsUtils();

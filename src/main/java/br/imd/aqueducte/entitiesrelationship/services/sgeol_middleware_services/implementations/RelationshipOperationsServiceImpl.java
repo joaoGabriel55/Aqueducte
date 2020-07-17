@@ -1,5 +1,6 @@
-package br.imd.aqueducte.services.sgeolqueriesservices;
+package br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.implementations;
 
+import br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.RelationshipOperationsService;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
@@ -10,28 +11,21 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.json.JSONObject;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
 
-import static br.imd.aqueducte.services.sgeolqueriesservices.EntityOperationsService.FIND_ENTITY_BY_DOCUMENT;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
-public class RelationshipOperationsService {
+@Service
+public class RelationshipOperationsServiceImpl implements RelationshipOperationsService {
 
     private static final String RELATIONSHIP = "/relationship";
     private static final String FIND_BY_RELATIONSHIP_FILTER = "/find-by-relationship-filter";
 
-    private static RelationshipOperationsService instance;
-
-    public static RelationshipOperationsService getInstance() {
-        if (instance == null) {
-            instance = new RelationshipOperationsService();
-        }
-        return instance;
-    }
-
+    @Override
     public boolean relationshipEntities(
             String sgeolInstance,
             String appToken,
@@ -178,7 +172,7 @@ public class RelationshipOperationsService {
             String objectId,
             boolean objectIsString
     ) {
-        String uri = sgeolInstance + "/v2/" + layer + FIND_ENTITY_BY_DOCUMENT;
+        String uri = sgeolInstance + "/v2/" + layer + EntityOperationsServiceImpl.FIND_ENTITY_BY_DOCUMENT;
         String query = "{\"$and\":[{\"_id\": \"" + entityId + "\"},{\"relationships." + relationshipName + ".object\":{\"$elemMatch\": {\"$eq\": \"" + objectId + "\"}}}]}";
         if (objectIsString)
             query = "{\"$and\":[{\"_id\": \"" + entityId + "\"},{\"relationships." + relationshipName + ".object\":{\"$eq\": \"" + objectId + "\"}}]}";
@@ -208,7 +202,10 @@ public class RelationshipOperationsService {
         return false;
     }
 
-    public Map<String, Object> getEntityRelationshipsObjectIds(String sgeolInstance, String appToken, String userToken, String layer, String entityId, String relationshipName) {
+    private Map<String, Object> getEntityRelationshipsObjectIds(
+            String sgeolInstance, String appToken, String userToken,
+            String layer, String entityId, String relationshipName
+    ) {
         String uri = sgeolInstance + "/v2/" + layer + RELATIONSHIP + "?entity-id=" + entityId + "&relationship-name=" + relationshipName;
         HttpGet request = new HttpGet(uri);
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
@@ -233,7 +230,7 @@ public class RelationshipOperationsService {
         return null;
     }
 
-    public List<String> addObjectIdIntoRelationship(Object relationshipObject, String objectId) {
+    private List<String> addObjectIdIntoRelationship(Object relationshipObject, String objectId) {
         if (relationshipObject instanceof String) {
             if (objectId.equals(relationshipObject))
                 return null;
