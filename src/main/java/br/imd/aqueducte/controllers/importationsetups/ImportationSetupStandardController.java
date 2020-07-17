@@ -1,11 +1,12 @@
 package br.imd.aqueducte.controllers.importationsetups;
 
 import br.imd.aqueducte.controllers.GenericController;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupStandard;
 import br.imd.aqueducte.models.response.Response;
-import br.imd.aqueducte.services.ImportationSetupWithoutContextService;
+import br.imd.aqueducte.services.ImportationSetupStandardService;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
 import com.mongodb.DuplicateKeyException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -17,166 +18,165 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
 @SuppressWarnings("ALL")
 @RestController
+@Log4j2
 @RequestMapping("/sync/withoutContextSetup")
 @CrossOrigin(origins = "*")
-public class ImportationSetupWithoutContextController extends GenericController {
+public class ImportationSetupStandardController extends GenericController {
 
     @Autowired
-    private ImportationSetupWithoutContextService impSetupWithoutCxtService;
+    private ImportationSetupStandardService impSetupWithoutCxtService;
 
     @Autowired
-    private LoadDataNGSILDByImportationSetupService<ImportationSetupWithoutContext> loadDataNGSILDByImportationSetupService;
+    private LoadDataNGSILDByImportationSetupService<ImportationSetupStandard> loadDataNGSILDByImportationSetupService;
 
     @GetMapping(value = "/{idUser}/{importType}/{page}/{count}")
-    public ResponseEntity<Response<Page<ImportationSetupWithoutContext>>> findImportTypeImportationSetupWithoutContext(
+    public ResponseEntity<Response<Page<ImportationSetupStandard>>> findImportTypeImportationSetupWithoutContext(
             @PathVariable("idUser") String idUser,
             @PathVariable("importType") String importType,
             @PathVariable("page") int page,
             @PathVariable("count") int count
     ) {
-        Response<Page<ImportationSetupWithoutContext>> response = new Response<>();
+        Response<Page<ImportationSetupStandard>> response = new Response<>();
         try {
-            Page<ImportationSetupWithoutContext> list = impSetupWithoutCxtService
+            Page<ImportationSetupStandard> list = impSetupWithoutCxtService
                     .findByIdUserImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
                             idUser, importType.toUpperCase(), page, count
                     );
             if (!list.hasContent()) {
                 response.getErrors().add("Has not content");
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.badRequest().body(response);
             }
             response.setData(list);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("GET findImportTypeImportationSetupWithoutContext", null);
+        log.info("GET findImportTypeImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Response<ImportationSetupWithoutContext>> getByIdImportationSetupWithoutContext(
+    public ResponseEntity<Response<ImportationSetupStandard>> getByIdImportationSetupWithoutContext(
             @PathVariable String id
     ) {
-        Response<ImportationSetupWithoutContext> response = new Response<>();
+        Response<ImportationSetupStandard> response = new Response<>();
         try {
-            Optional<ImportationSetupWithoutContext> importationSetupWithoutContext = impSetupWithoutCxtService
+            Optional<ImportationSetupStandard> importationSetupWithoutContext = impSetupWithoutCxtService
                     .findById(id);
             response.setData(importationSetupWithoutContext.get());
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("GET getByIdImportationSetupWithoutContext", null);
+        log.info("GET getByIdImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/user/{userId}")
-    public ResponseEntity<Response<List<ImportationSetupWithoutContext>>> findImportationSetupWithoutContextByFilePathAndUserId(
+    public ResponseEntity<Response<List<ImportationSetupStandard>>> findImportationSetupWithoutContextByFilePathAndUserId(
             @PathVariable("userId") String userId,
             @RequestParam("filePath") String filePath
     ) {
-        Response<List<ImportationSetupWithoutContext>> response = new Response<>();
+        Response<List<ImportationSetupStandard>> response = new Response<>();
 
         if (filePath == "" || filePath == null) {
             response.getErrors().add("File path must be informed");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
 
         try {
-            List<ImportationSetupWithoutContext> importationSetupWithoutContextList = impSetupWithoutCxtService.findByUserIdAndFilePath(userId, filePath);
-            response.setData(importationSetupWithoutContextList);
+            List<ImportationSetupStandard> importationSetupStandardList = impSetupWithoutCxtService.findByUserIdAndFilePath(userId, filePath);
+            response.setData(importationSetupStandardList);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("GET findImportationSetupWithoutContextByFilePathAndUserId", null);
+        log.info("GET findImportationSetupWithoutContextByFilePathAndUserId");
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<Response<ImportationSetupWithoutContext>> saveImportationSetupWithoutContext(
+    public ResponseEntity<Response<ImportationSetupStandard>> saveImportationSetupWithoutContext(
             HttpServletRequest request,
-            @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext
+            @RequestBody ImportationSetupStandard importationSetupStandard
     ) {
-        Response<ImportationSetupWithoutContext> response = new Response<>();
+        Response<ImportationSetupStandard> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
-        importationSetupWithoutContext.setIdUser(idUser);
+        importationSetupStandard.setIdUser(idUser);
         try {
-            if (importationSetupWithoutContext.getId() == null) {
-                importationSetupWithoutContext.setDateCreated(new Date());
-                importationSetupWithoutContext.setDateModified(new Date());
-                impSetupWithoutCxtService.createOrUpdate(importationSetupWithoutContext);
-                response.setData(importationSetupWithoutContext);
+            if (importationSetupStandard.getId() == null) {
+                importationSetupStandard.setDateCreated(new Date());
+                importationSetupStandard.setDateModified(new Date());
+                impSetupWithoutCxtService.createOrUpdate(importationSetupStandard);
+                response.setData(importationSetupStandard);
             } else {
                 response.getErrors().add("Object inconsistent");
-                logError(response.getErrors().get(0), null);
+                log.error(response.getErrors().get(0));
                 return ResponseEntity.badRequest().body(response);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("POST saveImportationSetupWithoutContext", null);
+        log.info("POST saveImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<Response<ImportationSetupWithoutContext>> updateImportationSetupWithoutContext(
+    public ResponseEntity<Response<ImportationSetupStandard>> updateImportationSetupWithoutContext(
             HttpServletRequest request,
             @PathVariable String id,
-            @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext
+            @RequestBody ImportationSetupStandard importationSetupStandard
     ) {
-        Response<ImportationSetupWithoutContext> response = new Response<>();
+        Response<ImportationSetupStandard> response = new Response<>();
 
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
-        } else if (!importationSetupWithoutContext.getId().equals(id)) {
+        } else if (!importationSetupStandard.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
-            logError(response.getErrors().get(0), null);
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
 
         try {
-            Optional<ImportationSetupWithoutContext> importSetup = impSetupWithoutCxtService.findById(id);
+            Optional<ImportationSetupStandard> importSetup = impSetupWithoutCxtService.findById(id);
             if (importSetup.isPresent()) {
-                importationSetupWithoutContext.setDateCreated(importSetup.get().getDateCreated());
-                importationSetupWithoutContext.setDateModified(new Date());
-                impSetupWithoutCxtService.createOrUpdate(importationSetupWithoutContext);
-                response.setData(importationSetupWithoutContext);
+                importationSetupStandard.setDateCreated(importSetup.get().getDateCreated());
+                importationSetupStandard.setDateModified(new Date());
+                impSetupWithoutCxtService.createOrUpdate(importationSetupStandard);
+                response.setData(importationSetupStandard);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("PUT updateImportationSetupWithoutContext", null);
+        log.info("PUT updateImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
@@ -190,10 +190,10 @@ public class ImportationSetupWithoutContextController extends GenericController 
                 response.setData(idDeleted);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        logInfo("DELETE deleteImportationSetupWithoutContext", null);
+        log.info("DELETE deleteImportationSetupWithoutContext");
         return ResponseEntity.ok(response);
     }
 
@@ -202,18 +202,19 @@ public class ImportationSetupWithoutContextController extends GenericController 
             @RequestHeader(USER_TOKEN) String userToken,
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @RequestParam boolean samples,
-            @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext
+            @RequestBody ImportationSetupStandard importationSetupStandard
     ) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
         try {
             List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDByImportationSetupService.loadData(
-                    importationSetupWithoutContext, sgeolInstance, userToken
+                    importationSetupStandard, sgeolInstance, userToken
             );
             response.setData(samples ? getSamples(ngsildData) : ngsildData);
-            logInfo("POST loadNGSILDDataFromImportSetupWithoutContext", null);
+            log.info("POST loadNGSILDDataFromImportSetupWithoutContext");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
+            log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
     }
@@ -222,19 +223,20 @@ public class ImportationSetupWithoutContextController extends GenericController 
     public ResponseEntity<Response<Integer>> loadCountNGSILDDataFromImportSetupWithoutContext(
             @RequestHeader(USER_TOKEN) String userToken,
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
-            @RequestBody ImportationSetupWithoutContext importationSetupWithoutContext
+            @RequestBody ImportationSetupStandard importationSetupStandard
     ) {
         Response<Integer> response = new Response<>();
         try {
             response.setData(
                     this.loadDataNGSILDByImportationSetupService
-                            .loadData(importationSetupWithoutContext, sgeolInstance, userToken)
+                            .loadData(importationSetupStandard, sgeolInstance, userToken)
                             .size()
             );
+            log.info("POST loadCountNGSILDDataFromImportSetupWithoutContext");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(response.getErrors().get(0), e.getMessage());
+            log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }

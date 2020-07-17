@@ -1,9 +1,9 @@
-package br.imd.aqueducte.models.entitiesrelationship.mongodocuments;
+package br.imd.aqueducte.entitiesrelationship.models.mongodocuments;
 
-import br.imd.aqueducte.models.entitiesrelationship.dtos.LayerSetup;
-import br.imd.aqueducte.models.entitiesrelationship.dtos.PropertyNGSILD;
-import br.imd.aqueducte.models.entitiesrelationship.enums.EntitiesRelationshipSetupStatus;
-import br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType;
+import br.imd.aqueducte.entitiesrelationship.models.dtos.LayerSetup;
+import br.imd.aqueducte.entitiesrelationship.models.dtos.PropertyNGSILD;
+import br.imd.aqueducte.entitiesrelationship.models.enums.EntitiesRelationshipSetupStatus;
+import br.imd.aqueducte.entitiesrelationship.models.enums.RelationshipType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

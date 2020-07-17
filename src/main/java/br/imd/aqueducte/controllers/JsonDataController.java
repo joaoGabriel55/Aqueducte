@@ -1,20 +1,23 @@
 package br.imd.aqueducte.controllers;
 
 import br.imd.aqueducte.models.response.Response;
-import br.imd.aqueducte.treats.impl.JsonFlatTreatImpl;
+import br.imd.aqueducte.services.JsonDataService;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
-
 @RestController
+@Log4j2
 @RequestMapping("/sync/jsonFlat")
 @CrossOrigin(origins = "*")
-public class JsonFlatConvertController {
+public class JsonDataController {
+
+    @Autowired
+    private JsonDataService jsonDataService;
 
     /*
      * Json data converter to flat json data.
@@ -22,16 +25,15 @@ public class JsonFlatConvertController {
     @PostMapping
     public ResponseEntity<Response<Object>> getFlatJSON(@RequestBody Object dataForConversion) {
         Response<Object> response = new Response<>();
-        JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
         try {
-            Object jsonFlatData = jsonFlatTreatImpl.getFlatJSON(dataForConversion);
+            Object jsonFlatData = jsonDataService.getFlatJSON(dataForConversion);
             response.setData(jsonFlatData);
-            logInfo("POST /jsonFlat", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getStackTrace());
+            log.error(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
+        log.info("POST /jsonFlat");
         return ResponseEntity.ok(response);
     }
 
@@ -39,16 +41,15 @@ public class JsonFlatConvertController {
     public ResponseEntity<Response<List<String>>> getKeysCollectionFromJSON(@RequestBody Map<String, Object> dataForConversion) {
 
         Response<List<String>> response = new Response<>();
-        JsonFlatTreatImpl jsonFlatTreatImpl = new JsonFlatTreatImpl();
         try {
-            List<String> jsonFlatCollection = jsonFlatTreatImpl.getKeysCollectionFromJSON(dataForConversion);
+            List<String> jsonFlatCollection = jsonDataService.getCollectionKeysFromJSON(dataForConversion);
             response.setData(jsonFlatCollection);
-            logInfo("POST /arrayKeys", null);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
-            logError(e.getMessage(), e.getStackTrace());
+            log.error(e.getMessage(), e.getStackTrace());
             return ResponseEntity.badRequest().body(response);
         }
+        log.info("POST /arrayKeys");
         return ResponseEntity.ok(response);
     }
 

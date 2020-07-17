@@ -2,15 +2,14 @@ package br.imd.aqueducte.services;
 
 import br.imd.aqueducte.AqueducteApplicationTests;
 import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipSetupService;
-import br.imd.aqueducte.models.entitiesrelationship.enums.EntitiesRelationshipSetupStatus;
-import br.imd.aqueducte.models.entitiesrelationship.enums.RelationshipType;
-import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.entitiesrelationship.models.enums.EntitiesRelationshipSetupStatus;
+import br.imd.aqueducte.entitiesrelationship.models.enums.RelationshipType;
+import br.imd.aqueducte.entitiesrelationship.models.mongodocuments.EntitiesRelationshipSetup;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,13 +26,13 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
         super.setUp();
         setupsToRemove = new ArrayList<>();
     }
 
     @Test
-    public void findAllTest() {
+    public void findAllTest() throws Exception {
         EntitiesRelationshipSetup setup1 = new EntitiesRelationshipSetup();
         setup1.setIdUser("123456");
         setup1.setRelationshipType(RelationshipType.ONE_TO_ONE);
@@ -65,7 +64,7 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
     }
 
     @Test
-    public void findByIdTest() {
+    public void findByIdTest() throws Exception {
         EntitiesRelationshipSetup setup = new EntitiesRelationshipSetup();
         setup.setIdUser("123456");
         setup.setRelationshipType(RelationshipType.ONE_TO_ONE);
@@ -77,7 +76,7 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
     }
 
     @Test
-    public void findByStatusTest() {
+    public void findByStatusTest() throws Exception {
         EntitiesRelationshipSetup setup1 = new EntitiesRelationshipSetup();
         setup1.setIdUser("123456");
         setup1.setRelationshipType(RelationshipType.ONE_TO_ONE);
@@ -111,7 +110,7 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
     }
 
     @Test
-    public void saveTest() {
+    public void saveTest() throws Exception {
         EntitiesRelationshipSetup setup = new EntitiesRelationshipSetup();
         setup.setIdUser("123456");
         setup.setRelationshipType(RelationshipType.ONE_TO_ONE);
@@ -122,7 +121,7 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
     }
 
     @Test
-    public void updateTest() {
+    public void updateTest() throws Exception {
         EntitiesRelationshipSetup setup = new EntitiesRelationshipSetup();
         setup.setIdUser("123456");
         setup.setRelationshipType(RelationshipType.ONE_TO_ONE);
@@ -135,7 +134,7 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
     }
 
     @Test
-    public void deleteTest() {
+    public void deleteTest() throws Exception {
         EntitiesRelationshipSetup setup = new EntitiesRelationshipSetup();
         setup.setIdUser("123456");
         setup.setRelationshipType(RelationshipType.ONE_TO_ONE);
@@ -147,7 +146,7 @@ public class EntitiesRelationshipSetupServiceTest extends AqueducteApplicationTe
 
     @After
     @Override
-    public void close() {
+    public void close() throws Exception {
         super.close();
         for (String id : setupsToRemove) {
             service.delete(id);

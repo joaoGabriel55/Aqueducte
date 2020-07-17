@@ -1,24 +1,26 @@
-package br.imd.aqueducte.treats;
+package br.imd.aqueducte.services;
 
 import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public interface NGSILDTreat {
-    List<LinkedHashMap<String, Object>> convertToEntityNGSILD(
+@Component
+public interface NGSILDConverterService {
+    List<LinkedHashMap<String, Object>> standardConverterNGSILD(
             String sgeolInstance,
             ImportNSILDDataWithoutContextConfig importConfig,
             String layerPath,
-            Map<Object, Object> contextLink);
+            Map<Object, Object> contextLink) throws Exception;
 
-    List<LinkedHashMap<String, Object>> matchingWithContextAndConvertToEntityNGSILD(
+    List<LinkedHashMap<String, Object>> contextConverterNGSILD(
             String sgeolInstance,
             List<String> context,
             List<MatchingConfig> matchingConfig,
             List<Map<String, Object>> contentForConvert,
             String layerPath
-    );
+    ) throws Exception;
 }

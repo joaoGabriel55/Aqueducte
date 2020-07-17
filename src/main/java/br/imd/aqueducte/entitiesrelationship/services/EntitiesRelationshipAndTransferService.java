@@ -1,6 +1,6 @@
 package br.imd.aqueducte.entitiesrelationship.services;
 
-import br.imd.aqueducte.models.entitiesrelationship.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.entitiesrelationship.models.mongodocuments.EntitiesRelationshipSetup;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.CompletableFuture;

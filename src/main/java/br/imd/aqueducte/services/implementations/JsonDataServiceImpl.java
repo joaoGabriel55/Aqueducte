@@ -1,7 +1,9 @@
-package br.imd.aqueducte.treats.impl;
+package br.imd.aqueducte.services.implementations;
 
-import br.imd.aqueducte.treats.JsonFlatTreat;
+import br.imd.aqueducte.services.JsonDataService;
+import lombok.extern.log4j.Log4j2;
 import org.codehaus.jettison.json.JSONException;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,13 +15,15 @@ import java.util.stream.Collectors;
 import static br.imd.aqueducte.utils.GeoJsonValidator.getGeoJson;
 
 @SuppressWarnings("ALL")
-public class JsonFlatTreatImpl implements JsonFlatTreat {
+@Service
+@Log4j2
+public class JsonDataServiceImpl implements JsonDataService {
 
     private String keyPath = "";
 
     @Override
-    public Object getFlatJSON(Object dataForConversion) {
-        if (dataForConversion instanceof Map) {
+    public Object getFlatJSON(Object dataForConversion) throws Exception {
+        if ((dataForConversion instanceof Map)) {
             Map<String, Object> result = new LinkedHashMap<>();
             Map<String, Object> dataMap = (Map<String, Object>) dataForConversion;
             for (Map.Entry<String, Object> entry : dataMap.entrySet()) {
@@ -28,6 +32,9 @@ public class JsonFlatTreatImpl implements JsonFlatTreat {
                 objectMap.put(entry.getKey(), entry.getValue());
                 result.putAll(convertToJsonFlat(jsonFlatAux, objectMap));
             }
+            if (result.size() == 0)
+                log.error("result is empty");
+            log.info("result successfuly");
             return result;
         } else if (dataForConversion instanceof List) {
             List<Object> result = (List<Object>) ((List) dataForConversion)
@@ -36,13 +43,16 @@ public class JsonFlatTreatImpl implements JsonFlatTreat {
                         Map<String, Object> jsonFlatAux = new LinkedHashMap<>();
                         return convertToJsonFlat(jsonFlatAux, elem);
                     }).collect(Collectors.toList());
+            if (result.size() == 0)
+                log.error("result is empty");
             return result;
         }
-        return null;
+        log.error("result error");
+        throw new Exception();
     }
 
     @Override
-    public List<String> getKeysCollectionFromJSON(Map<String, Object> dataForConversion) {
+    public List<String> getCollectionKeysFromJSON(Map<String, Object> dataForConversion) {
         return getKeysArray(dataForConversion);
     }
 

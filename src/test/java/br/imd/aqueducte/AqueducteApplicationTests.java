@@ -28,7 +28,7 @@ public abstract class AqueducteApplicationTests {
     WebApplicationContext webApplicationContext;
 
 
-    protected void setUp() throws IOException {
+    protected void setUp() throws Exception {
         mvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 
@@ -44,7 +44,7 @@ public abstract class AqueducteApplicationTests {
         return objectMapper.readValue(json, clazz);
     }
 
-    protected void close() {
+    protected void close() throws Exception {
     }
 
 }

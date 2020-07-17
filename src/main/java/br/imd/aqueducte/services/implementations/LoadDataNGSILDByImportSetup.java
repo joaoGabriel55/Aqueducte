@@ -3,11 +3,12 @@ package br.imd.aqueducte.services.implementations;
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetup;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithContext;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupWithoutContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupContext;
+import br.imd.aqueducte.models.mongodocuments.ImportationSetupStandard;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import lombok.extern.log4j.Log4j2;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -18,11 +19,10 @@ import java.io.IOException;
 import java.util.*;
 
 import static br.imd.aqueducte.config.PropertiesParams.URL_AQUECONNECT;
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
+@Log4j2
 public abstract class LoadDataNGSILDByImportSetup {
 
     protected Map<String, Object> loadDataWebservice(ImportationSetup importationSetup) {
@@ -30,9 +30,9 @@ public abstract class LoadDataNGSILDByImportSetup {
         Map<String, Object> responseWSResult = new HashMap<>();
         try {
             responseWSResult = requestsUtils.requestToAPI(mountRequestParams(importationSetup));
-            logInfo("Load Data from API", null);
+            log.info("Load Data from API");
         } catch (IOException e) {
-            logError(e.getMessage(), e.getStackTrace());
+            log.error(e.getMessage(), e.getStackTrace());
             e.printStackTrace();
             return null;
         }
@@ -62,7 +62,7 @@ public abstract class LoadDataNGSILDByImportSetup {
 
     protected List<Map<String, Object>> filterFieldsSelectedIntoArray(
             List<Object> dataCollection,
-            ImportationSetupWithoutContext importationSetup
+            ImportationSetupStandard importationSetup
     ) {
         List<Map<String, Object>> dataCollectionFiltered = new ArrayList<>();
         for (Object data : dataCollection) {
@@ -85,7 +85,7 @@ public abstract class LoadDataNGSILDByImportSetup {
 
     protected List<Map<String, Object>> filterFieldsSelectedIntoArray(
             List<Object> dataCollection,
-            ImportationSetupWithContext importationSetup
+            ImportationSetupContext importationSetup
     ) {
         List<Map<String, Object>> dataCollectionFiltered = new ArrayList<>();
         for (Object data : dataCollection) {
@@ -140,9 +140,11 @@ public abstract class LoadDataNGSILDByImportSetup {
                 );
                 return (Map<String, Integer>) responseMounted.get("fieldsMap");
             } else {
+                log.error("Error to get file fields");
                 return null;
             }
         } catch (IOException e) {
+            log.error(e.getMessage(), e.getStackTrace());
             e.printStackTrace();
         }
         return null;
@@ -175,6 +177,7 @@ public abstract class LoadDataNGSILDByImportSetup {
                 return (List<Map<String, Object>>) responseMounted.get("data");
             }
         } catch (IOException e) {
+            log.error(e.getMessage(), e.getStackTrace());
             e.printStackTrace();
             return null;
         }

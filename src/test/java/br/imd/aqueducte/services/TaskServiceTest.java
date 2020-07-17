@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 
-import java.io.IOException;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
@@ -22,12 +21,12 @@ public class TaskServiceTest extends AqueducteApplicationTests {
 
     @Override
     @Before
-    public void setUp() throws IOException {
+    public void setUp() throws Exception {
         super.setUp();
     }
 
     @Test
-    public void saveTest() {
+    public void saveTest() throws Exception {
         Task task = new Task("abc", "Task1", TaskType.IMPORT_DATA, TaskStatus.ERROR, "Sad Error", new Date(), new Date());
         Task createdTask = taskStatusService.createOrUpdate(task);
         assertEquals(task, createdTask);
@@ -35,7 +34,7 @@ public class TaskServiceTest extends AqueducteApplicationTests {
     }
 
     @Test
-    public void updateTest() {
+    public void updateTest() throws Exception {
         Task task = new Task("abc", "Task1", TaskType.IMPORT_DATA, TaskStatus.PROCESSING, "Sad Error", new Date(), new Date());
         Task createdTask = taskStatusService.createOrUpdate(task);
 
@@ -50,7 +49,7 @@ public class TaskServiceTest extends AqueducteApplicationTests {
 
 
     @Test
-    public void findByTypeTest() {
+    public void findByTypeTest() throws Exception {
 
         Task task1 = new Task("user1", "Task1", TaskType.IMPORT_DATA, TaskStatus.PROCESSING, "Sad Error", new Date(), new Date());
         Task task2 = new Task("user1", "Task1", TaskType.UPLOAD_FILE, TaskStatus.DONE, "Sad Error", new Date(), new Date());
@@ -71,7 +70,7 @@ public class TaskServiceTest extends AqueducteApplicationTests {
     }
 
     @Test
-    public void findByUserIdAndTypeTest() {
+    public void findByUserIdAndTypeTest() throws Exception {
 
         Task task1 = new Task("user1", "Task1", TaskType.IMPORT_DATA, TaskStatus.PROCESSING, "Sad Error", new Date(), new Date());
         Task task2 = new Task("user1", "Task1", TaskType.RELATIONSHIP_ENTITIES, TaskStatus.DONE, "Sad Error", new Date(), new Date());
@@ -111,7 +110,7 @@ public class TaskServiceTest extends AqueducteApplicationTests {
     }
 
     @Test
-    public void findByUserIdAndStatusTest() {
+    public void findByUserIdAndStatusTest() throws Exception {
 
         Task task1 = new Task("user1", "Task1", TaskType.IMPORT_DATA, TaskStatus.PROCESSING, "Sad Error", new Date(), new Date());
         Task task2 = new Task("user1", "Task1", TaskType.RELATIONSHIP_ENTITIES, TaskStatus.DONE, "Sad Error", new Date(), new Date());
@@ -151,7 +150,7 @@ public class TaskServiceTest extends AqueducteApplicationTests {
     }
 
     @Test
-    public void findByUserIdAndTypeAndStatusTest() {
+    public void findByUserIdAndTypeAndStatusTest() throws Exception {
         Task task1 = new Task("user1", "Task1", TaskType.IMPORT_DATA, TaskStatus.PROCESSING, "Sad Error", new Date(), new Date());
         Task task2 = new Task("user1", "Task1", TaskType.RELATIONSHIP_ENTITIES, TaskStatus.DONE, "Sad Error", new Date(), new Date());
         Task task3 = new Task("user2", "Task1", TaskType.IMPORT_DATA, TaskStatus.DONE, "Sad Error", new Date(), new Date());
@@ -182,7 +181,7 @@ public class TaskServiceTest extends AqueducteApplicationTests {
     }
 
     @Override
-    protected void close() {
+    protected void close() throws Exception {
         super.close();
     }
 }

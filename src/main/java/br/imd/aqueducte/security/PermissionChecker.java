@@ -1,5 +1,6 @@
 package br.imd.aqueducte.security;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -11,10 +12,9 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-import static br.imd.aqueducte.logger.LoggerMessage.logError;
-import static br.imd.aqueducte.logger.LoggerMessage.logInfo;
 import static br.imd.aqueducte.utils.RequestsUtils.getHttpClientInstance;
 
+@Log4j2
 public class PermissionChecker {
 
     /**
@@ -28,8 +28,8 @@ public class PermissionChecker {
             try {
                 HttpResponse response = getHttpClientInstance().execute(request);
                 // Get HttpResponse Status
-                logInfo("Logging ProtocolVersion: {}", response.getProtocolVersion());
-                logInfo("Logging Status Code: {}", response.getStatusLine().getStatusCode());
+                log.info("Logging ProtocolVersion: {}", response.getProtocolVersion());
+                log.info("Logging Status Code: {}", response.getStatusLine().getStatusCode());
 
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
@@ -42,19 +42,19 @@ public class PermissionChecker {
                     for (Object role : roles) {
                         JSONObject roleJson = new JSONObject(role.toString());
                         if (roleJson.getString("name").contains("gerente")) {
-                            logInfo("Authentication Status: {}", "SUCCESS");
+                            log.info("Authentication Status: {}", "SUCCESS");
                             return true;
                         }
                     }
-                    logInfo("Authentication Status: {}", "WRONG");
+                    log.info("Authentication Status: {}", "WRONG");
 
                 }
             } catch (ParseException e) {
                 e.printStackTrace();
-                logError("ParseException: {}", e.getMessage());
+                log.error("ParseException: {}", e.getMessage());
             } catch (IOException e) {
                 e.printStackTrace();
-                logError("IOException: {}", e.getMessage());
+                log.error("IOException: {}", e.getMessage());
             }
         }
         return false;
