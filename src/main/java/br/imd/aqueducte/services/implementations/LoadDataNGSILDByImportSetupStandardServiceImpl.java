@@ -1,7 +1,7 @@
 package br.imd.aqueducte.services.implementations;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
-import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDStandardDataConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupStandard;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
 import br.imd.aqueducte.services.NGSILDConverterService;
@@ -69,7 +69,7 @@ public class LoadDataNGSILDByImportSetupStandardServiceImpl
         );
 
         try {
-            ImportNSILDDataWithoutContextConfig importConfig = new ImportNSILDDataWithoutContextConfig();
+            ImportNSILDStandardDataConfig importConfig = new ImportNSILDStandardDataConfig();
             importConfig.setGeoLocationConfig(importationSetup.getFieldsGeolocationSelectedConfigs());
             importConfig.setDataContentForNGSILDConversion(dataForConvert);
 
@@ -109,7 +109,7 @@ public class LoadDataNGSILDByImportSetupStandardServiceImpl
                     sgeolInstance, userToken, importationSetup, fieldsFiltered
             );
 
-            ImportNSILDDataWithoutContextConfig importConfig = new ImportNSILDDataWithoutContextConfig();
+            ImportNSILDStandardDataConfig importConfig = new ImportNSILDStandardDataConfig();
             importConfig.setGeoLocationConfig(importationSetup.getFieldsGeolocationSelectedConfigs());
             importConfig.setDataContentForNGSILDConversion(fileConvertedIntoJSON);
 

@@ -1,8 +1,8 @@
 package br.imd.aqueducte.controllers;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
-import br.imd.aqueducte.models.dtos.ImportNSILDDataWithContextConfig;
-import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDContextDataConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDStandardDataConfig;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.services.NGSILDConverterService;
 import lombok.extern.log4j.Log4j2;
@@ -29,7 +29,7 @@ public class NGSILDConverterController {
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertToNGSILDWithoutContext(
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @PathVariable String layerPath,
-            @RequestBody ImportNSILDDataWithoutContextConfig importConfig) {
+            @RequestBody ImportNSILDStandardDataConfig importConfig) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
 
         List<GeoLocationConfig> geoLocationConfig = importConfig.getGeoLocationConfig();
@@ -60,7 +60,7 @@ public class NGSILDConverterController {
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertMatchingConfigIntoNGSILD(
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @PathVariable String layerPath,
-            @RequestBody ImportNSILDDataWithContextConfig importContextConfig) {
+            @RequestBody ImportNSILDContextDataConfig importContextConfig) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
 
         try {

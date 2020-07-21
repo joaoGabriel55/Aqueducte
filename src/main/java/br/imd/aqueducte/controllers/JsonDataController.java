@@ -38,7 +38,7 @@ public class JsonDataController {
     }
 
     @PostMapping(value = "/arrayKeys")
-    public ResponseEntity<Response<List<String>>> getKeysCollectionFromJSON(@RequestBody Map<String, Object> dataForConversion) {
+    public ResponseEntity<Response<List<String>>> retrieveKeysCollectionFromJSON(@RequestBody Map<String, Object> dataForConversion) {
 
         Response<List<String>> response = new Response<>();
         try {
