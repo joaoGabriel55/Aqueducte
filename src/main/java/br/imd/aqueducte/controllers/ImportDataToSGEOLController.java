@@ -1,8 +1,8 @@
 package br.imd.aqueducte.controllers;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
-import br.imd.aqueducte.models.dtos.ImportNSILDDataWithContextConfig;
-import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDContextDataConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDStandardDataConfig;
 import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupContext;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetupStandard;
@@ -198,7 +198,7 @@ public class ImportDataToSGEOLController {
             @RequestHeader(USER_TOKEN) String userToken,
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @PathVariable String layerPath,
-            @RequestBody ImportNSILDDataWithoutContextConfig importConfig
+            @RequestBody ImportNSILDStandardDataConfig importConfig
     ) {
         Response<List<String>> response = new Response<>();
 
@@ -248,7 +248,7 @@ public class ImportDataToSGEOLController {
             @RequestHeader(USER_TOKEN) String userToken,
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @PathVariable String layerPath,
-            @RequestBody ImportNSILDDataWithContextConfig importConfig
+            @RequestBody ImportNSILDContextDataConfig importConfig
     ) {
         Response<List<String>> response = new Response<>();
         try {

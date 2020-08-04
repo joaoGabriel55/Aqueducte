@@ -11,6 +11,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,9 @@ public class TaskStatusServiceImpl implements TaskStatusService {
 
     @Autowired
     private SimpMessagingTemplate messageTemplate;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
     public Task sendTaskStatusProgress(String taskId, TaskStatus status, String description, String topicName) throws Exception {
@@ -68,7 +73,7 @@ public class TaskStatusServiceImpl implements TaskStatusService {
     public Page<Task> findByType(String type, int page, int count) throws Exception {
         try {
             checkTaskType(type);
-            PageRequest pageable = new PageRequest(page, count);
+            PageRequest pageable = PageRequest.of(page, count, Sort.by(Sort.Direction.DESC, "dateCreated"));
             log.info("findByType Task - type: {} page: {} count: {}", type, page, count);
             return this.taskRepository.findByType(type, pageable);
         } catch (Exception e) {
@@ -80,9 +85,10 @@ public class TaskStatusServiceImpl implements TaskStatusService {
     @Override
     public Page<Task> findByUserId(String userId, int page, int count) throws Exception {
         try {
-            PageRequest pageable = new PageRequest(page, count);
             log.info("findByType Task - userId: {} page: {} count: {}", userId, page, count);
-            return this.taskRepository.findByUserId(userId, pageable);
+            PageRequest pageable = PageRequest.of(page, count, Sort.by(Sort.Direction.DESC, "dateCreated"));
+            Page<Task> tasksPageable = this.taskRepository.findByUserId(userId, pageable);
+            return tasksPageable;
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
             throw new Exception();
@@ -93,7 +99,7 @@ public class TaskStatusServiceImpl implements TaskStatusService {
     public Page<Task> findByUserIdAndType(String userId, String type, int page, int count) throws Exception {
         try {
             checkTaskType(type);
-            PageRequest pageable = new PageRequest(page, count);
+            PageRequest pageable = PageRequest.of(page, count, Sort.by(Sort.Direction.DESC, "dateCreated"));
             log.info("findByType Task - userId: {} type: {} page: {} count: {}", userId, type, page, count);
             return this.taskRepository.findByUserIdAndType(userId, type.toUpperCase(), pageable);
         } catch (Exception e) {
@@ -106,7 +112,7 @@ public class TaskStatusServiceImpl implements TaskStatusService {
     public Page<Task> findByUserIdAndStatus(String userId, String status, int page, int count) throws Exception {
         try {
             checkTaskStatus(status);
-            PageRequest pageable = new PageRequest(page, count);
+            PageRequest pageable = PageRequest.of(page, count, Sort.by(Sort.Direction.DESC, "dateCreated"));
             log.info("findByType Task - userId: {} status: {} page: {} count: {}", userId, status, page, count);
             return this.taskRepository.findByUserIdAndStatus(userId, status.toUpperCase(), pageable);
         } catch (Exception e) {
@@ -120,7 +126,7 @@ public class TaskStatusServiceImpl implements TaskStatusService {
         try {
             checkTaskType(type);
             checkTaskStatus(status);
-            PageRequest pageable = new PageRequest(page, count);
+            PageRequest pageable = PageRequest.of(page, count, Sort.by(Sort.Direction.DESC, "dateCreated"));
             log.info("findByType Task - userId: {} type: {} status: {} page: {} count: {}", userId, type, status, page, count);
             return this.taskRepository.findByUserIdAndTypeAndStatus(userId, type.toUpperCase(), status.toUpperCase(), pageable);
         } catch (Exception e) {

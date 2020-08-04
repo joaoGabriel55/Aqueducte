@@ -10,9 +10,10 @@ import java.util.Map;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ImportNSILDDataWithoutContextConfig {
-
+public class ImportNSILDContextDataConfig {
     private String primaryField;
-    private List<GeoLocationConfig> geoLocationConfig;
+    private List<String> contextLinks;
+    private List<MatchingConfig> matchingConfigContent;
     private List<Map<String, Object>> dataContentForNGSILDConversion;
+
 }

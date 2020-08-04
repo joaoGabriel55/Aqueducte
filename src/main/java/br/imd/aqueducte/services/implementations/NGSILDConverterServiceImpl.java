@@ -1,7 +1,7 @@
 package br.imd.aqueducte.services.implementations;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
-import br.imd.aqueducte.models.dtos.ImportNSILDDataWithoutContextConfig;
+import br.imd.aqueducte.models.dtos.ImportNSILDStandardDataConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.services.NGSILDConverterService;
 import br.imd.aqueducte.utils.NGSILDUtils;
@@ -27,7 +27,7 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
     @Override
     public List<LinkedHashMap<String, Object>> standardConverterNGSILD(
             String sgeolInstance,
-            ImportNSILDDataWithoutContextConfig importConfig,
+            ImportNSILDStandardDataConfig importConfig,
             String layerPath,
             Map<Object, Object> contextLink) throws Exception {
 
