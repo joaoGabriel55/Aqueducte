@@ -51,6 +51,7 @@ public class RequestResponseLoggingFilter implements Filter {
         byte[] responseToSend = restResponseBytes(errorResponse);
         ((HttpServletResponse) response).setHeader("Content-Type", "application/json");
         ((HttpServletResponse) response).setStatus(401);
+        log.error(message);
         response.getOutputStream().write(responseToSend);
     }
 
