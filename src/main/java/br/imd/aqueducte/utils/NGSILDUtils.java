@@ -167,9 +167,9 @@ public class NGSILDUtils {
                 try {
                     geojson = getGeoJson(property.getValue());
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                    continue;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    continue;
                 }
                 if (geojson != null) {
                     Map<String, Object> geoJsonMap = new HashMap<>();
