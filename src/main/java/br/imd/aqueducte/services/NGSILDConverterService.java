@@ -2,6 +2,7 @@ package br.imd.aqueducte.services;
 
 import br.imd.aqueducte.models.dtos.ImportNSILDStandardDataConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
+import br.imd.aqueducte.models.dtos.MatchingConverterSetup;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -20,6 +21,14 @@ public interface NGSILDConverterService {
             String sgeolInstance,
             List<String> context,
             List<MatchingConfig> matchingConfig,
+            List<Map<String, Object>> contentForConvert,
+            String layerPath
+    ) throws Exception;
+
+    List<LinkedHashMap<String, Object>> converterNGSILD(
+            String instanceUri,
+            List<String> contextLinks,
+            LinkedHashMap<String, MatchingConverterSetup> matchingConfig,
             List<Map<String, Object>> contentForConvert,
             String layerPath
     ) throws Exception;

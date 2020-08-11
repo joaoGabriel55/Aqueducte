@@ -1,6 +1,7 @@
 package br.imd.aqueducte.utils;
 
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
+import lombok.extern.log4j.Log4j2;
 import org.codehaus.jettison.json.JSONException;
 
 import java.io.IOException;
@@ -10,7 +11,21 @@ import java.util.stream.Collectors;
 import static br.imd.aqueducte.utils.GeoJsonValidator.getGeoJson;
 
 @SuppressWarnings("ALL")
-public class NGSILDUtils {
+@Log4j2
+public class NGSILDConverterUtils {
+
+    public static final String LOCATION_FIELD = "location";
+
+    public static final List<String> GEO_PROPERTY_TYPE = Arrays.asList("location", "observationSpace", "operationSpace");
+
+    private static NGSILDConverterUtils instance;
+
+    public static NGSILDConverterUtils getInstance() {
+        if (instance == null) {
+            return instance = new NGSILDConverterUtils();
+        }
+        return instance;
+    }
 
     public String treatIdOrType(String key) {
         if (key.equals("type") || key.equals("id")) {
@@ -131,11 +146,10 @@ public class NGSILDUtils {
                 coordinatesDoubleType.add(coordinate);
         }
 
-        // invertCoords
-        String typeOfSelection = (String) configGeoLocation.getTypeGeolocation();
+        String typeGeolocation = (String) configGeoLocation.getTypeGeolocation();
         Boolean invertCoords = (Boolean) configGeoLocation.isInvertCoords();
 
-        if (typeOfSelection.equals("Point") && (invertCoords != null && invertCoords))
+        if (typeGeolocation.equals("Point") && (invertCoords != null && invertCoords))
             Collections.reverse(coordinatesDoubleType);
 
         coordinatesFinal.add(coordinatesDoubleType);
@@ -148,10 +162,9 @@ public class NGSILDUtils {
         return null;
     }
 
-    public boolean propertyIsLocation(Map.Entry<String, Object> property, Boolean isLocation) {
-        if (property != null) {
-            return property.getValue() != null && property.getValue() != "" && (isLocation != null && isLocation);
-        }
+    public boolean propertyIsLocation(Object value, Boolean isLocation) {
+        if (value != null)
+            return value != "" && (isLocation != null && isLocation);
         return false;
     }
 
@@ -200,6 +213,69 @@ public class NGSILDUtils {
                         property.setValue(null);
                     }
                 }
+            }
+        }
+        return properties;
+    }
+
+    public void validNGSILDGeoPropertyType(String finalProperty, String key) throws Exception {
+        if (!GEO_PROPERTY_TYPE.contains(finalProperty) || !GEO_PROPERTY_TYPE.contains(key)) {
+            String msg = "GeoProperty type must be: [\"location\", \"observationSpace\", \"operationSpace\"].";
+            log.error(msg);
+            throw new Exception(msg);
+        }
+    }
+
+    private void validTwoFieldsSelection(LinkedHashMap<String, GeoLocationConfig> configElem) throws Exception {
+        boolean isTwoFields = configElem.values().stream()
+                .filter(elem -> elem.getTypeOfSelection().equals("twofields"))
+                .collect(Collectors.toList())
+                .size() == 2;
+        if (!isTwoFields) {
+            String msg = "typeOfSelection must contain 2 setups for type twofields";
+            log.error(msg);
+            throw new Exception(msg);
+        }
+    }
+
+    public LinkedHashMap<String, Object> geoJsonConverterFormat(
+            LinkedHashMap<String, GeoLocationConfig> configElem,
+            Map<String, Object> property,
+            String propertyName,
+            LinkedHashMap<String, Object> properties,
+            String finalProperty
+    ) throws Exception {
+        HashMap<String, Object> valueGeoLocation = new HashMap<>();
+        GeoLocationConfig configGeoElem = configElem.get(propertyName);
+        Map<String, Object> geojson = null;
+        if (configGeoElem != null && !configGeoElem.getTypeOfSelection().equals("twofields") && configElem.size() != 2) {
+            try {
+                geojson = getGeoJson(property.get(propertyName));
+            } catch (JSONException e) {
+                log.warn(e.getMessage());
+            } catch (IOException e) {
+                log.warn(e.getMessage());
+            }
+            if (geojson != null) {
+                Map<String, Object> geoJsonMap = new HashMap<>();
+                geoJsonMap.put("type", "GeoProperty");
+                geoJsonMap.put("value", geojson);
+                properties.put(finalProperty, geoJsonMap);
+            } else {
+                if (property.get(propertyName) != null) {
+                    convertToGeoJson(valueGeoLocation, property.get(propertyName), configGeoElem);
+                    properties.put(finalProperty, valueGeoLocation);
+                }
+            }
+        } else if (configElem != null && configElem.size() == 2) {
+            validTwoFieldsSelection(configElem);
+            List<Object> coordsList = configElem.keySet().stream()
+                    .filter(key -> property.get(key) != null)
+                    .map(key -> property.get(key))
+                    .collect(Collectors.toList());
+            if (coordsList != null && !coordsList.isEmpty()) {
+                convertToGeoJson(valueGeoLocation, coordsList, configElem.values().stream().findFirst().get());
+                properties.put(finalProperty, valueGeoLocation);
             }
         }
         return properties;

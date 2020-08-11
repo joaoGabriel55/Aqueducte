@@ -78,9 +78,6 @@ public abstract class ImportationSetup {
 
     private List<String> fieldsSelected;
 
-    /**
-     * This field is used for check if already some Entity at SGEOL DB
-     */
     private String primaryField;
 
     @JsonIgnore

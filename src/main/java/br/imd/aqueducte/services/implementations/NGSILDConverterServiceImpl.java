@@ -3,26 +3,22 @@ package br.imd.aqueducte.services.implementations;
 import br.imd.aqueducte.models.dtos.GeoLocationConfig;
 import br.imd.aqueducte.models.dtos.ImportNSILDStandardDataConfig;
 import br.imd.aqueducte.models.dtos.MatchingConfig;
+import br.imd.aqueducte.models.dtos.MatchingConverterSetup;
 import br.imd.aqueducte.services.NGSILDConverterService;
-import br.imd.aqueducte.utils.NGSILDUtils;
+import br.imd.aqueducte.utils.NGSILDConverterUtils;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.Map.Entry;
 
-import static br.imd.aqueducte.utils.NGSILDUtils.removeSpacesForeignProperty;
+import static br.imd.aqueducte.utils.NGSILDConverterUtils.LOCATION_FIELD;
+import static br.imd.aqueducte.utils.NGSILDConverterUtils.removeSpacesForeignProperty;
 
 @Service
 @Log4j2
 public class NGSILDConverterServiceImpl implements NGSILDConverterService {
-    private static final String LOCATION_FIELD = "location";
-
-    private final NGSILDUtils ngsildUtils;
-
-    public NGSILDConverterServiceImpl() {
-        this.ngsildUtils = new NGSILDUtils();
-    }
+    private final NGSILDConverterUtils ngsildConverterUtils = NGSILDConverterUtils.getInstance();
 
     @Override
     public List<LinkedHashMap<String, Object>> standardConverterNGSILD(
@@ -51,14 +47,14 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
             LinkedHashMap<String, Object> ldObj;
             ldObj = (LinkedHashMap<String, Object>) objectMap;
             UUID uuid = UUID.randomUUID();
-            this.ngsildUtils.initDefaultProperties(sgeolInstance, linkedHashMapNGSILD, null, layerPath, uuid.toString());
+            this.ngsildConverterUtils.initDefaultProperties(sgeolInstance, linkedHashMapNGSILD, null, layerPath, uuid.toString());
             LinkedHashMap<String, Object> typeAndValueMap = new LinkedHashMap<>();
             if (ldObj != null) {
                 List<Object> listTwoFields = new ArrayList<>();
                 for (Entry<String, Object> property : ldObj.entrySet()) {
                     HashMap<String, Object> objectValue = new HashMap<>();
                     if (geoLocationConfig != null && geoLocationConfig.size() > 0) {
-                        typeAndValueMap.putAll(this.ngsildUtils.propertyGeoJsonFormat(
+                        typeAndValueMap.putAll(this.ngsildConverterUtils.propertyGeoJsonFormat(
                                 geoLocationConfig,
                                 property,
                                 listTwoFields,
@@ -70,7 +66,7 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
                         objectValue.put("type", "Property");
                         objectValue.put("value", property.getValue());
                         if (property.getKey().equals("id") || property.getKey().equals("type")) {
-                            typeAndValueMap.put(this.ngsildUtils.treatIdOrType(property.getKey()), objectValue);
+                            typeAndValueMap.put(this.ngsildConverterUtils.treatIdOrType(property.getKey()), objectValue);
                         } else if (property.getKey().contains(".")) {
                             typeAndValueMap.put(property.getKey().replace(".", "_"), objectValue);
                         } else {
@@ -85,7 +81,7 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
         if (listContentConverted.size() == 0) {
             log.error("listContentConverted is empty");
         }
-        log.info("listContentConverted successfuly");
+        log.info("listContentConverted successfully");
         return listContentConverted;
     }
 
@@ -108,9 +104,8 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
         List<LinkedHashMap<String, Object>> listNGSILD = new ArrayList<>();
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
         for (Map<String, Object> element : contentForConvert) {
-            NGSILDUtils ngsildUtils = new NGSILDUtils();
             UUID uuid = UUID.randomUUID();
-            ngsildUtils.initDefaultProperties(sgeolInstance, properties, contextLinks, layerPath, uuid.toString());
+            this.ngsildConverterUtils.initDefaultProperties(sgeolInstance, properties, contextLinks, layerPath, uuid.toString());
             List<Object> listTwoFields = new ArrayList<>();
             for (Entry<String, Object> property : element.entrySet()) {
                 String key = removeSpacesForeignProperty(property.getKey());
@@ -119,19 +114,19 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
                     String contextName = matches.getContextName();
                     Boolean isLocation = matches.isLocation();
                     // getTempProperty()
-                    if (!this.ngsildUtils.propertyIsLocation(property, isLocation)) {
+                    if (!this.ngsildConverterUtils.propertyIsLocation(property, isLocation)) {
                         if (key.equalsIgnoreCase(foreignProperty) && matches.isTemporaryField()) {
-                            String foreignPropertyTreated = this.ngsildUtils.treatIdOrType(foreignProperty);
+                            String foreignPropertyTreated = this.ngsildConverterUtils.treatIdOrType(foreignProperty);
                             if (!properties.containsKey(foreignPropertyTreated))
                                 properties.put(foreignPropertyTreated, typeValue(property.getValue()));
                         } else if (key.equalsIgnoreCase(foreignProperty) && !isLocation) {
                             if (!properties.containsKey(contextName))
                                 properties.put(contextName, typeValue(property.getValue()));
                         }
-                    } else if (this.ngsildUtils.propertyIsLocation(property, isLocation)) {
+                    } else if (this.ngsildConverterUtils.propertyIsLocation(property, isLocation)) {
                         if (matches.isTemporaryField()) {
                             if (!properties.containsKey(LOCATION_FIELD)) {
-                                properties.putAll(this.ngsildUtils.propertyGeoJsonFormat(
+                                properties.putAll(this.ngsildConverterUtils.propertyGeoJsonFormat(
                                         matches.getGeoLocationConfig(),
                                         property,
                                         listTwoFields,
@@ -141,7 +136,7 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
                             }
                         } else {
                             if (!properties.containsKey(contextName)) {
-                                properties.putAll(this.ngsildUtils.propertyGeoJsonFormat(
+                                properties.putAll(this.ngsildConverterUtils.propertyGeoJsonFormat(
                                         matches.getGeoLocationConfig(),
                                         property,
                                         listTwoFields,
@@ -159,7 +154,60 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
         if (listNGSILD.size() == 0) {
             log.error("listNGSILD is empty");
         }
-        log.info("listNGSILD successfuly");
+        log.info("listNGSILD successfully");
+        return listNGSILD;
+    }
+
+    @Override
+    public List<LinkedHashMap<String, Object>> converterNGSILD(
+            String instanceUri,
+            List<String> contextLinks,
+            LinkedHashMap<String, MatchingConverterSetup> matchingConverterSetup,
+            List<Map<String, Object>> contentForConvert,
+            String layerPath
+    ) throws Exception {
+        if (contentForConvert == null) {
+            log.error("contentForConvert is null");
+            throw new Exception();
+        }
+        if (contentForConvert.size() == 0) {
+            log.error("contentForConvert is empty");
+            throw new Exception();
+        }
+
+        List<LinkedHashMap<String, Object>> listNGSILD = new ArrayList<>();
+        LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
+        for (Map<String, Object> element : contentForConvert) {
+            UUID uuid = UUID.randomUUID();
+            this.ngsildConverterUtils.initDefaultProperties(
+                    instanceUri, properties, contextLinks, layerPath, uuid.toString()
+            );
+            for (Entry<String, MatchingConverterSetup> setupEntry : matchingConverterSetup.entrySet()) {
+                String key = removeSpacesForeignProperty(setupEntry.getKey());
+                MatchingConverterSetup setup = setupEntry.getValue();
+                Boolean isLocation = setup.isLocation();
+                if (element.containsKey(key) && !isLocation) {
+                    if (!properties.containsKey(setup.getFinalProperty())) {
+                        properties.put(setup.getFinalProperty(), typeValue(element.get(key)));
+                    }
+                } else if (setup.getGeoLocationConfig() != null && setup.getGeoLocationConfig().size() != 0 && isLocation) {
+                    this.ngsildConverterUtils.validNGSILDGeoPropertyType(setup.getFinalProperty(), setupEntry.getKey());
+                    properties.putAll(this.ngsildConverterUtils.geoJsonConverterFormat(
+                            setup.getGeoLocationConfig(),
+                            element,
+                            setup.getForeignProperty(),
+                            properties,
+                            setup.getFinalProperty()
+                    ));
+                }
+            }
+            listNGSILD.add(properties);
+            properties = new LinkedHashMap<>();
+        }
+        if (listNGSILD.size() == 0)
+            log.warn("listNGSILD is empty");
+
+        log.info("listNGSILD successfully");
         return listNGSILD;
     }
 
