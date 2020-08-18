@@ -16,14 +16,14 @@ import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 @SuppressWarnings("ALL")
 @RestController
 @Log4j2
-@RequestMapping("/sync/ngsildConverter")
+@RequestMapping("/sync/ngsild-converter")
 @CrossOrigin(origins = "*")
 public class NGSILDConverterController {
 
     @Autowired
     private NGSILDConverterService ngsildConverterService;
 
-    @PostMapping(value = "/matchingsetup/{layerPath}")
+    @PostMapping(value = "/{layerPath}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertMatchingSetupIntoNGSILD(
             @RequestHeader(SGEOL_INSTANCE) String instanceUri,
             @PathVariable String layerPath,
@@ -32,7 +32,7 @@ public class NGSILDConverterController {
 
         try {
             long startTime = System.currentTimeMillis();
-            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.converterNGSILD(
+            List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.convertIntoNGSILD(
                     instanceUri,
                     converterSetup.getContextLinks(),
                     converterSetup.getMatchingConverterSetup(),

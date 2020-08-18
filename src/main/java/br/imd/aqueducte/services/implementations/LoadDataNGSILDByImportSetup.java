@@ -1,10 +1,6 @@
 package br.imd.aqueducte.services.implementations;
 
-import br.imd.aqueducte.models.dtos.GeoLocationConfig;
-import br.imd.aqueducte.models.dtos.MatchingConfig;
 import br.imd.aqueducte.models.mongodocuments.ImportationSetup;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupContext;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupStandard;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -16,7 +12,9 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static br.imd.aqueducte.config.PropertiesParams.URL_AQUECONNECT;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
@@ -58,66 +56,6 @@ public abstract class LoadDataNGSILDByImportSetup {
             }
         }
         return null;
-    }
-
-    protected List<Map<String, Object>> filterFieldsSelectedIntoArray(
-            List<Object> dataCollection,
-            ImportationSetupStandard importationSetup
-    ) {
-        List<Map<String, Object>> dataCollectionFiltered = new ArrayList<>();
-        for (Object data : dataCollection) {
-            LinkedHashMap<String, Object> dataFiltered = new LinkedHashMap<>();
-            Map<String, Object> dataMap = (Map<String, Object>) data;
-            for (String fieldSelected : importationSetup.getFieldsSelected()) {
-                if (dataMap.containsKey(fieldSelected)) {
-                    dataFiltered.put(fieldSelected, dataMap.get(fieldSelected));
-                }
-            }
-            for (GeoLocationConfig fieldGeoLocation : importationSetup.getFieldsGeolocationSelectedConfigs()) {
-                if (dataMap.containsKey(fieldGeoLocation.getKey())) {
-                    dataFiltered.put(fieldGeoLocation.getKey(), dataMap.get(fieldGeoLocation.getKey()));
-                }
-            }
-            dataCollectionFiltered.add(dataFiltered);
-        }
-        return dataCollectionFiltered;
-    }
-
-    protected List<Map<String, Object>> filterFieldsSelectedIntoArray(
-            List<Object> dataCollection,
-            ImportationSetupContext importationSetup
-    ) {
-        List<Map<String, Object>> dataCollectionFiltered = new ArrayList<>();
-        for (Object data : dataCollection) {
-            LinkedHashMap<String, Object> dataFiltered = new LinkedHashMap<>();
-            Map<String, Object> dataMap = (Map<String, Object>) data;
-            for (MatchingConfig matchingConfig : importationSetup.getMatchingConfigList()) {
-                if (matchingConfig.getForeignProperty() != null &&
-                        dataMap.containsKey(matchingConfig.getForeignProperty()) &&
-                        !matchingConfig.isLocation()) {
-                    dataFiltered.put(
-                            matchingConfig.getForeignProperty(),
-                            dataMap.get(matchingConfig.getForeignProperty())
-                    );
-                } else if (matchingConfig.isLocation()) {
-                    Map<String, Object> dataMapGeo = filterGeoLocationFieldsSelectedIntoArray(matchingConfig.getGeoLocationConfig(), dataMap);
-                    dataFiltered.putAll(dataMapGeo);
-                }
-            }
-            dataCollectionFiltered.add(dataFiltered);
-        }
-        return dataCollectionFiltered;
-    }
-
-    protected Map<String, Object> filterGeoLocationFieldsSelectedIntoArray(
-            List<GeoLocationConfig> geoLocationConfig, Map<String, Object> dataMap) {
-        Map<String, Object> dataFiltered = new HashMap<>();
-        for (GeoLocationConfig config : geoLocationConfig) {
-            if (dataMap.containsKey(config.getKey())) {
-                dataFiltered.put(config.getKey(), dataMap.get(config.getKey()));
-            }
-        }
-        return dataFiltered;
     }
 
     protected Map<String, Integer> getFileFields(String sgeolInstance, String userToken, ImportationSetup importationSetup) {

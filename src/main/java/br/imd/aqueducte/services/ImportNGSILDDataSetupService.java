@@ -11,9 +11,8 @@ public interface ImportNGSILDDataSetupService extends GenericService<ImportNGSIL
 
     ImportNGSILDDataSetup createOrUpdate(String userId, ImportNGSILDDataSetup setup) throws Exception;
 
-
-    Page<ImportNGSILDDataSetup> findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
-            String idUser, String importType, int page, int count
+    Page<ImportNGSILDDataSetup> findByIdUserAndImportTypeAndUseContextOrderByDateCreatedDesc(
+            String idUser, String importType, boolean useContext, int page, int count
     ) throws Exception;
 
     List<ImportNGSILDDataSetup> findByUserIdAndFilePath(String userId, String filePath) throws Exception;

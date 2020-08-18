@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +33,12 @@ public class ImportNGSILDDataSetupServiceImpl implements ImportNGSILDDataSetupSe
     @Override
     public ImportNGSILDDataSetup createOrUpdate(ImportNGSILDDataSetup setup) throws Exception {
         try {
+            if (setup.getId() == null)
+                setup.setDateCreated(new Date());
+            else
+                setup.setDateCreated(setup.getDateCreated());
+
+            setup.setDateModified(new Date());
             log.info("createOrUpdate ImportNGSILDDataSetup");
             return this.repository.save(setup);
         } catch (Exception e) {
@@ -57,16 +64,19 @@ public class ImportNGSILDDataSetupServiceImpl implements ImportNGSILDDataSetupSe
     }
 
     @Override
-    public Page<ImportNGSILDDataSetup> findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
+    public Page<ImportNGSILDDataSetup> findByIdUserAndImportTypeAndUseContextOrderByDateCreatedDesc(
             String idUser,
             String importType,
+            boolean useContext,
             int page,
             int count
     ) throws Exception {
         try {
             PageRequest pageable = new PageRequest(page, count);
             log.info("findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated ImportNGSILDDataSetup - page: {} count: {}", page, count);
-            return this.repository.findByIdUserAndImportTypeOrderByDateCreatedDesc(idUser, importType, pageable);
+            return this.repository.findByIdUserAndImportTypeAndUseContextOrderByDateCreatedDesc(
+                    idUser, importType, useContext, pageable
+            );
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
             throw new Exception();

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.FILE;
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.WEB_SERVICE;
+import static br.imd.aqueducte.utils.NGSILDConverterUtils.GEO_PROPERTY_TYPE;
 
 @Component
 @Log4j2
@@ -17,7 +18,11 @@ public class ImportNGSILDDataSetupValidator {
     private String errorMessage;
 
     public void validImportNGSILDDataSetup(ImportNGSILDDataSetup setup) throws Exception {
-        if (setup.getLabel() == null || setup.getLabel() == "") {
+        if (setup.getIdUser() == null || setup.getIdUser() == "") {
+            errorMessage = "ImportNGSILDDataSetup - user ID is required";
+            log.error(errorMessage);
+            throw new Exception(errorMessage);
+        } else if (setup.getLabel() == null || setup.getLabel() == "") {
             errorMessage = "ImportNGSILDDataSetup - label is required";
             log.error(errorMessage);
             throw new Exception(errorMessage);
@@ -25,7 +30,7 @@ public class ImportNGSILDDataSetupValidator {
             errorMessage = "ImportNGSILDDataSetup - import type is required";
             log.error(errorMessage);
             throw new Exception(errorMessage);
-        } else if (!setup.getImportType().equals(FILE) || !setup.getImportType().equals(WEB_SERVICE)) {
+        } else if (!setup.getImportType().equals(FILE) && !setup.getImportType().equals(WEB_SERVICE)) {
             errorMessage = "ImportNGSILDDataSetup - import type must be FILE or WEB_SERVICE";
             log.error(errorMessage);
             throw new Exception(errorMessage);
@@ -79,10 +84,6 @@ public class ImportNGSILDDataSetupValidator {
             errorMessage = "ImportNGSILDDataSetup - Fields Available is required";
             log.error(errorMessage);
             throw new Exception(errorMessage);
-        } else if (setup.getFieldsSelected() == null || setup.getFieldsSelected().size() == 0) {
-            errorMessage = "ImportNGSILDDataSetup - Fields Selected is required";
-            log.error(errorMessage);
-            throw new Exception(errorMessage);
         }
 
         if (setup.isUseContext() && (setup.getContextSources() == null || setup.getContextSources().size() == 0)) {
@@ -91,23 +92,35 @@ public class ImportNGSILDDataSetupValidator {
             throw new Exception(errorMessage);
         }
 
+        if (setup.getMatchingConverterSetup() == null) {
+            errorMessage = "ImportNGSILDDataSetup - MatchingConverterSetup is required";
+            log.error(errorMessage);
+            throw new Exception(errorMessage);
+        }
+
         for (Map.Entry<String, MatchingConverterSetup> entry : setup.getMatchingConverterSetup().entrySet()) {
             String key = entry.getKey();
             MatchingConverterSetup converterSetup = entry.getValue();
             if (converterSetup.getFinalProperty() == null) {
-                errorMessage = "ImportNGSILDDataSetup MatchingConverterSetup " + key + " - Final property is required";
+                errorMessage = "ImportNGSILDDataSetup - MatchingConverterSetup " + key + " - Final property is required";
                 log.error(errorMessage);
                 throw new Exception(errorMessage);
             } else if (converterSetup.getForeignProperty() == null) {
-                errorMessage = "ImportNGSILDDataSetup MatchingConverterSetup " + key + " - Foreign property is required";
+                errorMessage = "ImportNGSILDDataSetup - MatchingConverterSetup " + key + " - Foreign property is required";
                 log.error(errorMessage);
                 throw new Exception(errorMessage);
-            } else if (converterSetup.isLocation() &&
-                    (converterSetup.getGeoLocationConfig() == null && converterSetup.getGeoLocationConfig().size() == 0)
-            ) {
-                errorMessage = "ImportNGSILDDataSetup MatchingConverterSetup " + key + " - GeoLocation Config is required";
-                log.error(errorMessage);
-                throw new Exception(errorMessage);
+            } else if (converterSetup.isLocation()) {
+                if (converterSetup.getGeoLocationConfig() == null || converterSetup.getGeoLocationConfig().size() == 0) {
+                    errorMessage = "ImportNGSILDDataSetup - MatchingConverterSetup " + key + " - GeoLocation Config is required";
+                    log.error(errorMessage);
+                    throw new Exception(errorMessage);
+                }
+                if (!GEO_PROPERTY_TYPE.contains(key) || !GEO_PROPERTY_TYPE.contains(converterSetup.getFinalProperty())) {
+                    errorMessage = "ImportNGSILDDataSetup - MatchingConverterSetup " + key +
+                            " - GeoLocation Config must be: \"location\", \"observationSpace\", \"operationSpace\"";
+                    log.error(errorMessage);
+                    throw new Exception(errorMessage);
+                }
             }
         }
     }

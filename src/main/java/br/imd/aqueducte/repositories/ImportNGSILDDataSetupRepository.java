@@ -9,8 +9,8 @@ import java.util.List;
 
 public interface ImportNGSILDDataSetupRepository extends MongoRepository<ImportNGSILDDataSetup, String> {
 
-    Page<ImportNGSILDDataSetup> findByIdUserAndImportTypeOrderByDateCreatedDesc(
-            String idUser, String importType, Pageable pages
+    Page<ImportNGSILDDataSetup> findByIdUserAndImportTypeAndUseContextOrderByDateCreatedDesc(
+            String idUser, String importType, boolean useContext, Pageable pages
     );
 
     List<ImportNGSILDDataSetup> findByIdUserAndFilePath(String userId, String filePath);
