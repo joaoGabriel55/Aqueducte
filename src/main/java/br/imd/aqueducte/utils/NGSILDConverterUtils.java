@@ -36,7 +36,7 @@ public class NGSILDConverterUtils {
 
     public static String removeSpacesForeignProperty(String value) {
         if (value != null)
-            return value.toLowerCase().replaceAll(" ", "_").trim();
+            return value.replaceAll(" ", "_").trim();
         return null;
     }
 

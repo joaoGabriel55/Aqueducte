@@ -92,7 +92,7 @@ public class ImportNGSILDDataSetupValidator {
             throw new Exception(errorMessage);
         }
 
-        if (setup.getMatchingConverterSetup() == null) {
+        if (setup.getMatchingConverterSetup() == null || setup.getMatchingConverterSetup().size() == 0) {
             errorMessage = "ImportNGSILDDataSetup - MatchingConverterSetup is required";
             log.error(errorMessage);
             throw new Exception(errorMessage);

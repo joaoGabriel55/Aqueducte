@@ -112,7 +112,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
         }
         try {
             if (importNGSILDDataSetup.getId() == null) {
-                ImportNGSILDDataSetup result = service.createOrUpdate(importNGSILDDataSetup);
+                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, importNGSILDDataSetup);
                 response.setData(result);
             } else {
                 response.getErrors().add("Object inconsistent");
@@ -152,7 +152,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
         try {
             Optional<ImportNGSILDDataSetup> importSetup = service.findById(id);
             if (importSetup.isPresent()) {
-                ImportNGSILDDataSetup result = service.createOrUpdate(importSetup.get());
+                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, importNGSILDDataSetup);
                 response.setData(result);
             }
         } catch (DuplicateKeyException e) {

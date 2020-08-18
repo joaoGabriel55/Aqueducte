@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.FILE;
 import static br.imd.aqueducte.models.mongodocuments.ImportationSetup.WEB_SERVICE;
+import static br.imd.aqueducte.utils.NGSILDConverterUtils.GEO_PROPERTY_TYPE;
 
 @Service
 @Log4j2
@@ -80,7 +81,7 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
     @Override
     public List<LinkedHashMap<String, Object>> loadDataFile(ImportNGSILDDataSetup importationSetup, String sgeolInstance, String userToken) throws Exception {
         try {
-            Map<String, Integer> fieldsFiltered = getFieldsForImportSetupContextWithFile(
+            Map<String, Integer> fieldsFiltered = getFieldsForImportSetupFromFile(
                     getFileFields(sgeolInstance, userToken, importationSetup), importationSetup.getMatchingConverterSetup()
             );
 
@@ -112,7 +113,7 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
         }
     }
 
-    private Map<String, Integer> getFieldsForImportSetupContextWithFile(
+    private Map<String, Integer> getFieldsForImportSetupFromFile(
             Map<String, Integer> fileFields,
             LinkedHashMap<String, MatchingConverterSetup> matchingConverterSetup
     ) throws Exception {
@@ -121,14 +122,16 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
             throw new Exception();
         }
 
-        List<String> foreignPropertiesSelected = matchingConverterSetup.entrySet()
-                .stream().map(elem -> elem.getValue().getForeignProperty())
-                .collect(Collectors.toList());
+        List<String> foreignPropertiesSelected = matchingConverterSetup.keySet().stream().collect(Collectors.toList());
 
         Map<String, Integer> filteredFieldsMap = new HashMap<>();
         for (String key : foreignPropertiesSelected) {
-            if (foreignPropertiesSelected.contains(key)) {
+            if (fileFields.containsKey(key)) {
                 filteredFieldsMap.put(key, fileFields.get(key));
+            } else if (GEO_PROPERTY_TYPE.contains(key)) {
+                matchingConverterSetup.get(key).getGeoLocationConfig().keySet().forEach(k -> {
+                    filteredFieldsMap.put(k, fileFields.get(k));
+                });
             }
         }
         log.info("getFieldsForImportSetupContextWithFile successfully");
