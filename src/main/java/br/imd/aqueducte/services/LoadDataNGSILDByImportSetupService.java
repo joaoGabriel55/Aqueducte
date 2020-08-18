@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 @Component
-public interface LoadDataNGSILDByImportationSetupService<T> {
+public interface LoadDataNGSILDByImportSetupService<T> {
 
     List<LinkedHashMap<String, Object>> loadData(T importationSetup, String sgeolInstance, String userToken) throws Exception;
 
