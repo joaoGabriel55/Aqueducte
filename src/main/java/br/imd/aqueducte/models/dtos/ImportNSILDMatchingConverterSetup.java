@@ -4,16 +4,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class ImportNSILDContextDataConfig {
+public class ImportNSILDMatchingConverterSetup {
     private String primaryField;
     private List<String> contextLinks;
-    private List<MatchingConfig> matchingConfigContent;
-    private List<Map<String, Object>> dataContentForNGSILDConversion;
-
+    private LinkedHashMap<String, MatchingConverterSetup> matchingConverterSetup;
+    private List<Map<String, Object>> dataCollection;
 }

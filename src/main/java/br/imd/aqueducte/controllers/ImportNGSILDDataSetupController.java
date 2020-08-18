@@ -1,11 +1,9 @@
-package br.imd.aqueducte.controllers.importationsetups;
+package br.imd.aqueducte.controllers;
 
-
-import br.imd.aqueducte.controllers.GenericController;
-import br.imd.aqueducte.models.mongodocuments.ImportationSetupContext;
+import br.imd.aqueducte.models.mongodocuments.ImportNGSILDDataSetup;
 import br.imd.aqueducte.models.response.Response;
-import br.imd.aqueducte.services.ImportationSetupContextService;
-import br.imd.aqueducte.services.LoadDataNGSILDByImportationSetupService;
+import br.imd.aqueducte.services.ImportNGSILDDataSetupService;
+import br.imd.aqueducte.services.LoadDataNGSILDByImportSetupService;
 import com.mongodb.DuplicateKeyException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -22,39 +19,39 @@ import java.util.Optional;
 import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
 import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
 
-@SuppressWarnings("ALL")
 @RestController
 @Log4j2
-@RequestMapping("/sync/withContextSetup")
+@RequestMapping("/sync/import-ngsild-data-setup")
 @CrossOrigin(origins = "*")
-public class ImportationSetupContextController extends GenericController {
+public class ImportNGSILDDataSetupController extends GenericController {
 
     @Autowired
-    private ImportationSetupContextService importationSetupContextService;
+    private ImportNGSILDDataSetupService service;
 
     @Autowired
-    private LoadDataNGSILDByImportationSetupService<ImportationSetupContext> loadDataNGSILDByImportationSetupService;
+    private LoadDataNGSILDByImportSetupService<ImportNGSILDDataSetup> loadDataNGSILDService;
 
     @GetMapping(value = "/{idUser}/{importType}/{page}/{count}")
-    public ResponseEntity<Response<Page<ImportationSetupContext>>> findAllImportationSetupWithoutContextByUserId(
+    public ResponseEntity<Response<Page<ImportNGSILDDataSetup>>> findAllImportSetupByUserId(
             @PathVariable("idUser") String idUser,
             @PathVariable("importType") String importType,
             @PathVariable("page") int page,
-            @PathVariable("count") int count
+            @PathVariable("count") int count,
+            @RequestParam("useContext") boolean useContext
     ) {
-        Response<Page<ImportationSetupContext>> response = new Response<>();
+        Response<Page<ImportNGSILDDataSetup>> response = new Response<>();
         try {
-            Page<ImportationSetupContext> importationSetupWithContextList = importationSetupContextService
-                    .findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated(
-                            idUser, importType.toUpperCase(), page, count
+            Page<ImportNGSILDDataSetup> importNGSILDDataSetups = service
+                    .findByIdUserAndImportTypeAndUseContextOrderByDateCreatedDesc(
+                            idUser, importType.toUpperCase(), useContext, page, count
                     );
-            if (!importationSetupWithContextList.hasContent()) {
+            if (!importNGSILDDataSetups.hasContent()) {
                 response.getErrors().add("Has not content");
                 return ResponseEntity.badRequest().body(response);
             }
 
-            response.setData(importationSetupWithContextList);
-            log.info("GET findAllImportationSetupWithoutContext");
+            response.setData(importNGSILDDataSetups);
+            log.info("GET findAllImportSetupByUserId");
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             response.getErrors().add("Error on get Importation Setup with Context list");
@@ -64,65 +61,59 @@ public class ImportationSetupContextController extends GenericController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Response<ImportationSetupContext>> getByIdImportationSetupWithContext(
-            @PathVariable String id) {
-
-        Response<ImportationSetupContext> response = new Response<>();
+    public ResponseEntity<Response<ImportNGSILDDataSetup>> getImportSetupById(@PathVariable String id) {
+        Response<ImportNGSILDDataSetup> response = new Response<>();
         try {
-            Optional<ImportationSetupContext> importationSetupWithContext = importationSetupContextService
-                    .findById(id);
-            importationSetupWithContext.ifPresent(response::setData);
+            Optional<ImportNGSILDDataSetup> importNGSILDDataSetup = service.findById(id);
+            importNGSILDDataSetup.ifPresent(response::setData);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
             log.error(e.getMessage(), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        log.info("GET Importation Setup With Context");
+        log.info("GET getImportSetupById - {}", id);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/user/{userId}")
-    public ResponseEntity<Response<List<ImportationSetupContext>>> findImportationSetupWithContextByFilePathAndUserId(
+    public ResponseEntity<Response<List<ImportNGSILDDataSetup>>> findImportSetupByFilePathAndUserId(
             @PathVariable("userId") String userId,
             @RequestParam("filePath") String filePath
     ) {
-        Response<List<ImportationSetupContext>> response = new Response<>();
+        Response<List<ImportNGSILDDataSetup>> response = new Response<>();
 
         if (filePath == null || filePath.equals("")) {
             response.getErrors().add("File path must be informed");
             log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
-
         try {
-            List<ImportationSetupContext> importationSetupContextList = importationSetupContextService.findByUserIdAndFilePath(userId, filePath);
-            response.setData(importationSetupContextList);
+            List<ImportNGSILDDataSetup> importNGSILDDataSetups = service.findByUserIdAndFilePath(userId, filePath);
+            response.setData(importNGSILDDataSetups);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
             log.error(e.getMessage(), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        log.info("GET findImportationSetupWithContextByFilePathAndUserId");
+        log.info("GET findImportSetupByFilePathAndUserId");
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<Response<ImportationSetupContext>> saveImportationSetupWithContext(
+    public ResponseEntity<Response<ImportNGSILDDataSetup>> saveImportSetup(
             HttpServletRequest request,
-            @RequestBody ImportationSetupContext importationSetupContext) {
-        Response<ImportationSetupContext> response = new Response<>();
+            @RequestBody ImportNGSILDDataSetup importNGSILDDataSetup
+    ) {
+        Response<ImportNGSILDDataSetup> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
             log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
-        importationSetupContext.setIdUser(idUser);
         try {
-            if (importationSetupContext.getId() == null) {
-                importationSetupContext.setDateCreated(new Date());
-                importationSetupContext.setDateModified(new Date());
-                importationSetupContextService.createOrUpdate(importationSetupContext);
-                response.setData(importationSetupContext);
+            if (importNGSILDDataSetup.getId() == null) {
+                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, importNGSILDDataSetup);
+                response.setData(result);
             } else {
                 response.getErrors().add("Object inconsistent");
                 log.error(response.getErrors().get(0));
@@ -137,35 +128,32 @@ public class ImportationSetupContextController extends GenericController {
             log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        log.info("POST saveImportationSetupWithContext");
+        log.info("POST saveImportSetup");
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping(value = "/{id}")
-    public ResponseEntity<Response<ImportationSetupContext>> updateImportationSetupWithContext(
+    @PatchMapping(value = "/{id}")
+    public ResponseEntity<Response<ImportNGSILDDataSetup>> updateImportSetup(
             HttpServletRequest request,
             @PathVariable String id,
-            @RequestBody ImportationSetupContext importationSetupWithoutContext
+            @RequestBody ImportNGSILDDataSetup importNGSILDDataSetup
     ) {
-        Response<ImportationSetupContext> response = new Response<>();
+        Response<ImportNGSILDDataSetup> response = new Response<>();
 
         if (checkUserIdIsEmpty(request)) {
             response.getErrors().add("Without user id");
             log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
-        } else if (!importationSetupWithoutContext.getId().equals(id)) {
+        } else if (!importNGSILDDataSetup.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
             log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
         }
-
         try {
-            Optional<ImportationSetupContext> importSetup = importationSetupContextService.findById(id);
+            Optional<ImportNGSILDDataSetup> importSetup = service.findById(id);
             if (importSetup.isPresent()) {
-                importationSetupWithoutContext.setDateCreated(importSetup.get().getDateCreated());
-                importationSetupWithoutContext.setDateModified(new Date());
-                importationSetupContextService.createOrUpdate(importationSetupWithoutContext);
-                response.setData(importationSetupWithoutContext);
+                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, importNGSILDDataSetup);
+                response.setData(result);
             }
         } catch (DuplicateKeyException e) {
             response.getErrors().add("Duplicate ID");
@@ -176,17 +164,15 @@ public class ImportationSetupContextController extends GenericController {
             log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        log.info("PUT updateImportationSetupWithContext");
+        log.info("PUT updateImportSetup");
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Response<String>> deleteImportationSetupWithContext(
-            @PathVariable(required = true) String id
-    ) {
+    public ResponseEntity<Response<String>> deleteImportSetupById(@PathVariable String id) {
         Response<String> response = new Response<>();
         try {
-            String idDeleted = importationSetupContextService.delete(id);
+            String idDeleted = service.delete(id);
             if (idDeleted != null) {
                 response.setData(idDeleted);
             }
@@ -195,24 +181,24 @@ public class ImportationSetupContextController extends GenericController {
             log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        log.info("DELETE deleteImportationSetupWithContext");
+        log.info("DELETE deleteImportSetupById");
         return ResponseEntity.ok(response);
     }
 
     @PostMapping(value = "/load-ngsild-data")
-    public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetupWithContext(
+    public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetup(
             @RequestHeader(USER_TOKEN) String userToken,
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
-            @RequestParam boolean samples,
-            @RequestBody ImportationSetupContext importationSetupContext
+            @RequestBody ImportNGSILDDataSetup importNGSILDDataSetup,
+            @RequestParam boolean samples
     ) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
         try {
-            List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDByImportationSetupService.loadData(
-                    importationSetupContext, sgeolInstance, userToken
+            List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDService.loadData(
+                    importNGSILDDataSetup, sgeolInstance, userToken
             );
             response.setData(samples ? getSamples(ngsildData) : ngsildData);
-            log.info("POST loadNGSILDDataFromImportSetupWithContext");
+            log.info("GET loadNGSILDDataFromImportSetup");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
@@ -222,17 +208,17 @@ public class ImportationSetupContextController extends GenericController {
     }
 
     @PostMapping(value = "/load-ngsild-data/count")
-    public ResponseEntity<Response<Integer>> loadCountNGSILDDataFromImportSetupWithoutContext(
+    public ResponseEntity<Response<Integer>> loadNGSILDDataCountFromImportSetup(
             @RequestHeader(USER_TOKEN) String userToken,
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
-            @RequestBody ImportationSetupContext importationSetupContext
+            @RequestBody ImportNGSILDDataSetup importNGSILDDataSetup
     ) {
         Response<Integer> response = new Response<>();
         try {
-            response.setData(this.loadDataNGSILDByImportationSetupService
-                    .loadData(importationSetupContext, sgeolInstance, userToken)
+            response.setData(this.loadDataNGSILDService
+                    .loadData(importNGSILDDataSetup, sgeolInstance, userToken)
                     .size());
-            log.info("POST loadCountNGSILDDataFromImportSetupWithoutContext");
+            log.info("GET loadNGSILDDataCountFromImportSetup");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
@@ -240,5 +226,4 @@ public class ImportationSetupContextController extends GenericController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-
 }
