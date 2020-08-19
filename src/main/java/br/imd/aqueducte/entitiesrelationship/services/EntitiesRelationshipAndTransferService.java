@@ -14,8 +14,8 @@ public interface EntitiesRelationshipAndTransferService {
 
     int relationshipOneToOne(EntitiesRelationshipSetup setup, String sgeolInstance, String appToken, String userToken);
 
-    CompletableFuture<Integer> transferLayerEntitiesAsync(String layer, String sgeolInstance, String appToken, String userToken) throws Exception;
-
-    int transferLayerEntities(String layer, String sgeolInstance, String appToken, String userToken) throws Exception;
+    CompletableFuture<Integer> transferLayerEntitiesAsync(
+            String layer, String tempProperty, String sgeolInstance, String appToken, String userToken
+    ) throws Exception;
 
 }

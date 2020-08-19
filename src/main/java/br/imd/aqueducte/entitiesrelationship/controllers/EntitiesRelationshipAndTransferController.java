@@ -1,9 +1,10 @@
 package br.imd.aqueducte.entitiesrelationship.controllers;
 
 import br.imd.aqueducte.entitiesrelationship.business.EntitiesRelationshipSetupValidate;
-import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipAndTransferService;
+import br.imd.aqueducte.entitiesrelationship.models.dtos.TransferPreprocessingLayerEntitiesSetup;
 import br.imd.aqueducte.entitiesrelationship.models.enums.EntitiesRelationshipSetupStatus;
 import br.imd.aqueducte.entitiesrelationship.models.mongodocuments.EntitiesRelationshipSetup;
+import br.imd.aqueducte.entitiesrelationship.services.EntitiesRelationshipAndTransferService;
 import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.services.TaskStatusService;
@@ -18,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static br.imd.aqueducte.entitiesrelationship.services.implementations.EntitiesRelationshipAndTransferServiceImpl.*;
 import static br.imd.aqueducte.entitiesrelationship.models.enums.RelationshipType.*;
+import static br.imd.aqueducte.entitiesrelationship.services.implementations.EntitiesRelationshipAndTransferServiceImpl.*;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @RestController
@@ -128,23 +129,32 @@ public class EntitiesRelationshipAndTransferController {
         return "Erro";
     }
 
-    @PostMapping(value = {"/transfer/{layer1}/{layer2}", "/transfer/{layer1}/{layer2}/{taskId}"})
+    @PostMapping(value = {"/transfer", "/transfer/{taskId}"})
     public ResponseEntity<Response<Map<String, String>>> transferDataWithRelationshipToOriginLayer(
             @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
             @RequestHeader(APP_TOKEN) String appToken,
             @RequestHeader(USER_TOKEN) String userToken,
-            @PathVariable String layer1,
-            @PathVariable String layer2,
-            @PathVariable String taskId
+            @PathVariable String taskId,
+            @RequestBody TransferPreprocessingLayerEntitiesSetup transferSetup
     ) {
         Response<Map<String, String>> response = new Response<>();
         try {
+
+            String layer1 = transferSetup.getPreProcessingLayer1();
+            String layer2 = transferSetup.getPreProcessingLayer2();
+
+            String tempProperty1 = transferSetup.getTempPropertyLayer1();
+            String tempProperty2 = transferSetup.getTempPropertyLayer2();
+
             CompletableFuture<Integer> data1 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(
-                    layer1, sgeolInstance, appToken, userToken
+                    layer1, tempProperty1,
+                    sgeolInstance, appToken, userToken
             );
             CompletableFuture<Integer> data2 = entitiesRelationshipAndTransferService.transferLayerEntitiesAsync(
-                    layer2, sgeolInstance, appToken, userToken
+                    layer2, tempProperty2,
+                    sgeolInstance, appToken, userToken
             );
+
             CompletableFuture.allOf(data1, data2).join();
 
             Map<String, String> layersTransferResponse = new LinkedHashMap<>();
