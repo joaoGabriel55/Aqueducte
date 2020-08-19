@@ -7,7 +7,6 @@ import br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.
 import br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.RelationshipOperationsService;
 import br.imd.aqueducte.services.ImportNGSILDDataService;
 import lombok.extern.log4j.Log4j2;
-import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -280,31 +279,18 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
     ) throws Exception {
         for (String idFromLayerEntity2 : response) {
             boolean status = relationshipOperationsService.relationshipEntities(
-                    sgeolInstance,
-                    appToken, userToken,
-                    layer1,
-                    layer2,
-                    idFromLayerEntity1,
-                    idFromLayerEntity2,
-                    setup.getRelationships()
+                    sgeolInstance, appToken, userToken, layer1, layer2,
+                    idFromLayerEntity1, idFromLayerEntity2, setup.getRelationships()
             );
             if (status)
                 statusOperation = STATUS_RELATIONSHIP_OK;
 
-            if (statusOperation == STATUS_RELATIONSHIP_OK) {
-                deleteTempProperties(
-                        sgeolInstance,
-                        appToken,
-                        userToken,
-                        setup.getPropertiesLinked(),
-                        layer1,
-                        layer2,
-                        idFromLayerEntity1,
-                        idFromLayerEntity2,
-                        property1,
-                        property2
-                );
-            }
+//            if (statusOperation == STATUS_RELATIONSHIP_OK) {
+//                deleteTempProperties(
+//                        sgeolInstance, appToken, userToken, setup.getPropertiesLinked(), layer1, layer2,
+//                        idFromLayerEntity1, idFromLayerEntity2, property1, property2
+//                );
+//            }
         }
         return statusOperation;
     }
@@ -353,48 +339,61 @@ public class EntitiesRelationshipAndTransferServiceImpl implements EntitiesRelat
 
     @Override
     @Async
-    public CompletableFuture<Integer> transferLayerEntitiesAsync(String layer, String sgeolInstance, String appToken, String userToken) throws Exception {
+    public CompletableFuture<Integer> transferLayerEntitiesAsync(
+            String layer, String tempProperty, String sgeolInstance, String appToken, String userToken
+    ) throws Exception {
         log.info("getLayerEntitiesAsync - {}", layer);
-        final int status = transferLayerEntities(layer, sgeolInstance, appToken, userToken);
+        final int status = transferLayerEntities(layer, tempProperty, sgeolInstance, appToken, userToken);
         return CompletableFuture.completedFuture(status);
     }
 
-    @Override
-    public int transferLayerEntities(String layer, String sgeolInstance, String appToken, String userToken) throws Exception {
-        if (layer.contains("_preprocessing")) {
-            boolean statusLayerEntitiesTransfered = false;
-            boolean statusLayerDeleted = false;
-            int status = 0;
-            try {
-                int offset = 0;
-                String layerDestiny = layer.replace("_preprocessing", "");
-                List<Map<String, Object>> entities = new ArrayList<>();
-                while (offset == 0 || entities.size() != 0) {
-                    entities = getEntities(sgeolInstance, appToken, userToken, layer, offset);
-                    if (offset == 0 && (entities == null || entities.size() == 0)) {
-                        return STATUS_TRANSFER_NOTHING_TODO;
+    private int transferLayerEntities(String layer, String tempProperty, String sgeolInstance, String appToken, String userToken) throws Exception {
+        if (!layer.contains("_preprocessing"))
+            return STATUS_TRANSFER_NOTHING_TODO;
+
+        boolean statusLayerEntitiesTransfered = false;
+        boolean statusLayerDeleted = false;
+        int status = 0;
+        try {
+            int offset = 0;
+            String layerDestiny = layer.replace("_preprocessing", "");
+            List<Map<String, Object>> entities = new ArrayList<>();
+
+            while (offset == 0 || entities.size() != 0) {
+                int entitiesSize = entities.size();
+                entities = getEntities(sgeolInstance, appToken, userToken, layer, offset * entitiesSize);
+                if (offset == 0 && (entities == null || entities.size() == 0))
+                    return STATUS_TRANSFER_NOTHING_TODO;
+
+                if (tempProperty != null) {
+                    for (Map<String, Object> entity : entities) {
+                        String entityId = entity.get("id").toString();
+                        entityOperationsService.deleteEntityTempProperty(
+                                sgeolInstance, appToken, userToken, layer, entityId, tempProperty
+                        );
                     }
-                    JSONArray entitiesJsonArray = new JSONArray(entities);
-                    statusLayerEntitiesTransfered = entityOperationsService.transferPreprocessingLayerEntitiesToFinalLayer(
-                            sgeolInstance,
-                            appToken, userToken,
-                            layer, layerDestiny
-                    );
-                    offset++;
                 }
-                statusLayerDeleted = entityOperationsService.deleteDataFromPreprocessingLayer(
-                        sgeolInstance, appToken, userToken, layer
-                );
-                if (statusLayerDeleted && statusLayerEntitiesTransfered)
-                    return STATUS_TRANSFER_OK;
-                else
-                    return STATUS_TRANSFER_ERROR;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return STATUS_TRANSFER_ERROR;
+                offset++;
             }
+
+            statusLayerEntitiesTransfered = entityOperationsService.transferPreprocessingLayerEntitiesToFinalLayer(
+                    sgeolInstance,
+                    appToken, userToken,
+                    layer, layerDestiny
+            );
+
+            statusLayerDeleted = entityOperationsService.deleteDataFromPreprocessingLayer(
+                    sgeolInstance, appToken, userToken, layer
+            );
+
+            if (statusLayerDeleted && statusLayerEntitiesTransfered)
+                return STATUS_TRANSFER_OK;
+            else
+                return STATUS_TRANSFER_ERROR;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return STATUS_TRANSFER_ERROR;
         }
-        return STATUS_TRANSFER_NOTHING_TODO;
     }
 
     private Map<String, Object> getEntityById(String sgeolInstance, String appToken, String userToken, String layer, String id) {

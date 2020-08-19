@@ -31,20 +31,19 @@ public class ImportNGSILDDataSetupController extends GenericController {
     @Autowired
     private LoadDataNGSILDByImportSetupService<ImportNGSILDDataSetup> loadDataNGSILDService;
 
-    @GetMapping(value = "/{idUser}/{importType}/{page}/{count}")
+    @GetMapping(value = "/{idUser}/{page}/{count}")
     public ResponseEntity<Response<Page<ImportNGSILDDataSetup>>> findAllImportSetupByUserId(
             @PathVariable("idUser") String idUser,
-            @PathVariable("importType") String importType,
             @PathVariable("page") int page,
             @PathVariable("count") int count,
-            @RequestParam("useContext") boolean useContext
+            @RequestParam(value = "importType", required = false) String importType,
+            @RequestParam(value = "useContext", required = false) Boolean useContext
     ) {
         Response<Page<ImportNGSILDDataSetup>> response = new Response<>();
         try {
-            Page<ImportNGSILDDataSetup> importNGSILDDataSetups = service
-                    .findByIdUserAndImportTypeAndUseContextOrderByDateCreatedDesc(
-                            idUser, importType.toUpperCase(), useContext, page, count
-                    );
+            Page<ImportNGSILDDataSetup> importNGSILDDataSetups = service.findImportSetupWithFilters(
+                    idUser, importType, useContext, page, count
+            );
             if (!importNGSILDDataSetups.hasContent()) {
                 response.getErrors().add("Has not content");
                 return ResponseEntity.badRequest().body(response);
@@ -54,7 +53,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
             log.info("GET findAllImportSetupByUserId");
             return ResponseEntity.ok().body(response);
         } catch (Exception e) {
-            response.getErrors().add("Error on get Importation Setup with Context list");
+            response.getErrors().add("Error into findAllImportSetupByUserId");
             log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
