@@ -13,5 +13,7 @@ public interface ImportNGSILDDataSetupRepository extends MongoRepository<ImportN
             String idUser, String importType, boolean useContext, Pageable pages
     );
 
+    Page<ImportNGSILDDataSetup> findByIdUserOrderByDateCreatedDesc(String idUser, Pageable pages);
+
     List<ImportNGSILDDataSetup> findByIdUserAndFilePath(String userId, String filePath);
 }

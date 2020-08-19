@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @Service
 @Log4j2
 public class ImportNGSILDDataSetupServiceImpl implements ImportNGSILDDataSetupService {
+
     @Autowired
     private ImportNGSILDDataSetupRepository repository;
 
@@ -65,22 +67,28 @@ public class ImportNGSILDDataSetupServiceImpl implements ImportNGSILDDataSetupSe
     }
 
     @Override
-    public Page<ImportNGSILDDataSetup> findByIdUserAndImportTypeAndUseContextOrderByDateCreatedDesc(
+    public Page<ImportNGSILDDataSetup> findImportSetupWithFilters(
             String idUser,
             String importType,
-            boolean useContext,
+            Boolean useContext,
             int page,
             int count
     ) throws Exception {
         try {
-            PageRequest pageable = new PageRequest(page, count);
-            log.info("findByIdUserAndImportTypeLabelAndDescriptionAndDateCreatedAndDateModifiedOrderByDateCreated ImportNGSILDDataSetup - page: {} count: {}", page, count);
-            return this.repository.findByIdUserAndImportTypeAndUseContextOrderByDateCreatedDesc(
-                    idUser, importType, useContext, pageable
-            );
+            PageRequest pageable = PageRequest.of(page, count, Sort.by(Sort.Direction.DESC, "dateCreated"));
+
+            String logMsg = "findImportSetupWithFilters ImportNGSILDDataSetup - page: {} count: {} importType: {} useContext: {}";
+            log.info(logMsg, page, count, importType, useContext);
+
+            if (importType != null && useContext != null) {
+                return this.repository.findByIdUserAndImportTypeAndUseContextOrderByDateCreatedDesc(
+                        idUser, importType.toUpperCase(), useContext, pageable
+                );
+            }
+            return this.repository.findByIdUserOrderByDateCreatedDesc(idUser, pageable);
         } catch (Exception e) {
             log.error(e.getMessage(), e.getStackTrace());
-            throw new Exception();
+            throw new Exception(e.getMessage());
         }
     }
 
