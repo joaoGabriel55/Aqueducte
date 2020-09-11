@@ -8,6 +8,7 @@ import com.mongodb.DuplicateKeyException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -128,7 +129,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
             return ResponseEntity.badRequest().body(response);
         }
         log.info("POST saveImportSetup");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PatchMapping(value = "/{id}")
@@ -163,7 +164,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
             log.error(response.getErrors().get(0), e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
-        log.info("PUT updateImportSetup");
+        log.info("PATCH updateImportSetup");
         return ResponseEntity.ok(response);
     }
 

@@ -1,6 +1,5 @@
 package br.imd.aqueducte.services.implementations;
 
-import br.imd.aqueducte.entitiesrelationship.services.sgeol_middleware_services.EntityOperationsService;
 import br.imd.aqueducte.services.ImportNGSILDDataService;
 import br.imd.aqueducte.utils.RequestsUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +9,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.json.JSONArray;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
@@ -24,9 +22,6 @@ import static br.imd.aqueducte.utils.RequestsUtils.*;
 @Log4j2
 public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
 
-    @Autowired
-    private EntityOperationsService entityOperationsService;
-
     public HttpRequestBase requestConfigParams(String url, String appToken, String userToken, JSONArray jsonArray) {
         RequestsUtils requestsUtils = new RequestsUtils();
         HttpPost request = new HttpPost(url);
@@ -37,38 +32,6 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
         requestsUtils.setHeadersParams(headers, request);
         request.setEntity(requestsUtils.buildEntity(jsonArray));
         return request;
-    }
-
-    @Override
-    public int updateDataAlreadyImported(
-            String layer,
-            String sgeolInstance,
-            String appToken,
-            String userToken,
-            List<LinkedHashMap<String, Object>> ngsildData,
-            String primaryField
-    ) {
-        final int[] index = {0};
-        ngsildData.removeIf(entity -> {
-            log.info("[" + index[0] + "] Entity ID: {}", entity.get("id"));
-            index[0]++;
-            if (!entity.containsKey(primaryField))
-                return false;
-            Map<String, Object> value = (Map<String, Object>) entity.get(primaryField);
-            if (value == null)
-                return false;
-            List<String> entityId = entityOperationsService.findByDocument(
-                    sgeolInstance, layer, primaryField, value.get("value"), false, appToken, userToken
-            );
-            if (entityId != null && entityId.size() != 0) {
-                if (entityOperationsService.updateEntity(sgeolInstance, entityId.get(0), appToken, userToken, entity, layer)) {
-                    return true;
-                }
-                return false;
-            }
-            return false;
-        });
-        return ngsildData.size();
     }
 
     @Override

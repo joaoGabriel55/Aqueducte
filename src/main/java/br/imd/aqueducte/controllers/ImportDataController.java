@@ -8,7 +8,6 @@ import br.imd.aqueducte.services.ImportNGSILDDataService;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportSetupService;
 import br.imd.aqueducte.services.NGSILDConverterService;
 import br.imd.aqueducte.services.TaskStatusService;
-import br.imd.aqueducte.utils.NGSILDConverterUtils;
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static br.imd.aqueducte.utils.FormatterUtils.treatPrimaryField;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
@@ -70,27 +68,6 @@ public class ImportDataController {
             response.getErrors().add(e.getMessage());
             log.error(e.getMessage(), e.getStackTrace());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    private void updateData(
-            String primaryField,
-            List<LinkedHashMap<String, Object>> ngsildData,
-            String layer,
-            Response<List<String>> response,
-            String sgeolInstance,
-            String appToken,
-            String userToken
-
-    ) {
-        NGSILDConverterUtils utils = NGSILDConverterUtils.getInstance();
-        if (primaryField != null && !primaryField.equals("")) {
-            int entitiesUpdated = importNGSILDDataService.updateDataAlreadyImported(
-                    layer, sgeolInstance, appToken, userToken, ngsildData, treatPrimaryField(primaryField)
-            );
-            if (entitiesUpdated == 0) {
-                response.getErrors().add("Todos os dados foram atualizados. Nada para importar");
-            }
         }
     }
 
