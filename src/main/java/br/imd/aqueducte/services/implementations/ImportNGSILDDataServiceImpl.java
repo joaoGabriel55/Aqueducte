@@ -35,14 +35,11 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
     }
 
     @Override
-    public List<String> importData(String layer, String sgeolInstance, String appToken, String userToken, JSONArray jsonArray) throws Exception {
-        String url = sgeolInstance + "/v2/" + layer + "/batch";
-        if (layer.contains("preprocessing"))
-            url = sgeolInstance + "/v2/preprocessing/" + layer;
+    public List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws Exception {
+        String url = "/v2/" + layer + "/batch";
+        HttpResponse response = getHttpClientInstance().execute(requestConfigParams(url, appToken, userToken, jsonArray));
 
-        HttpResponse responseSGEOL = getHttpClientInstance().execute(requestConfigParams(url, appToken, userToken, jsonArray));
-
-        if (responseSGEOL.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
+        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
             String msg = "Error on middleware request";
             log.error(msg);
             throw new Exception(msg);
@@ -50,7 +47,7 @@ public class ImportNGSILDDataServiceImpl implements ImportNGSILDDataService {
 
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> mapFromJson = mapper.readValue(
-                readBodyReq(responseSGEOL.getEntity().getContent()), Map.class
+                readBodyReq(response.getEntity().getContent()), Map.class
         );
         List<String> entitiesId = (List<String>) mapFromJson.get("entities");
         log.info("POST /entity imported {}", entitiesId);

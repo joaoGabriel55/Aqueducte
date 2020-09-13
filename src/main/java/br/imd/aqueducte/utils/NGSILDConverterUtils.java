@@ -41,7 +41,6 @@ public class NGSILDConverterUtils {
     }
 
     public void initDefaultProperties(
-            String sgeolInstance,
             Map<String, Object> linkedHashMapNGSILD,
             List<String> contextList,
             String layerType,
@@ -52,7 +51,7 @@ public class NGSILDConverterUtils {
                 .add("https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld");
 
         if (contextList != null) {
-            String contextSource = sgeolInstance + "/v2/context-sources/";
+            String contextSource = "sgeolInstance/v2/context-sources/";
             List<String> contextLinks = contextList.stream().map((link) -> contextSource + link).collect(Collectors.toList());
             contextListDefault.addAll(contextLinks);
         }

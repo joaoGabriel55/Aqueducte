@@ -64,7 +64,6 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
 
         try {
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.convertIntoNGSILD(
-                    sgeolInstance,
                     getContextLinks(importationSetup.getContextSources().values()),
                     importationSetup.getMatchingConverterSetup(),
                     dataCollectionFlat,
@@ -99,7 +98,6 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
             );
 
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.convertIntoNGSILD(
-                    sgeolInstance,
                     getContextLinks(importationSetup.getContextSources().values()),
                     importationSetup.getMatchingConverterSetup(),
                     fileConvertedIntoJSON,

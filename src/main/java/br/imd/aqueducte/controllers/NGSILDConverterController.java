@@ -25,7 +25,6 @@ public class NGSILDConverterController {
 
     @PostMapping(value = "/{layerPath}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertMatchingSetupIntoNGSILD(
-            @RequestHeader(SGEOL_INSTANCE) String instanceUri,
             @PathVariable String layerPath,
             @RequestBody ImportNSILDMatchingConverterSetup converterSetup) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
@@ -33,7 +32,6 @@ public class NGSILDConverterController {
         try {
             long startTime = System.currentTimeMillis();
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.convertIntoNGSILD(
-                    instanceUri,
                     converterSetup.getContextLinks(),
                     converterSetup.getMatchingConverterSetup(),
                     converterSetup.getDataCollection(),

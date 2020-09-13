@@ -9,8 +9,8 @@ import org.junit.After;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,16 +27,18 @@ public class ExternalAppConfigServiceTest extends AqueducteApplicationTests {
         ServiceConfig authServiceConfig = new ServiceConfig();
         authServiceConfig.setUrl("http://test.com");
         authServiceConfig.setHttpVerb("GET");
-        Map<String, Object> headers = new LinkedHashMap<>();
-        headers.put("token", "123456");
-        headers.put("token2", "a1b2");
+        Set<String> headers = new HashSet<>();
+        headers.add("token");
+        headers.add("token2");
         authServiceConfig.setHeaders(headers);
+        authServiceConfig.setContentType("application/json");
         authServiceConfig.setReturnStatusCode(200);
         config.setAuthServiceConfig(authServiceConfig);
 
         PersistenceServiceConfig persistenceServiceConfig = new PersistenceServiceConfig();
         persistenceServiceConfig.setUrl("http://test.com");
         persistenceServiceConfig.setHttpVerb("POST");
+        persistenceServiceConfig.setContentType("application/json");
         persistenceServiceConfig.setReturnStatusCode(201);
         config.setPersistenceServiceConfig(persistenceServiceConfig);
         return config;

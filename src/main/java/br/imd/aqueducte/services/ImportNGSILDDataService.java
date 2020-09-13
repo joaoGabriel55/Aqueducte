@@ -7,5 +7,5 @@ import java.util.List;
 
 @Component
 public interface ImportNGSILDDataService {
-    List<String> importData(String layer, String sgeolInstance, String appToken, String userToken, JSONArray jsonArray) throws Exception;
+    List<String> importData(String layer, String appToken, String userToken, JSONArray jsonArray) throws Exception;
 }

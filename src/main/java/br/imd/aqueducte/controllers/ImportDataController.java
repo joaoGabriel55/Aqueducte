@@ -63,7 +63,7 @@ public class ImportDataController {
                 );
                 return ResponseEntity.badRequest().body(response);
             }
-            return importData(middlewareInstance, appToken, userToken, layer, response, taskId, ngsildData);
+            return importData(appToken, userToken, layer, response, taskId, ngsildData);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
             log.error(e.getMessage(), e.getStackTrace());
@@ -83,7 +83,6 @@ public class ImportDataController {
         try {
             long startTime = System.currentTimeMillis();
             List<LinkedHashMap<String, Object>> listNGSILD = ngsildConverterService.convertIntoNGSILD(
-                    middlewareInstance,
                     importConfig.getContextLinks(),
                     importConfig.getMatchingConverterSetup(),
                     importConfig.getDataCollection(),
@@ -96,7 +95,7 @@ public class ImportDataController {
             JSONArray jsonArrayNGSILD = new JSONArray(listNGSILD);
             try {
                 List<String> jsonArrayResponse = importNGSILDDataService.importData(
-                        layerPath, middlewareInstance, appToken, userToken, jsonArrayNGSILD
+                        layerPath, appToken, userToken, jsonArrayNGSILD
                 );
                 response.setData(jsonArrayResponse);
                 long endTime = System.currentTimeMillis();
@@ -118,7 +117,6 @@ public class ImportDataController {
 
 
     private ResponseEntity<Response<List<String>>> importData(
-            String middlewareInstance,
             String appToken,
             String userToken,
             String layer,
@@ -134,7 +132,7 @@ public class ImportDataController {
             try {
                 JSONArray jsonArrayNGSILD = new JSONArray(ngsildData);
                 List<String> jsonArrayResponse = importNGSILDDataService.importData(
-                        layer, middlewareInstance, appToken, userToken, jsonArrayNGSILD
+                        layer, appToken, userToken, jsonArrayNGSILD
                 );
 
                 if (jsonArrayResponse != null && jsonArrayResponse.size() == 0) {

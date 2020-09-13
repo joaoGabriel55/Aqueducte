@@ -11,7 +11,6 @@ import java.util.Map;
 public interface NGSILDConverterService {
 
     List<LinkedHashMap<String, Object>> convertIntoNGSILD(
-            String instanceUri,
             List<String> contextLinks,
             LinkedHashMap<String, MatchingConverterSetup> matchingConfig,
             List<Map<String, Object>> contentForConvert,
