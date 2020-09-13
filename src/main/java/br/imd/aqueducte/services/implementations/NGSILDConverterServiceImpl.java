@@ -19,9 +19,9 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
     @Override
     public List<LinkedHashMap<String, Object>> convertIntoNGSILD(
             List<String> contextLinks,
+            String type,
             LinkedHashMap<String, MatchingConverterSetup> matchingConverterSetup,
-            List<Map<String, Object>> contentForConvert,
-            String layerPath
+            List<Map<String, Object>> contentForConvert
     ) throws Exception {
         if (contentForConvert == null) {
             log.error("contentForConvert is null");
@@ -36,7 +36,7 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
         LinkedHashMap<String, Object> properties = new LinkedHashMap<>();
         for (Map<String, Object> element : contentForConvert) {
             UUID uuid = UUID.randomUUID();
-            this.ngsildConverterUtils.initDefaultProperties(properties, contextLinks, layerPath, uuid.toString());
+            this.ngsildConverterUtils.initDefaultProperties(properties, contextLinks, type, uuid.toString());
             for (Entry<String, MatchingConverterSetup> setupEntry : matchingConverterSetup.entrySet()) {
                 String key = removeSpacesForeignProperty(setupEntry.getKey());
                 MatchingConverterSetup setup = setupEntry.getValue();

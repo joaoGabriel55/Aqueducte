@@ -65,9 +65,9 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
         try {
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.convertIntoNGSILD(
                     getContextLinks(importationSetup.getContextSources().values()),
+                    importationSetup.getLayerPathSelected(),
                     importationSetup.getMatchingConverterSetup(),
-                    dataCollectionFlat,
-                    importationSetup.getLayerPathSelected()
+                    dataCollectionFlat
             );
             log.info("loadData WebService successfully");
             return listConvertedIntoNGSILD;
@@ -99,9 +99,9 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
 
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.convertIntoNGSILD(
                     getContextLinks(importationSetup.getContextSources().values()),
+                    importationSetup.getLayerPathSelected(),
                     importationSetup.getMatchingConverterSetup(),
-                    fileConvertedIntoJSON,
-                    importationSetup.getLayerPathSelected()
+                    fileConvertedIntoJSON
             );
             log.info("loadData File successfully");
             return listConvertedIntoNGSILD;

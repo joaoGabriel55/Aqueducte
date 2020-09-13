@@ -55,13 +55,13 @@ public class RequestResponseLoggingFilter implements Filter {
 
             ExternalAppConfig externalAppConfig = this.externalAppConfigService.getConfigByHash(hashConfig);
             if (externalAppConfig.getAuthServiceConfig() != null) {
-                Map<String, Object> headers = new LinkedHashMap<>();
+                Map<String, String> headers = new LinkedHashMap<>();
                 for (Iterator<String> it = req.getHeaderNames().asIterator(); it.hasNext(); ) {
                     String header = it.next();
                     headers.put(header, req.getHeader(header));
                 }
                 HttpRequestBase authRequest = this.externalAppConfigService.mountExternalAppConfigService(
-                        externalAppConfig.getAuthServiceConfig(), headers
+                        externalAppConfig.getAuthServiceConfig(), null, headers
                 );
                 HttpResponse authResponse = getHttpClientInstance().execute(authRequest);
 

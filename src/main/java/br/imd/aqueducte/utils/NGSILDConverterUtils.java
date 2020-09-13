@@ -43,7 +43,7 @@ public class NGSILDConverterUtils {
     public void initDefaultProperties(
             Map<String, Object> linkedHashMapNGSILD,
             List<String> contextList,
-            String layerType,
+            String type,
             String uuid
     ) {
         List<String> contextListDefault = new ArrayList<>();
@@ -57,8 +57,8 @@ public class NGSILDConverterUtils {
         }
 
         linkedHashMapNGSILD.put("@context", contextListDefault);
-        linkedHashMapNGSILD.put("id", "urn:ngsi-ld:" + layerType + ":" + uuid);
-        linkedHashMapNGSILD.put("type", layerType);
+        linkedHashMapNGSILD.put("id", "urn:ngsi-ld:" + type + ":" + uuid);
+        linkedHashMapNGSILD.put("type", type);
     }
 
     public boolean checkIfEntityAlreadyExistsByPrimaryField(

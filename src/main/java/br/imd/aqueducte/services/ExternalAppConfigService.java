@@ -13,5 +13,7 @@ public interface ExternalAppConfigService extends GenericService<ExternalAppConf
 
     void deleteByHash(String hash) throws Exception;
 
-    HttpRequestBase mountExternalAppConfigService(ServiceConfig serviceConfig, Map<String, Object> headers);
+    HttpRequestBase mountExternalAppConfigService(
+            ServiceConfig serviceConfig, Map<String, String> queryParams, Map<String, String> headers
+    );
 }

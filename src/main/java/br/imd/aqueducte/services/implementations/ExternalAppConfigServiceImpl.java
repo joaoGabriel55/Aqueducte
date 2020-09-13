@@ -61,27 +61,39 @@ public class ExternalAppConfigServiceImpl implements ExternalAppConfigService {
         }
     }
 
+
+    private String getFinalUrl(Map<String, String> queryParams, String url) {
+        String finalUrl = url;
+        if (queryParams != null && queryParams.size() > 0) {
+            queryParams.entrySet().forEach((query) -> {
+                finalUrl.replace("{" + query + "}", queryParams.get(query));
+            });
+        }
+        return finalUrl;
+    }
+
     @Override
     public HttpRequestBase mountExternalAppConfigService(
-            ServiceConfig serviceConfig, Map<String, Object> requestHeaders
+            ServiceConfig serviceConfig, Map<String, String> queryParams, Map<String, String> requestHeaders
     ) {
         HttpRequestBase request = null;
+        String url = getFinalUrl(queryParams, serviceConfig.getUrl());
         if (serviceConfig.getHttpVerb().toUpperCase().equals("GET")) {
-            request = new HttpGet(serviceConfig.getUrl());
+            request = new HttpGet(url);
         } else if (serviceConfig.getHttpVerb().toUpperCase().equals("POST")) {
-            request = new HttpPost(serviceConfig.getUrl());
+            request = new HttpPost(url);
         } else if (serviceConfig.getHttpVerb().toUpperCase().equals("PATCH")) {
-            request = new HttpPatch(serviceConfig.getUrl());
+            request = new HttpPatch(url);
         } else if (serviceConfig.getHttpVerb().toUpperCase().equals("PUT")) {
-            request = new HttpPut(serviceConfig.getUrl());
+            request = new HttpPut(url);
         }
 
         request.addHeader("Content-Type", serviceConfig.getContentType());
         if (serviceConfig.getHeaders() != null) {
             Set<String> headers = serviceConfig.getHeaders();
-            for (Map.Entry<String, Object> requestHeader : requestHeaders.entrySet()) {
+            for (Map.Entry<String, String> requestHeader : requestHeaders.entrySet()) {
                 if (headers.contains(requestHeader.getKey()))
-                    request.addHeader(requestHeader.getKey(), requestHeader.getValue().toString());
+                    request.addHeader(requestHeader.getKey(), requestHeader.getValue());
             }
         }
         return request;
