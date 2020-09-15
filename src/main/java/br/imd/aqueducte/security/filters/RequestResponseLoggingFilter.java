@@ -42,7 +42,7 @@ public class RequestResponseLoggingFilter implements Filter {
         try {
             String path = req.getRequestURI();
             log.info(path);
-            if (path.contains("/sync/external-app-config")) {
+            if (path.contains("/sync/external-app-config") || path.contains("aqueducte-socket")) {
                 chain.doFilter(request, response);
                 return;
             }

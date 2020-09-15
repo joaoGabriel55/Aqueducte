@@ -33,21 +33,21 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> loadData(ImportNGSILDDataSetup importationSetup, String sgeolInstance, String userToken) throws Exception {
+    public List<LinkedHashMap<String, Object>> loadData(ImportNGSILDDataSetup importationSetup, String hashConfig) throws Exception {
         importationSetup.setLabel("JustLoad");
         validator.validImportNGSILDDataSetup(importationSetup);
 
         if (importationSetup.getImportType().equals(WEB_SERVICE)) {
-            return loadDataWebService(importationSetup, sgeolInstance);
+            return loadDataWebService(importationSetup);
         } else if (importationSetup.getImportType().equals(FILE)) {
-            return loadDataFile(importationSetup, sgeolInstance, userToken);
+            return loadDataFile(importationSetup, hashConfig);
         }
         log.error("Load data error");
         throw new Exception();
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> loadDataWebService(ImportNGSILDDataSetup importationSetup, String sgeolInstance) throws Exception {
+    public List<LinkedHashMap<String, Object>> loadDataWebService(ImportNGSILDDataSetup importationSetup) throws Exception {
         JsonDataServiceImpl jsonFlatTreatImpl = new JsonDataServiceImpl();
 
         // Load data from Webservice
@@ -78,10 +78,11 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
     }
 
     @Override
-    public List<LinkedHashMap<String, Object>> loadDataFile(ImportNGSILDDataSetup importationSetup, String sgeolInstance, String userToken) throws Exception {
+    public List<LinkedHashMap<String, Object>> loadDataFile(ImportNGSILDDataSetup importationSetup, String hashConfig) throws Exception {
         try {
             Map<String, Integer> fieldsFiltered = getFieldsForImportSetupFromFile(
-                    getFileFields(sgeolInstance, userToken, importationSetup), importationSetup.getMatchingConverterSetup()
+                    getFileFields(hashConfig, importationSetup),
+                    importationSetup.getMatchingConverterSetup()
             );
 
             if (fieldsFiltered == null) {
@@ -93,15 +94,13 @@ public class LoadDataNGSILDByImportNGSILDDataSetupServiceImpl
                 throw new Exception();
             }
 
-            List<Map<String, Object>> fileConvertedIntoJSON = convertToJSON(
-                    sgeolInstance, userToken, importationSetup, fieldsFiltered
-            );
+            List<Map<String, Object>> fileToJSONData = convertToJSON(hashConfig, importationSetup, fieldsFiltered);
 
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.convertIntoNGSILD(
                     getContextLinks(importationSetup.getContextSources().values()),
                     importationSetup.getLayerPathSelected(),
                     importationSetup.getMatchingConverterSetup(),
-                    fileConvertedIntoJSON
+                    fileToJSONData
             );
             log.info("loadData File successfully");
             return listConvertedIntoNGSILD;

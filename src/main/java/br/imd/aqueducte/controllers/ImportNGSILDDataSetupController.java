@@ -17,8 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 
-import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
-import static br.imd.aqueducte.utils.RequestsUtils.USER_TOKEN;
+import static br.imd.aqueducte.utils.RequestsUtils.HASH_CONFIG;
 
 @RestController
 @Log4j2
@@ -102,7 +101,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
     @PostMapping
     public ResponseEntity<Response<ImportNGSILDDataSetup>> saveImportSetup(
             HttpServletRequest request,
-            @RequestBody ImportNGSILDDataSetup importNGSILDDataSetup
+            @RequestBody ImportNGSILDDataSetup setup
     ) {
         Response<ImportNGSILDDataSetup> response = new Response<>();
         if (checkUserIdIsEmpty(request)) {
@@ -111,8 +110,8 @@ public class ImportNGSILDDataSetupController extends GenericController {
             return ResponseEntity.badRequest().body(response);
         }
         try {
-            if (importNGSILDDataSetup.getId() == null) {
-                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, importNGSILDDataSetup);
+            if (setup.getId() == null) {
+                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, setup);
                 response.setData(result);
             } else {
                 response.getErrors().add("Object inconsistent");
@@ -136,7 +135,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
     public ResponseEntity<Response<ImportNGSILDDataSetup>> updateImportSetup(
             HttpServletRequest request,
             @PathVariable String id,
-            @RequestBody ImportNGSILDDataSetup importNGSILDDataSetup
+            @RequestBody ImportNGSILDDataSetup setup
     ) {
         Response<ImportNGSILDDataSetup> response = new Response<>();
 
@@ -144,7 +143,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
             response.getErrors().add("Without user id");
             log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
-        } else if (!importNGSILDDataSetup.getId().equals(id)) {
+        } else if (!setup.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
             log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
@@ -152,7 +151,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
         try {
             Optional<ImportNGSILDDataSetup> importSetup = service.findById(id);
             if (importSetup.isPresent()) {
-                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, importNGSILDDataSetup);
+                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, setup);
                 response.setData(result);
             }
         } catch (DuplicateKeyException e) {
@@ -187,16 +186,13 @@ public class ImportNGSILDDataSetupController extends GenericController {
 
     @PostMapping(value = "/load-ngsild-data")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> loadNGSILDDataFromImportSetup(
-            @RequestHeader(USER_TOKEN) String userToken,
-            @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
-            @RequestBody ImportNGSILDDataSetup importNGSILDDataSetup,
+            @RequestHeader(HASH_CONFIG) String hashConfig,
+            @RequestBody ImportNGSILDDataSetup setup,
             @RequestParam boolean samples
     ) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
         try {
-            List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDService.loadData(
-                    importNGSILDDataSetup, sgeolInstance, userToken
-            );
+            List<LinkedHashMap<String, Object>> ngsildData = this.loadDataNGSILDService.loadData(setup, hashConfig);
             response.setData(samples ? getSamples(ngsildData) : ngsildData);
             log.info("GET loadNGSILDDataFromImportSetup");
             return ResponseEntity.ok(response);
@@ -209,15 +205,12 @@ public class ImportNGSILDDataSetupController extends GenericController {
 
     @PostMapping(value = "/load-ngsild-data/count")
     public ResponseEntity<Response<Integer>> loadNGSILDDataCountFromImportSetup(
-            @RequestHeader(USER_TOKEN) String userToken,
-            @RequestHeader(SGEOL_INSTANCE) String sgeolInstance,
-            @RequestBody ImportNGSILDDataSetup importNGSILDDataSetup
+            @RequestHeader(HASH_CONFIG) String hashConfig,
+            @RequestBody ImportNGSILDDataSetup setup
     ) {
         Response<Integer> response = new Response<>();
         try {
-            response.setData(this.loadDataNGSILDService
-                    .loadData(importNGSILDDataSetup, sgeolInstance, userToken)
-                    .size());
+            response.setData(this.loadDataNGSILDService.loadData(setup, hashConfig).size());
             log.info("GET loadNGSILDDataCountFromImportSetup");
             return ResponseEntity.ok(response);
         } catch (Exception e) {

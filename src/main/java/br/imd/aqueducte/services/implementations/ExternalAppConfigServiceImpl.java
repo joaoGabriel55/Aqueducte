@@ -65,9 +65,9 @@ public class ExternalAppConfigServiceImpl implements ExternalAppConfigService {
     private String getFinalUrl(Map<String, String> queryParams, String url) {
         String finalUrl = url;
         if (queryParams != null && queryParams.size() > 0) {
-            queryParams.entrySet().forEach((query) -> {
-                finalUrl.replace("{" + query + "}", queryParams.get(query));
-            });
+            for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+                finalUrl = finalUrl.replace("{" + entry.getKey() + "}", queryParams.get(entry.getKey()));
+            }
         }
         return finalUrl;
     }

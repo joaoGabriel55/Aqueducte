@@ -19,6 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static br.imd.aqueducte.utils.RequestsUtils.HASH_CONFIG;
+
 @SuppressWarnings("ALL")
 @RestController
 @Log4j2
@@ -49,7 +51,7 @@ public class ImportDataController {
         Response<List<String>> response = new Response<>();
         try {
             List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupService.loadData(
-                    setup, "middlewareInstance", null
+                    setup, headers.get(HASH_CONFIG)
             );
             return importData(headers, allParams, type, response, taskId, ngsildData);
         } catch (Exception e) {
