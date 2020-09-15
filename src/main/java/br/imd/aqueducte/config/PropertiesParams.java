@@ -5,8 +5,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class PropertiesParams {
-    public static boolean AUTH;
-    public static boolean TEST_ENV;
+    public static boolean USE_USER_ID;
     public static String URL_AQUECONNECT;
 
     static {
@@ -22,8 +21,7 @@ public class PropertiesParams {
         InputStream source = classLoader.getResourceAsStream("properties.cfg");
         Properties conf = new Properties();
         conf.load(source);
-        AUTH = Boolean.parseBoolean(conf.getProperty("AUTH"));
-        TEST_ENV = Boolean.parseBoolean(conf.getProperty("AUTH"));
+        USE_USER_ID = Boolean.parseBoolean(conf.getProperty("AUTH"));
         URL_AQUECONNECT = String.valueOf(conf.getProperty("URL_AQUECONNECT"));
     }
 }

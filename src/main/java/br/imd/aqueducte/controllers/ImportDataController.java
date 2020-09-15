@@ -8,7 +8,6 @@ import br.imd.aqueducte.services.ImportNGSILDDataService;
 import br.imd.aqueducte.services.LoadDataNGSILDByImportSetupService;
 import br.imd.aqueducte.services.NGSILDConverterService;
 import br.imd.aqueducte.services.TaskStatusService;
-import br.imd.aqueducte.utils.NGSILDConverterUtils;
 import lombok.extern.log4j.Log4j2;
 import org.json.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,9 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-import static br.imd.aqueducte.utils.FormatterUtils.treatPrimaryField;
-import static br.imd.aqueducte.utils.RequestsUtils.*;
+import static br.imd.aqueducte.utils.RequestsUtils.HASH_CONFIG;
 
 @SuppressWarnings("ALL")
 @RestController
@@ -41,31 +40,20 @@ public class ImportDataController {
     @Autowired
     private TaskStatusService taskStatusService;
 
-    @PostMapping(value = {"/{layer}", "/{layer}/{taskId}"})
+    @PostMapping(value = {"/{type}", "/{type}/{taskId}"})
     public ResponseEntity<Response<List<String>>> importNGSILDData(
-            @RequestHeader(APP_TOKEN) String appToken,
-            @RequestHeader(USER_TOKEN) String userToken,
-            @RequestHeader(SGEOL_INSTANCE) String middlewareInstance,
-            @PathVariable String taskId,
-            @PathVariable String layer,
+            @RequestHeader Map<String, String> headers,
+            @RequestParam Map<String, String> allParams,
+            @PathVariable(required = false) String taskId,
+            @PathVariable String type,
             @RequestBody ImportNGSILDDataSetup setup
     ) {
         Response<List<String>> response = new Response<>();
         try {
             List<LinkedHashMap<String, Object>> ngsildData = this.importationSetupService.loadData(
-                    setup, middlewareInstance, null
+                    setup, headers.get(HASH_CONFIG)
             );
-            if (response.getErrors().size() > 0) {
-                log.error(response.getErrors().get(0));
-                taskStatusService.sendTaskStatusProgress(
-                        taskId,
-                        TaskStatus.ERROR,
-                        response.getErrors().get(0),
-                        "status-task-import-process"
-                );
-                return ResponseEntity.badRequest().body(response);
-            }
-            return importData(middlewareInstance, appToken, userToken, layer, response, taskId, ngsildData);
+            return importData(headers, allParams, type, response, taskId, ngsildData);
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
             log.error(e.getMessage(), e.getStackTrace());
@@ -73,44 +61,21 @@ public class ImportDataController {
         }
     }
 
-    private void updateData(
-            String primaryField,
-            List<LinkedHashMap<String, Object>> ngsildData,
-            String layer,
-            Response<List<String>> response,
-            String sgeolInstance,
-            String appToken,
-            String userToken
-
-    ) {
-        NGSILDConverterUtils utils = NGSILDConverterUtils.getInstance();
-        if (primaryField != null && !primaryField.equals("")) {
-            int entitiesUpdated = importNGSILDDataService.updateDataAlreadyImported(
-                    layer, sgeolInstance, appToken, userToken, ngsildData, treatPrimaryField(primaryField)
-            );
-            if (entitiesUpdated == 0) {
-                response.getErrors().add("Todos os dados foram atualizados. Nada para importar");
-            }
-        }
-    }
-
-    @PostMapping(value = "/file/{layerPath}")
+    @PostMapping(value = "/file/{type}")
     public ResponseEntity<Response<List<String>>> importNGSILDDataFromFile(
-            @RequestHeader(APP_TOKEN) String appToken,
-            @RequestHeader(USER_TOKEN) String userToken,
-            @RequestHeader(SGEOL_INSTANCE) String middlewareInstance,
-            @PathVariable String layerPath,
+            @RequestHeader Map<String, String> headers,
+            @RequestParam Map<String, String> allParams,
+            @PathVariable String type,
             @RequestBody ImportNSILDMatchingConverterSetup importConfig
     ) {
         Response<List<String>> response = new Response<>();
         try {
             long startTime = System.currentTimeMillis();
             List<LinkedHashMap<String, Object>> listNGSILD = ngsildConverterService.convertIntoNGSILD(
-                    middlewareInstance,
                     importConfig.getContextLinks(),
+                    type,
                     importConfig.getMatchingConverterSetup(),
-                    importConfig.getDataCollection(),
-                    layerPath
+                    importConfig.getDataCollection()
             );
             if (response.getErrors().size() > 0) {
                 log.error(response.getErrors().get(0));
@@ -118,20 +83,19 @@ public class ImportDataController {
             }
             JSONArray jsonArrayNGSILD = new JSONArray(listNGSILD);
             try {
-                List<String> jsonArrayResponse = importNGSILDDataService.importData(
-                        layerPath, middlewareInstance, appToken, userToken, jsonArrayNGSILD
+                importNGSILDDataService.importData(
+                        type, headers, allParams, jsonArrayNGSILD
                 );
-                response.setData(jsonArrayResponse);
                 long endTime = System.currentTimeMillis();
                 long timeElapsed = endTime - startTime;
                 log.info("POST time elapsed: {} ms", timeElapsed);
-                log.info("POST convertToNGSILDWithContextAndImportData");
+                log.info("POST /import-ngsild-data using file");
             } catch (Exception e) {
                 response.getErrors().add(e.getLocalizedMessage());
                 log.error(e.getMessage(), e.getStackTrace());
                 return ResponseEntity.badRequest().body(response);
             }
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             response.getErrors().add(e.getMessage());
             log.error(e.getMessage(), e.getStackTrace());
@@ -141,10 +105,9 @@ public class ImportDataController {
 
 
     private ResponseEntity<Response<List<String>>> importData(
-            String middlewareInstance,
-            String appToken,
-            String userToken,
-            String layer,
+            Map<String, String> headers,
+            Map<String, String> allParams,
+            String type,
             Response<List<String>> response,
             String taskId,
             List<LinkedHashMap<String, Object>> ngsildData
@@ -156,36 +119,22 @@ public class ImportDataController {
         } else {
             try {
                 JSONArray jsonArrayNGSILD = new JSONArray(ngsildData);
-                List<String> jsonArrayResponse = importNGSILDDataService.importData(
-                        layer, middlewareInstance, appToken, userToken, jsonArrayNGSILD
+                importNGSILDDataService.importData(
+                        type, headers, allParams, jsonArrayNGSILD
                 );
-
-                if (jsonArrayResponse != null && jsonArrayResponse.size() == 0) {
-                    response.getErrors().add("Nenhuma Entity importada");
-                    log.error(response.getErrors().get(0));
-                    taskStatusService.sendTaskStatusProgress(
-                            taskId,
-                            TaskStatus.ERROR,
-                            response.getErrors().get(0),
-                            "status-task-import-process"
-                    );
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-                }
-
-                response.setData(jsonArrayResponse);
-                log.info("POST /importToSgeol - {} entities", jsonArrayResponse.size());
+                log.info("POST /import-ngsild-data");
                 if (taskId != null && !taskId.equals("")) {
                     taskStatusService.sendTaskStatusProgress(
                             taskId,
                             TaskStatus.DONE,
-                            "Layer: " + layer,
+                            "Type: " + type,
                             "status-task-import-process"
                     );
                     log.info("Web Socket sendTaskStatusProgress");
                 }
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok().build();
             } catch (Exception e) {
-                response.getErrors().add("Erro interno");
+                response.getErrors().add(e.getMessage());
                 log.error(response.getErrors().get(0), e.getMessage());
                 taskStatusService.sendTaskStatusProgress(
                         taskId,

@@ -58,7 +58,7 @@ public abstract class LoadDataNGSILDByImportSetup {
         return null;
     }
 
-    protected Map<String, Integer> getFileFields(String sgeolInstance, String userToken, ImportationSetup importationSetup) {
+    protected Map<String, Integer> getFileFields(String hashConfig, ImportationSetup importationSetup) {
         StringBuilder url = new StringBuilder();
         url.append(URL_AQUECONNECT);
         url.append("file-import-setup-resource/file-fields/");
@@ -67,8 +67,7 @@ public abstract class LoadDataNGSILDByImportSetup {
         url.append("&delimiter=" + importationSetup.getDelimiterFileContent());
 
         HttpGet request = new HttpGet(url.toString());
-        request.setHeader(SGEOL_INSTANCE, sgeolInstance);
-        request.setHeader(USER_TOKEN, userToken);
+        request.setHeader(HASH_CONFIG, hashConfig);
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
             if (response.getStatusLine().getStatusCode() == STATUS_OK) {
@@ -89,8 +88,7 @@ public abstract class LoadDataNGSILDByImportSetup {
     }
 
     protected List<Map<String, Object>> convertToJSON(
-            String sgeolInstance,
-            String userToken,
+            String hashConfig,
             ImportationSetup importationSetup,
             Map<String, Integer> fieldsSelected
     ) {
@@ -102,8 +100,7 @@ public abstract class LoadDataNGSILDByImportSetup {
         url.append("&delimiter=" + importationSetup.getDelimiterFileContent());
 
         HttpPost request = new HttpPost(url.toString());
-        request.setHeader(USER_TOKEN, userToken);
-        request.setHeader(SGEOL_INSTANCE, sgeolInstance);
+        request.setHeader(HASH_CONFIG, hashConfig);
         request.setEntity(objectToJson(fieldsSelected));
         try {
             HttpResponse response = getHttpClientInstance().execute(request);
