@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static br.imd.aqueducte.utils.NGSILDConverterUtils.removeSpacesForeignProperty;
-
 @Service
 @Log4j2
 public class NGSILDConverterServiceImpl implements NGSILDConverterService {
@@ -38,7 +36,7 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
             UUID uuid = UUID.randomUUID();
             this.ngsildConverterUtils.initDefaultProperties(properties, contextLinks, type, uuid.toString());
             for (Entry<String, MatchingConverterSetup> setupEntry : matchingConverterSetup.entrySet()) {
-                String key = removeSpacesForeignProperty(setupEntry.getKey());
+                String key = setupEntry.getKey().trim();
                 MatchingConverterSetup setup = setupEntry.getValue();
                 Boolean isLocation = setup.isLocation();
                 String finalProperty = this.ngsildConverterUtils.treatIdOrType(setup.getFinalProperty());
