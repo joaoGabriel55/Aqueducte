@@ -21,7 +21,7 @@ public class PropertiesParams {
         InputStream source = classLoader.getResourceAsStream("properties.cfg");
         Properties conf = new Properties();
         conf.load(source);
-        USE_USER_ID = Boolean.parseBoolean(conf.getProperty("AUTH"));
+        USE_USER_ID = Boolean.parseBoolean(conf.getProperty("USE_USER_ID"));
         URL_AQUECONNECT = String.valueOf(conf.getProperty("URL_AQUECONNECT"));
     }
 }
