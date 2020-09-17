@@ -26,16 +26,10 @@ public class ImportNGSILDDataSetupServiceImpl implements ImportNGSILDDataSetupSe
     private ImportNGSILDDataSetupValidator validator;
 
     @Override
-    public ImportNGSILDDataSetup createOrUpdate(String userId, ImportNGSILDDataSetup setup) throws Exception {
-        if (setup.getIdUser() == null || setup.getIdUser() == "")
-            setup.setIdUser(userId);
-        validator.validImportNGSILDDataSetup(setup);
-        return this.createOrUpdate(setup);
-    }
-
-    @Override
     public ImportNGSILDDataSetup createOrUpdate(ImportNGSILDDataSetup setup) throws Exception {
         try {
+            validator.validImportNGSILDDataSetup(setup);
+
             if (setup.getId() == null)
                 setup.setDateCreated(new Date());
             else

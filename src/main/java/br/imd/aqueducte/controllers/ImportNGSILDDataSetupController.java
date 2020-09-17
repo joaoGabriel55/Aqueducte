@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -31,11 +30,11 @@ public class ImportNGSILDDataSetupController extends GenericController {
     @Autowired
     private LoadDataNGSILDByImportSetupService<ImportNGSILDDataSetup> loadDataNGSILDService;
 
-    @GetMapping(value = "/{idUser}/{page}/{count}")
+    @GetMapping(value = "/{page}/{count}")
     public ResponseEntity<Response<Page<ImportNGSILDDataSetup>>> findAllImportSetupByUserId(
-            @PathVariable("idUser") String idUser,
             @PathVariable("page") int page,
             @PathVariable("count") int count,
+            @RequestParam(value = "idUser", required = false) String idUser,
             @RequestParam(value = "importType", required = false) String importType,
             @RequestParam(value = "useContext", required = false) Boolean useContext
     ) {
@@ -99,19 +98,11 @@ public class ImportNGSILDDataSetupController extends GenericController {
     }
 
     @PostMapping
-    public ResponseEntity<Response<ImportNGSILDDataSetup>> saveImportSetup(
-            HttpServletRequest request,
-            @RequestBody ImportNGSILDDataSetup setup
-    ) {
+    public ResponseEntity<Response<ImportNGSILDDataSetup>> saveImportSetup(@RequestBody ImportNGSILDDataSetup setup) {
         Response<ImportNGSILDDataSetup> response = new Response<>();
-        if (checkUserIdIsEmpty(request)) {
-            response.getErrors().add("Without user id");
-            log.error(response.getErrors().get(0));
-            return ResponseEntity.badRequest().body(response);
-        }
         try {
             if (setup.getId() == null) {
-                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, setup);
+                ImportNGSILDDataSetup result = service.createOrUpdate(setup);
                 response.setData(result);
             } else {
                 response.getErrors().add("Object inconsistent");
@@ -133,17 +124,12 @@ public class ImportNGSILDDataSetupController extends GenericController {
 
     @PatchMapping(value = "/{id}")
     public ResponseEntity<Response<ImportNGSILDDataSetup>> updateImportSetup(
-            HttpServletRequest request,
             @PathVariable String id,
             @RequestBody ImportNGSILDDataSetup setup
     ) {
         Response<ImportNGSILDDataSetup> response = new Response<>();
 
-        if (checkUserIdIsEmpty(request)) {
-            response.getErrors().add("Without user id");
-            log.error(response.getErrors().get(0));
-            return ResponseEntity.badRequest().body(response);
-        } else if (!setup.getId().equals(id)) {
+        if (!setup.getId().equals(id)) {
             response.getErrors().add("Id from payload does not match with id from URL path");
             log.error(response.getErrors().get(0));
             return ResponseEntity.badRequest().body(response);
@@ -151,7 +137,7 @@ public class ImportNGSILDDataSetupController extends GenericController {
         try {
             Optional<ImportNGSILDDataSetup> importSetup = service.findById(id);
             if (importSetup.isPresent()) {
-                ImportNGSILDDataSetup result = service.createOrUpdate(idUser, setup);
+                ImportNGSILDDataSetup result = service.createOrUpdate(setup);
                 response.setData(result);
             }
         } catch (DuplicateKeyException e) {

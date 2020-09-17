@@ -79,14 +79,14 @@ public class ImportNGSILDDataSetupServiceTest extends AqueducteApplicationTests 
     @Test
     public void saveTest() throws Exception {
         ImportNGSILDDataSetup mockSetup = createMockSetup("Test", ImportationSetup.FILE, false);
-        ImportNGSILDDataSetup setupSaved = service.createOrUpdate(mockSetup.getIdUser(), mockSetup);
+        ImportNGSILDDataSetup setupSaved = service.createOrUpdate(mockSetup);
         assertEquals(setupSaved.getLabel(), mockSetup.getLabel());
     }
 
     @Test
     public void updateTest() throws Exception {
         ImportNGSILDDataSetup mockSetup = createMockSetup("Test", ImportationSetup.FILE, false);
-        ImportNGSILDDataSetup setupSaved = service.createOrUpdate(mockSetup.getIdUser(), mockSetup);
+        ImportNGSILDDataSetup setupSaved = service.createOrUpdate(mockSetup);
         assertEquals(setupSaved.getLabel(), mockSetup.getLabel());
         setupSaved.setLabel("Updated");
         ImportNGSILDDataSetup setupUpdated = service.createOrUpdate(setupSaved);
@@ -100,8 +100,8 @@ public class ImportNGSILDDataSetupServiceTest extends AqueducteApplicationTests 
 
         mockSetup1 = createMockSetup("Test0", ImportationSetup.FILE, false);
         mockSetup2 = createMockSetup("Test1", ImportationSetup.FILE, false);
-        service.createOrUpdate(mockSetup1.getIdUser(), mockSetup1);
-        service.createOrUpdate(mockSetup2.getIdUser(), mockSetup2);
+        service.createOrUpdate(mockSetup1);
+        service.createOrUpdate(mockSetup2);
 
         size = service.findImportSetupWithFilters(
                 USER_ID, ImportNGSILDDataSetup.FILE, false, 0, 15
@@ -110,8 +110,8 @@ public class ImportNGSILDDataSetupServiceTest extends AqueducteApplicationTests 
 
         mockSetup1 = createMockSetup("Test2", ImportationSetup.FILE, true);
         mockSetup2 = createMockSetup("Test3", ImportationSetup.FILE, true);
-        service.createOrUpdate(mockSetup1.getIdUser(), mockSetup1);
-        service.createOrUpdate(mockSetup2.getIdUser(), mockSetup2);
+        service.createOrUpdate(mockSetup1);
+        service.createOrUpdate(mockSetup2);
 
         size = service.findImportSetupWithFilters(
                 USER_ID, ImportNGSILDDataSetup.FILE, true, 0, 15
@@ -120,8 +120,8 @@ public class ImportNGSILDDataSetupServiceTest extends AqueducteApplicationTests 
 
         mockSetup1 = createMockSetup("Test4", ImportationSetup.WEB_SERVICE, false);
         mockSetup2 = createMockSetup("Test5", ImportationSetup.WEB_SERVICE, false);
-        service.createOrUpdate(mockSetup1.getIdUser(), mockSetup1);
-        service.createOrUpdate(mockSetup2.getIdUser(), mockSetup2);
+        service.createOrUpdate(mockSetup1);
+        service.createOrUpdate(mockSetup2);
 
         size = service.findImportSetupWithFilters(
                 USER_ID, ImportNGSILDDataSetup.WEB_SERVICE, false, 0, 15
@@ -130,8 +130,8 @@ public class ImportNGSILDDataSetupServiceTest extends AqueducteApplicationTests 
 
         mockSetup1 = createMockSetup("Test6", ImportationSetup.WEB_SERVICE, true);
         mockSetup2 = createMockSetup("Test7", ImportationSetup.WEB_SERVICE, true);
-        service.createOrUpdate(mockSetup1.getIdUser(), mockSetup1);
-        service.createOrUpdate(mockSetup2.getIdUser(), mockSetup2);
+        service.createOrUpdate(mockSetup1);
+        service.createOrUpdate(mockSetup2);
 
         size = service.findImportSetupWithFilters(
                 USER_ID, ImportNGSILDDataSetup.WEB_SERVICE, true, 0, 15
