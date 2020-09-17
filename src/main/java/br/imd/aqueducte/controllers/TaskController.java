@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 @SuppressWarnings("ALL")
@@ -55,14 +54,8 @@ public class TaskController extends GenericController {
     }
 
     @PostMapping
-    public ResponseEntity<Response<Task>> saveTask(HttpServletRequest request, @RequestBody Task task) {
+    public ResponseEntity<Response<Task>> saveTask(@RequestBody Task task) {
         Response<Task> response = new Response<>();
-        if (checkUserIdIsEmpty(request)) {
-            response.getErrors().add("Without user id");
-            log.error(response.getErrors().get(0));
-            return ResponseEntity.badRequest().body(response);
-        }
-        task.setUserId(idUser);
         try {
             if (task.getId() != null) {
                 if (taskStatusService.findById(task.getId()).isPresent()) {

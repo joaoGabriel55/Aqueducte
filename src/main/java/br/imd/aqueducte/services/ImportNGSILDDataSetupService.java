@@ -8,9 +8,6 @@ import java.util.List;
 
 @Component
 public interface ImportNGSILDDataSetupService extends GenericService<ImportNGSILDDataSetup> {
-
-    ImportNGSILDDataSetup createOrUpdate(String userId, ImportNGSILDDataSetup setup) throws Exception;
-
     Page<ImportNGSILDDataSetup> findImportSetupWithFilters(
             String idUser, String importType, Boolean useContext, int page, int count
     ) throws Exception;
