@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static br.imd.aqueducte.utils.RequestsUtils.SGEOL_INSTANCE;
-
 @SuppressWarnings("ALL")
 @RestController
 @Log4j2
@@ -23,21 +21,19 @@ public class NGSILDConverterController {
     @Autowired
     private NGSILDConverterService ngsildConverterService;
 
-    @PostMapping(value = "/{layerPath}")
+    @PostMapping(value = "/{type}")
     public ResponseEntity<Response<List<LinkedHashMap<String, Object>>>> convertMatchingSetupIntoNGSILD(
-            @RequestHeader(SGEOL_INSTANCE) String instanceUri,
-            @PathVariable String layerPath,
+            @PathVariable String type,
             @RequestBody ImportNSILDMatchingConverterSetup converterSetup) {
         Response<List<LinkedHashMap<String, Object>>> response = new Response<>();
 
         try {
             long startTime = System.currentTimeMillis();
             List<LinkedHashMap<String, Object>> listConvertedIntoNGSILD = ngsildConverterService.convertIntoNGSILD(
-                    instanceUri,
                     converterSetup.getContextLinks(),
+                    type,
                     converterSetup.getMatchingConverterSetup(),
-                    converterSetup.getDataCollection(),
-                    layerPath
+                    converterSetup.getDataCollection()
             );
             long endTime = System.currentTimeMillis();
             long timeElapsed = endTime - startTime;

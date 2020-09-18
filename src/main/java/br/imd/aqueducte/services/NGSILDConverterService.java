@@ -11,10 +11,9 @@ import java.util.Map;
 public interface NGSILDConverterService {
 
     List<LinkedHashMap<String, Object>> convertIntoNGSILD(
-            String instanceUri,
             List<String> contextLinks,
+            String type,
             LinkedHashMap<String, MatchingConverterSetup> matchingConfig,
-            List<Map<String, Object>> contentForConvert,
-            String layerPath
+            List<Map<String, Object>> contentForConvert
     ) throws Exception;
 }

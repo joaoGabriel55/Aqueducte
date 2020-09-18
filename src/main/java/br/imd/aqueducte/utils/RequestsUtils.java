@@ -41,6 +41,8 @@ public class RequestsUtils {
     public static final String USER_TOKEN = "user-token";
     public static final String SGEOL_INSTANCE = "sgeol-instance";
 
+    public static final String HASH_CONFIG = "hash-config";
+
     public static HttpClient getHttpClientInstance() {
         HttpClient httpClientInstance = null;
         TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
