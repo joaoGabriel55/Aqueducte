@@ -1,7 +1,11 @@
 # Aqüeducte
-API for consume data on format NGSI-LD
 
-<img src="screens/img_1.jpeg"/>
+REST API to consume and import data in [NGSI-LD protocol](https://www.etsi.org/deliver/etsi_gs/CIM/001_099/009/01.01.01_60/gs_CIM009v010101p.pdf)
+
+The Aqüeducte can work with two anothers micro services:
+ 
+ - [Aqüeconnect](https://github.com/joaoGabriel55/Aqueconnect-Spring-HDFS), that works with management (download, upload...) of csv files
+ - [Aqüegeo](https://github.com/joaoGabriel55/aqueducte-geo-data-py), that works exclusive with geofiles like shapefiles.
 
 ## How to use docker compose
 
@@ -13,9 +17,7 @@ API for consume data on format NGSI-LD
 
     ``sudo systemctl stop mongod``
 
-- If want use Aqueducte without Auth, just change AUTH param from file: src/main/resources/properties.cfg
-
-    ``AUTH = false;``
+- In resources folder, edit the file "application.properties" changing the env to "production".
 
 - For build a new jar file, after some change on Aqüeducte, run this command in root folder:
 
