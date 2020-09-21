@@ -47,14 +47,11 @@ public class NGSILDConverterUtils {
             String uuid
     ) {
         List<String> contextListDefault = new ArrayList<>();
-        contextListDefault
-                .add("https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld");
+        contextListDefault.add(
+            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld"
+        );
 
-        if (contextList != null) {
-            String contextSource = "sgeolInstance/v2/context-sources/";
-            List<String> contextLinks = contextList.stream().map((link) -> contextSource + link).collect(Collectors.toList());
-            contextListDefault.addAll(contextLinks);
-        }
+        if (contextList != null && contextList.size() > 0) contextListDefault.addAll(contextList);
 
         linkedHashMapNGSILD.put("@context", contextListDefault);
         linkedHashMapNGSILD.put("id", "urn:ngsi-ld:" + type + ":" + uuid);
