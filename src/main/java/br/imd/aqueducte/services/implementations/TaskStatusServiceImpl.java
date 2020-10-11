@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -33,9 +32,6 @@ public class TaskStatusServiceImpl implements TaskStatusService {
 
     @Autowired
     private SimpMessagingTemplate messageTemplate;
-
-    @Autowired
-    private MongoTemplate mongoTemplate;
 
     @Override
     public Task sendTaskStatusProgress(String taskId, TaskStatus status, String description, String topicName) throws Exception {
