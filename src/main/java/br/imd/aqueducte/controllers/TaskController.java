@@ -1,9 +1,9 @@
 package br.imd.aqueducte.controllers;
 
+import br.imd.aqueducte.models.enums.TaskStatus;
 import br.imd.aqueducte.models.mongodocuments.Task;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.services.TaskStatusService;
-import com.google.gson.Gson;
 import com.mongodb.DuplicateKeyException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +32,16 @@ public class TaskController extends GenericController {
     public ResponseEntity<Response<Task>> receiveSendAndSaveTaskToWebSocketTopic(
             @PathVariable String topicName,
             @PathVariable String taskId,
-            @RequestBody Map<String, Object> task
+            @RequestBody Map<String, Object> payload
     ) {
         Response<Task> response = new Response<>();
-        if (task != null) {
+        if (payload != null) {
             try {
-                showRoundTripTime((Double) task.get("time"));
-                Task payload = toTask(task);
+                if (payload.containsKey("time"))
+                    showRoundTripTime((Double) payload.get("time"));
+                Task task = toTask(payload);
                 Task taskSent = taskStatusService.sendTaskStatusProgress(
-                        taskId, payload.getStatus(), payload.getDescription(), topicName
+                        taskId, task.getStatus(), task.getDescription(), topicName
                 );
                 if (taskSent == null) {
                     response.getErrors().add("Error on send message to web socket topic");
@@ -147,10 +148,17 @@ public class TaskController extends GenericController {
     }
 
     private static Task toTask(Map<String, Object> data) throws IOException, ClassNotFoundException {
-        String dataString = new String(String.valueOf(data));
-        log.info("Receiving task message: {}", dataString);
-        Gson gson = new Gson();
-        Task task = gson.fromJson(dataString, Task.class);
+        log.info("Receiving task message: {}", data.toString());
+
+        if (!data.containsKey("status") || !data.containsKey("description")) {
+            String msg = "Task must contain: \"status\" and \"description\"";
+            log.error(msg);
+            throw new NullPointerException(msg);
+        }
+
+        Task task = new Task();
+        task.setDescription(data.get("description").toString());
+        task.setStatus(TaskStatus.valueOf(data.get("status").toString()));
         return task;
     }
 }
