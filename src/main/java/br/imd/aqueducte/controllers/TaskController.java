@@ -3,6 +3,7 @@ package br.imd.aqueducte.controllers;
 import br.imd.aqueducte.models.mongodocuments.Task;
 import br.imd.aqueducte.models.response.Response;
 import br.imd.aqueducte.services.TaskStatusService;
+import com.google.gson.Gson;
 import com.mongodb.DuplicateKeyException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 @SuppressWarnings("ALL")
 @RestController
@@ -25,14 +29,19 @@ public class TaskController extends GenericController {
 
 
     @PostMapping(value = "/topic/{topicName}/{taskId}")
-    public ResponseEntity<Response<Task>> receiveSendAndSaveTaskToWebSocketTopic(@PathVariable String topicName,
-                                                                                 @PathVariable String taskId,
-                                                                                 @RequestBody Task task
+    public ResponseEntity<Response<Task>> receiveSendAndSaveTaskToWebSocketTopic(
+            @PathVariable String topicName,
+            @PathVariable String taskId,
+            @RequestBody Map<String, Object> task
     ) {
         Response<Task> response = new Response<>();
         if (task != null) {
             try {
-                Task taskSent = taskStatusService.sendTaskStatusProgress(taskId, task.getStatus(), task.getDescription(), topicName);
+                showRoundTripTime((Double) task.get("time"));
+                Task payload = toTask(task);
+                Task taskSent = taskStatusService.sendTaskStatusProgress(
+                        taskId, payload.getStatus(), payload.getDescription(), topicName
+                );
                 if (taskSent == null) {
                     response.getErrors().add("Error on send message to web socket topic");
                     log.error(response.getErrors().get(0));
@@ -131,4 +140,17 @@ public class TaskController extends GenericController {
         }
     }
 
+    private void showRoundTripTime(Double sendTime) {
+        Long receivedTime = Calendar.getInstance().getTimeInMillis();
+        log.info("Received time -> {}", receivedTime);
+        log.info("HTTP - Round Trip Time (RTT) -> {}", Double.parseDouble(receivedTime.toString()) - sendTime);
+    }
+
+    private static Task toTask(Map<String, Object> data) throws IOException, ClassNotFoundException {
+        String dataString = new String(String.valueOf(data));
+        log.info("Receiving task message: {}", dataString);
+        Gson gson = new Gson();
+        Task task = gson.fromJson(dataString, Task.class);
+        return task;
+    }
 }

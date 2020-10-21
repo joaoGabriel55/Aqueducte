@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Map;
 
 
@@ -26,7 +27,12 @@ public class TaskAMQPConsumerImpl implements AMQPConsumer {
     @RabbitListener(queues = AMQPConfig.QUEUE)
     public void consumer(Message message) {
         try {
+            Long receivedTime = Calendar.getInstance().getTimeInMillis();
             Map<String, Object> taskMap = toMap(message.getBody());
+            log.info("Received time -> {}", receivedTime);
+            Double sendTime = (Double) taskMap.get("time");
+            log.info("AMQP - Round Trip Time (RTT) -> {}", Double.parseDouble(receivedTime.toString()) - sendTime);
+
             taskStatusService.sendTaskStatusProgress(
                     taskMap.get("id").toString(),
                     TaskStatus.valueOf(taskMap.get("status").toString()),
