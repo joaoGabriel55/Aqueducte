@@ -39,13 +39,14 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
                 String key = setupEntry.getKey().trim();
                 MatchingConverterSetup setup = setupEntry.getValue();
                 Boolean isLocation = setup.isLocation();
+                Boolean isDate = setup.isDate();
                 String finalProperty = this.ngsildConverterUtils.treatIdOrType(setup.getFinalProperty());
 
                 if (element.containsKey(key) && !isLocation) {
                     if (!properties.containsKey(finalProperty)) {
                         properties.put(finalProperty, typeValue(element.get(key)));
                     }
-                } else if (setup.getGeoLocationConfig() != null && setup.getGeoLocationConfig().size() != 0 && isLocation) {
+                } else if (setup.getGeoLocationConfig() != null && setup.getGeoLocationConfig().size() != 0 && isLocation && !isDate) {
                     this.ngsildConverterUtils.validNGSILDGeoPropertyType(setup.getFinalProperty(), setupEntry.getKey());
                     properties.putAll(this.ngsildConverterUtils.geoJsonConverterFormat(
                             setup.getGeoLocationConfig(),
@@ -54,6 +55,10 @@ public class NGSILDConverterServiceImpl implements NGSILDConverterService {
                             properties,
                             setup.getFinalProperty()
                     ));
+                } else if (setup.getDatePropertyConfig() != null && setup.getDatePropertyConfig().size() != 0 && isDate && !isLocation) {
+                    final String mask = setup.getDatePropertyConfig().get(key);
+                    final String isoDate = NGSILDConverterUtils.getISODate(element.get(key).toString(), mask);
+                    properties.put(finalProperty, this.typeValue(isoDate));
                 }
             }
             listNGSILD.add(properties);
