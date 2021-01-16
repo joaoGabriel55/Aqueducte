@@ -10,18 +10,23 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static br.imd.aqueducte.config.PropertiesParams.URL_AQUECONNECT;
 import static br.imd.aqueducte.utils.RequestsUtils.*;
 
 @SuppressWarnings("ALL")
+@Component
 @Log4j2
 public abstract class LoadDataNGSILDByImportSetup {
+
+    @Value("${aqueconnect.url}")
+    private String urlAqueconnect;
 
     protected Map<String, Object> loadDataWebservice(ImportationSetup importationSetup) {
         RequestsUtils requestsUtils = new RequestsUtils();
@@ -60,7 +65,7 @@ public abstract class LoadDataNGSILDByImportSetup {
 
     protected Map<String, Integer> getFileFields(String hashConfig, ImportationSetup importationSetup) {
         StringBuilder url = new StringBuilder();
-        url.append(URL_AQUECONNECT);
+        url.append(urlAqueconnect);
         url.append("file-import-setup-resource/file-fields/");
         url.append(importationSetup.getIdUser());
         url.append("?path=" + importationSetup.getFilePath());
@@ -93,7 +98,7 @@ public abstract class LoadDataNGSILDByImportSetup {
             Map<String, Integer> fieldsSelected
     ) {
         StringBuilder url = new StringBuilder();
-        url.append(URL_AQUECONNECT);
+        url.append(urlAqueconnect);
         url.append("file-import-setup-resource/convert-to-json/");
         url.append(importationSetup.getIdUser());
         url.append("?path=" + importationSetup.getFilePath());

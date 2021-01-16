@@ -5,6 +5,8 @@ import lombok.extern.log4j.Log4j2;
 import org.codehaus.jettison.json.JSONException;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,7 +50,7 @@ public class NGSILDConverterUtils {
     ) {
         List<String> contextListDefault = new ArrayList<>();
         contextListDefault.add(
-            "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld"
+                "https://forge.etsi.org/gitlab/NGSI-LD/NGSI-LD/raw/master/coreContext/ngsi-ld-core-context.jsonld"
         );
 
         if (contextList != null && contextList.size() > 0) contextListDefault.addAll(contextList);
@@ -275,5 +277,22 @@ public class NGSILDConverterUtils {
             }
         }
         return properties;
+    }
+
+    public static String getISODate(final String dateValue, final String dateMask) throws ParseException, Exception {
+        try {
+            final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateMask);
+            final Date date = simpleDateFormat.parse(dateValue);
+            final String isoDatePattern = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+            final SimpleDateFormat simpleDateISOFormat = new SimpleDateFormat(isoDatePattern);
+            final String dateString = simpleDateISOFormat.format(date);
+            return dateString;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            throw new ParseException(e.getMessage(), e.getErrorOffset());
+        } catch (Exception e2) {
+            e2.printStackTrace();
+            throw new Exception(e2.getMessage());
+        }
     }
 }

@@ -15,4 +15,6 @@ public class MatchingConverterSetup {
     private String foreignProperty;
     private boolean isLocation;
     private LinkedHashMap<String, GeoLocationConfig> geoLocationConfig;
+    private boolean isDate;
+    private LinkedHashMap<String, String> datePropertyConfig;
 }
