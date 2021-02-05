@@ -16,8 +16,6 @@ import static br.imd.aqueducte.utils.GeoJsonValidator.getGeoJson;
 @Log4j2
 public class JsonDataServiceImpl implements JsonDataService {
 
-    private String keyPath = "";
-
     @Override
     public Object getFlatJSON(Object dataForConversion) throws Exception {
         if ((dataForConversion instanceof Map)) {
